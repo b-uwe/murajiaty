@@ -1,0 +1,40 @@
+{
+  "name": "murajiaty",
+  "version": "1.0.0",
+  "description": "A small project to learn Arabic vocabulary",
+  "keywords": [
+    "learn",
+    "arabic",
+    "vocabulary"
+  ],
+  "homepage": "https://github.com/b-uwe/murajiaty#readme",
+  "bugs": {
+    "url": "https://github.com/b-uwe/murajiaty/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/b-uwe/murajiaty.git"
+  },
+  "license": "GPL-3.0-or-later",
+  "author": "b-uwe",
+  "type": "website",
+  "main": "index.html",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest --config tests/jest.config.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.0",
+    "@eslint/js": "^9.21.0",
+    "eslint": "^9.21.0",
+    "globals": "^16.0.0",
+    "jest": "^27.5.1",
+    "jsdom": "^26.0.0",
+    "text-decoding": "^1.0.0",
+    "text-encoding": "^0.7.0"
+  }
+}
