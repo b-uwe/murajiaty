@@ -64,6 +64,7 @@
 
       if ( solution === input.value ) {
         shownText += '🎉';
+        speakWord( vocabulary.ar );
       }
 
       overlay.innerHTML = shownText;
