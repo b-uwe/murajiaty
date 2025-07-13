@@ -336,30 +336,30 @@
   };
 
 
-/**
+  /**
  * Export vocabulary to CSV format
  * Format: arabic ; german ; english ; spanish ; bucket
  */
-function exportVocabulary() {
-  const buckets = JSON.parse( localStorage.getItem( 'buckets' ) );
-  let csvContent = '';
+  const exportVocabulary = () => {
+    const buckets = JSON.parse( localStorage.getItem( 'buckets' ) );
+    let csvContent = '';
 
-  // Process each bucket
-  for ( let i = 0; i < buckets.length; i++ ) {
-    const bucket = buckets[ i ];
-    for ( const word of bucket ) {
-      csvContent += `${word.ar} ; ${word.de} ; ${word.en} ; ${word.es} ; ${i}\n`;
+    // Process each bucket
+    for ( let i = 0; i < buckets.length; i++ ) {
+      const bucket = buckets[ i ];
+      for ( const word of bucket ) {
+        csvContent += `${word.ar} ; ${word.de} ; ${word.en} ; ${word.es} ; ${i}\n`;
+      }
     }
-  }
 
-  // Create a blob and trigger download
-  const blob = new Blob( [ csvContent ], { type: 'text/csv;charset=utf-8;' } );
-  const link = document.createElement( 'a' );
-  link.href = URL.createObjectURL( blob );
-  link.download = 'vocabulary.csv';
-  link.click();
-  URL.revokeObjectURL( link.href );
-}
+    // Create a blob and trigger download
+    const blob = new Blob( [ csvContent ], { 'type': 'text/csv;charset=utf-8;' } );
+    const link = document.createElement( 'a' );
+    link.href = URL.createObjectURL( blob );
+    link.download = 'vocabulary.csv';
+    link.click();
+    URL.revokeObjectURL( link.href );
+  };
 
   /**
    * Initializes the browser interface by setting up DOM elements and event listeners
@@ -395,7 +395,7 @@ function exportVocabulary() {
       } );
 
       // Shuffle each inner array
-      buckets = buckets.map( bucket => {
+      buckets = buckets.map( ( bucket ) => {
         for ( let i = bucket.length - 1; i > 0; i-- ) {
           const j = Math.floor( Math.random() * ( i + 1 ) );
           [ bucket[ i ], bucket[ j ] ] = [ bucket[ j ], bucket[ i ] ];
@@ -410,7 +410,7 @@ function exportVocabulary() {
     // Initialize event listeners
     if ( mainElement && speakButton && successButton && failButton && flipButton && letterOverlay && wordsElement ) { 
       speakButton.addEventListener( 'click', () => {
-        speakWord( buckets[currentBucket][0].ar );
+        speakWord( buckets[ currentBucket ][ 0 ].ar );
       } );
       successButton.addEventListener( 'click', rememberedCorrectly );
       failButton.addEventListener( 'click', rememberedIncorrectly );
