@@ -228,10 +228,6 @@
    * @param {string} word - The word to be spoken.
    */
   const speakWord = ( word ) => {
-    if ( currentSide === 'de' ) {
-      return;
-    }
-
     const audioContext = new ( window.AudioContext || window.webkitAudioContext )();
     const url = `https://bernitt.biz/murajiaty/proxy/proxy.php?text=${encodeURIComponent( word )}`;
 
