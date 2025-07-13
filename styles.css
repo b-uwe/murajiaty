@@ -59,3 +59,40 @@ body {
   text-align: center;
   display: none;
 }
+
+.arabic-input-relative {
+  position: relative;
+  width: 85vw;
+  direction: rtl;
+  text-align: right;
+  height: 4rem;
+  overflow-x: auto;
+}
+
+.arabic-input-relative::-webkit-scrollbar {
+  display: none;
+}
+
+#arabicInputOverlay, #arabicInput {
+  position: absolute;
+  min-width: 100%;
+  font-size: 3rem;
+  text-align: right;
+  direction: rtl;
+  line-height: 4rem;
+  white-space: pre;
+}
+
+#arabicInputOverlay {
+  pointer-events: none;
+  z-index: 2;
+}
+
+#arabicInput {
+  color: transparent;
+  background: transparent;
+  z-index: 1;
+}
+
+.input-correct { color: #2e7d32; }
+.input-wrong { color: #c62828; }

@@ -17,7 +17,7 @@
 
   // Other global variables
   let buckets = [ [], [], [], [], [], [], [] ];
-  const languages = [ 'es', 'de', 'en' ];
+  const flags = [ '🇪🇸', '🇩🇪', '🇺🇸' ];
 
   /**
    * Common Arabic diacritical marks (basic vowels and sukun)
@@ -31,19 +31,112 @@
   ];
 
   /**
+   * Strips Arabic diacritics from a string.
+   * @param {string} str
+   * @returns {string}
+   */
+  const stripArabicDiacritics = ( str ) => {
+    // Covers Arabic vowels and sukun, shadda, etc.
+    return str.replace( /[\u064B-\u0652\u0670]/g, '' ).replace( /[أإ]/g,'ا' );
+  };
+
+  const renderArabicInput = ( word ) => {
+    /**
+     * Upates the input overlay that shows the inputted text with color coding for right or wrong
+     */
+    const updateOverlay = () => {
+      const userInput = stripArabicDiacritics( input.value );
+      let shownText = '';
+      
+      for ( let i = 0; i < userInput.length || i < solution.length; i++ ) {
+        const uc = userInput[ i ] || '';
+        const sc = solution[ i ] || '';
+        if ( uc === sc ) {
+          shownText += `<span class="input-correct">${uc}</span>`;
+        } else {
+          shownText += `<span class="input-wrong">${uc}</span>`;
+        }
+      }
+
+      if ( solution === input.value ) {
+        shownText += '🎉';
+      }
+
+      overlay.innerHTML = shownText;
+      overlay.style.color = 'inherit';
+
+      relativeDiv.scrollTo( -overlay.scrollWidth, 0 );
+    };
+
+    // Remove previous inputs
+    const existing = document.getElementById( 'arabicInputWrapper' );
+    if ( existing ) existing.remove();
+
+    const labelLang = Math.floor( Math.random() * 3 );
+    const label = document.createElement( 'div' );
+    label.className = 'arabic-label';
+    label.innerHTML = flags[ labelLang ] + '<br/>' + word[ [ 'es','de','en' ][ labelLang ] ];
+
+    // Relative container for overlay + input
+    const relativeDiv = document.createElement( 'div' );
+    relativeDiv.className = 'arabic-input-relative';
+
+    // Overlay
+    const overlay = document.createElement( 'div' );
+    overlay.id = 'arabicInputOverlay';
+
+    // Input
+    const input = document.createElement( 'input' );
+    input.type = 'text';
+    input.id = 'arabicInput';
+    input.lang = 'ar';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.style.opacity =0;
+
+    const wrapper = document.createElement( 'div' );
+
+    relativeDiv.appendChild( overlay );
+    relativeDiv.appendChild( input );
+    wrapper.appendChild( label );
+    wrapper.appendChild( relativeDiv );
+    mainElement.innerHTML = '';
+    mainElement.appendChild( wrapper );
+
+    input.addEventListener( 'focus', () => {
+      input.style.position = 'fixed';
+      input.style.opacity = 0;
+      input.style.height = 0;
+      input.style.width = 0;
+      input.style.top = '100%';
+      setTimeout( () => {
+        input.scrollIntoView();
+
+        successButton.disabled = false;
+        failButton.disabled = false;
+      }, 100 );
+    } );
+
+    const solution = stripArabicDiacritics( word.ar );
+
+    input.addEventListener( 'input', () => {
+      updateOverlay();
+    } );
+    
+    updateOverlay();
+  };
+
+  /**
    * Picks the first word in the current bucket and shows it in #main.
    * If there is none, it goes one bucket higher and tries there.
    * Handles overflow in case there are no more buckets available.
    */
   const pickNextWord = () => {
-    const flags = [ '🇪🇸', '🇩🇪', '🇺🇸' ];
-
     // Check if the current bucket has words
     if ( buckets[ currentBucket ].filter( ( item ) => {
       return !item.touched;
     } ).length > 0 ) {
       const word = buckets[ currentBucket ][ 0 ]; // Get the first word
-      let randomLanguage;
 
       switch ( currentBucket ) {
       case 0:
@@ -59,12 +152,10 @@
         mainElement.textContent = word.ar;
         break;
       case 4:
-        const langNo = Math.floor( Math.random() * 3 );
-        randomLanguage = languages[ langNo ];
-        mainElement.innerHTML = flags[ langNo ] + '<br/>' + word[ randomLanguage ];
+        renderArabicInput( word );
         break;
       default:
-        mainElement.textContent = word.ar.replace( /[\u064B-\u0652\u0670]/g, '' );
+        mainElement.textContent = stripArabicDiacritics( word.ar );
         break;
       }
     } else {
@@ -96,6 +187,7 @@
       mainElement.classList.remove( 'ar' );
       speakButton.disabled = true;
     }
+
     successButton.disabled = true;
     failButton.disabled = true;
   };
@@ -336,30 +428,30 @@
   };
 
 
-/**
+  /**
  * Export vocabulary to CSV format
  * Format: arabic ; german ; english ; spanish ; bucket
  */
-function exportVocabulary() {
-  const buckets = JSON.parse( localStorage.getItem( 'buckets' ) );
-  let csvContent = '';
+  const exportVocabulary = () => {
+    const buckets = JSON.parse( localStorage.getItem( 'buckets' ) );
+    let csvContent = '';
 
-  // Process each bucket
-  for ( let i = 0; i < buckets.length; i++ ) {
-    const bucket = buckets[ i ];
-    for ( const word of bucket ) {
-      csvContent += `${word.ar} ; ${word.de} ; ${word.en} ; ${word.es} ; ${i}\n`;
+    // Process each bucket
+    for ( let i = 0; i < buckets.length; i++ ) {
+      const bucket = buckets[ i ];
+      for ( const word of bucket ) {
+        csvContent += `${word.ar} ; ${word.de} ; ${word.en} ; ${word.es} ; ${i}\n`;
+      }
     }
-  }
 
-  // Create a blob and trigger download
-  const blob = new Blob( [ csvContent ], { type: 'text/csv;charset=utf-8;' } );
-  const link = document.createElement( 'a' );
-  link.href = URL.createObjectURL( blob );
-  link.download = 'vocabulary.csv';
-  link.click();
-  URL.revokeObjectURL( link.href );
-}
+    // Create a blob and trigger download
+    const blob = new Blob( [ csvContent ], { 'type': 'text/csv;charset=utf-8;' } );
+    const link = document.createElement( 'a' );
+    link.href = URL.createObjectURL( blob );
+    link.download = 'vocabulary.csv';
+    link.click();
+    URL.revokeObjectURL( link.href );
+  };
 
   /**
    * Initializes the browser interface by setting up DOM elements and event listeners
@@ -395,7 +487,7 @@ function exportVocabulary() {
       } );
 
       // Shuffle each inner array
-      buckets = buckets.map( bucket => {
+      buckets = buckets.map( ( bucket ) => {
         for ( let i = bucket.length - 1; i > 0; i-- ) {
           const j = Math.floor( Math.random() * ( i + 1 ) );
           [ bucket[ i ], bucket[ j ] ] = [ bucket[ j ], bucket[ i ] ];
@@ -410,7 +502,7 @@ function exportVocabulary() {
     // Initialize event listeners
     if ( mainElement && speakButton && successButton && failButton && flipButton && letterOverlay && wordsElement ) { 
       speakButton.addEventListener( 'click', () => {
-        speakWord( buckets[currentBucket][0].ar );
+        speakWord( buckets[ currentBucket ][ 0 ].ar );
       } );
       successButton.addEventListener( 'click', rememberedCorrectly );
       failButton.addEventListener( 'click', rememberedIncorrectly );

@@ -48,5 +48,6 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
     'no-unsafe-optional-chaining': 'error',
     'no-irregular-whitespace': 'error',
     'no-regex-spaces': 'error',
+    'func-style': [ 'error', 'expression', { 'allowArrowFunctions': true } ]
   },
 } ];
