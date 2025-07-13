@@ -1,6 +1,6 @@
 ( () => {
   /**
-   * @fileoverview Main JavaScript file for Murajiaty application
+   * @file Main JavaScript file for Murajiaty application
    */
 
   // DOM elements
@@ -32,7 +32,7 @@
 
   /**
    * Strips Arabic diacritics from a string.
-   * @param {string} str
+   * @param {string} str - The text with diacritics
    * @returns {string}
    */
   const stripArabicDiacritics = ( str ) => {
@@ -40,7 +40,11 @@
     return str.replace( /[\u064B-\u0652\u0670]/g, '' ).replace( /[أإ]/g,'ا' );
   };
 
-  const renderArabicInput = ( word ) => {
+  /**
+   * Renders all elements needed for the input of Arabic text
+   * @param {object} vocabulary - the word or phrase to learn as an object with all translations
+   */
+  const renderArabicInput = ( vocabulary ) => {
     /**
      * Upates the input overlay that shows the inputted text with color coding for right or wrong
      */
@@ -75,7 +79,7 @@
     const labelLang = Math.floor( Math.random() * 3 );
     const label = document.createElement( 'div' );
     label.className = 'arabic-label';
-    label.innerHTML = flags[ labelLang ] + '<br/>' + word[ [ 'es','de','en' ][ labelLang ] ];
+    label.innerHTML = flags[ labelLang ] + '<br/>' + vocabulary[ [ 'es','de','en' ][ labelLang ] ];
 
     // Relative container for overlay + input
     const relativeDiv = document.createElement( 'div' );
@@ -117,7 +121,7 @@
       }, 100 );
     } );
 
-    const solution = stripArabicDiacritics( word.ar );
+    const solution = stripArabicDiacritics( vocabulary.ar );
 
     input.addEventListener( 'input', () => {
       updateOverlay();
@@ -377,6 +381,7 @@
 
   /**
    * Fetches new vocabulary from the server
+   * @param {bool} all - Whether to import ALL vocabulary (from buckets.all.csv) or just the new vocab (from buckets.csv)
    */
   const fetchNewVocabulary = ( all = false ) => {
     fetch( `https://bernitt.biz/murajiaty/buckets${all ? '.all' : ''}.csv?t=${Date.now()}` ) 
@@ -429,9 +434,9 @@
 
 
   /**
- * Export vocabulary to CSV format
- * Format: arabic ; german ; english ; spanish ; bucket
- */
+   * Export vocabulary to CSV format
+   * Format: arabic ; german ; english ; spanish ; bucket
+   */
   const exportVocabulary = () => {
     const buckets = JSON.parse( localStorage.getItem( 'buckets' ) );
     let csvContent = '';

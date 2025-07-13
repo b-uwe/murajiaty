@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
+import jsdocPlugin from 'eslint-plugin-jsdoc';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
@@ -48,6 +49,29 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
     'no-unsafe-optional-chaining': 'error',
     'no-irregular-whitespace': 'error',
     'no-regex-spaces': 'error',
-    'func-style': [ 'error', 'expression', { 'allowArrowFunctions': true } ]
+    'func-style': [ 'error', 'expression', { 'allowArrowFunctions': true } ],
+    'jsdoc/check-alignment': 'error',
+    'jsdoc/check-param-names': 'error',
+    'jsdoc/check-tag-names': 'error',
+    'jsdoc/check-types': 'error',
+    'jsdoc/require-param': 'error',
+    'jsdoc/require-returns': 'error',
+    'jsdoc/require-param-description': 'error',
+    'jsdoc/require-jsdoc': [
+      'error',
+      {
+        'require': {
+          'FunctionDeclaration': true,
+          'MethodDefinition': true,
+          'ClassDeclaration': true,
+          'ArrowFunctionExpression': true,
+          'FunctionExpression': true
+        }
+      }
+    ]
   },
+
+  'plugins': {
+    'jsdoc': jsdocPlugin,
+  }
 } ];
