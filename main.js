@@ -70,6 +70,41 @@
   };
 
   /**
+   * Parses a Google Sheets CSV line to extract word data
+   * Uses columns 1, 3, 4, 5 (AR, DE, EN, ES) from Google Sheets format
+   * @param {string} csvLine - The CSV line to parse
+   * @returns {object|null} Parsed word object or null if invalid
+   */
+  const parseGoogleSheetsCSVLineToWord = ( csvLine ) => {
+    if ( !csvLine || csvLine.trim() === '' ) {
+      return null;
+    }
+
+    // Skip header row
+    if ( csvLine.includes( 'AR,AR,DE,EN,ES' ) ) {
+      return null;
+    }
+
+    // Simple CSV parsing - split by comma and handle quoted fields
+    const parts = csvLine.split( ',' ).map( ( part ) => {
+      return part.replace( /^"(.*)"$/, '$1' ); // Remove surrounding quotes
+    } );
+
+    // Extract columns: 0=AR, 1=AR(duplicate), 2=DE, 3=EN, 4=ES, 5=md5
+    const ar = ( parts[ 0 ] || '' ).trim();
+    const de = ( parts[ 2 ] || '' ).trim();
+    const en = ( parts[ 3 ] || '' ).trim();
+    const es = ( parts[ 4 ] || '' ).trim();
+
+    // Validate that all required fields are present and non-empty
+    if ( ar && de && en && es && parts.length >= 5 ) {
+      return { 'ar': ar, 'de': de, 'en': en, 'es': es, 'bucketIndex': 0 };
+    }
+
+    return null;
+  };
+
+  /**
    * Shuffles an array in place using Fisher-Yates algorithm
    * @param {Array} array - The array to shuffle
    * @returns {Array} The shuffled array (same reference)
@@ -429,11 +464,18 @@
   };
 
   /**
-   * Fetches new vocabulary from the server
-   * @param {bool} all - Whether to import ALL vocabulary (from buckets.all.csv) or just the new vocab (from buckets.csv)
+   * Fetches vocabulary from Google Sheets
+   * @param {bool} loadInitialData - Whether to load initial vocabulary data when localStorage is empty
    */
-  const fetchNewVocabulary = ( all = false ) => {
-    fetch( `https://bernitt.biz/murajiaty/buckets${all ? '.all' : ''}.csv?t=${Date.now()}` ) 
+  const fetchNewVocabulary = ( loadInitialData = false ) => {
+    if ( !loadInitialData ) {
+      // Skip fetching when localStorage has data - Google Sheets is only for initial load
+      return;
+    }
+
+    const googleSheetsUrl = 'https://docs.google.com/spreadsheets/d/1kPsGq3Zo9PPjtcst-T3pfiToeohq82K-yHuLywxtucU/export?format=csv';
+    
+    fetch( `${googleSheetsUrl}&t=${Date.now()}` )
       .then( ( response ) => {
         if ( !response.ok ) {
           throw new Error( 'Network response was not ok: ' + response.status );
@@ -442,41 +484,25 @@
       } )
       .then( ( content ) => {
         if ( content.length > 0 ) {
-          // Delete the file on the server
-          fetch( 'https://bernitt.biz/murajiaty/delete.php' )
-            .then( () => {
-              const rows = content.split( '\n' );
+          const rows = content.split( '\n' );
 
-              rows.forEach( ( row ) => {
-                const parsedWord = parseCSVLineToWord( row );
-                
-                if ( parsedWord ) {
-                  const { ar, de, en, es, bucketIndex } = parsedWord;
-                  
-                  // If bucketIndex is -1, search for matching entries and remove them
-                  if ( bucketIndex === -1 ) {
-                    buckets.forEach( ( bucket ) => {
-                      const entryIndex = bucket.findIndex( ( item ) => {
-                        return item.ar === ar && item.de === de;
-                      } );
-                      if ( entryIndex !== -1 ) {
-                        bucket.splice( entryIndex, 1 ); // Remove the matching entry
-                      }
-                    } );
-                  } else {
-                    buckets[ bucketIndex ].push( { 'de': de, 'ar': ar, 'en': en, 'es': es } );
-                  }
-                }
-              } );
+          rows.forEach( ( row ) => {
+            const parsedWord = parseGoogleSheetsCSVLineToWord( row );
+            
+            if ( parsedWord ) {
+              const { ar, de, en, es } = parsedWord;
+              // Add all words to bucket 0 initially
+              buckets[ 0 ].push( { 'de': de, 'ar': ar, 'en': en, 'es': es } );
+            }
+          } );
 
-              updateStorage();
-              currentBucket = 0;
-              pickNextWord();
-            } );
+          updateStorage();
+          currentBucket = 0;
+          pickNextWord();
         }
       } )
       .catch( ( err ) => {
-        console.error( 'Error importing buckets: ', err.message );
+        console.error( 'Error importing vocabulary from Google Sheets: ', err.message );
         pickNextWord();
       } );
   };
@@ -577,6 +603,7 @@
       stripArabicDiacritics,
       formatWordToCSVLine,
       parseCSVLineToWord,
+      parseGoogleSheetsCSVLineToWord,
       shuffleArray
     };
   };
