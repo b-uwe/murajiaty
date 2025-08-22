@@ -571,15 +571,13 @@
     initBrowser();
   };
 
-  // Export functions and constants for Node.js testing environment
+  // Export functions for Node.js testing environment
   if ( typeof module !== 'undefined' && module.exports ) { 
     module.exports = { 
       stripArabicDiacritics,
       formatWordToCSVLine,
       parseCSVLineToWord,
-      shuffleArray,
-      flags,
-      COMMON_ARABIC_DIACRITICS
+      shuffleArray
     };
   };
 } )();
