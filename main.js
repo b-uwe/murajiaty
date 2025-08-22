@@ -556,7 +556,7 @@
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
         return bucket.map( ( { de, ar, en, es } ) => {
-          return  { de, ar, en, es }; 
+          return { de, ar, en, es }; 
         } );
       } );
 
