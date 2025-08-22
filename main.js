@@ -493,6 +493,7 @@
 
           updateStorage();
           currentBucket = 0;
+          pickNextWord();
         }
       } )
       .catch( ( err ) => {
@@ -588,8 +589,12 @@
         fetchInitialVocabulary();
       }
 
-      // Initialize UI with first word regardless of data source
-      pickNextWord();
+      // Only initialize UI if we have data to show
+      if ( buckets.some( ( bucket ) => {
+        return bucket.length > 0;
+      } ) ) {
+        pickNextWord();
+      }
     }
   };
 
