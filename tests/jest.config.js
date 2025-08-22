@@ -1,5 +1,6 @@
 /**
  * @file Jest configuration for Murajiaty tests
+ * Configures Jest to run tests with jsdom environment for browser-like testing
  */
 module.exports = {
   'testEnvironment': 'jsdom',

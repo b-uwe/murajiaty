@@ -12,7 +12,10 @@ const stripArabicDiacritics = ( str ) => {
   return str.replace( /[\u064B-\u0652\u0670]/g, '' ).replace( /[أإ]/g, 'ا' );
 };
 
-// Export for Node.js testing
+/**
+ * Export for Node.js testing environment
+ * Conditionally exports functions when module system is available
+ */
 if ( typeof module !== 'undefined' && module.exports ) {
   module.exports = {
     stripArabicDiacritics
