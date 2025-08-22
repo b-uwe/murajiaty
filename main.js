@@ -565,9 +565,9 @@
         } );
       } );
 
-      // Shuffle each inner array
+      // Shuffle each inner array (create copy to avoid modifying original)
       buckets = buckets.map( ( bucket ) => {
-        return shuffleArray( [ ...bucket ] ); // Create copy and shuffle
+        return shuffleArray( [ ...bucket ] );
       } );
 
       // Recalls a word we considered "learned forever"
@@ -575,7 +575,9 @@
     }
 
     // Initialize event listeners
-    if ( mainElement && speakButton && successButton && failButton && flipButton && letterOverlay && wordsElement ) { 
+    const allElementsPresent = mainElement && speakButton && successButton && 
+                               failButton && flipButton && letterOverlay && wordsElement;
+    if ( allElementsPresent ) { 
       speakButton.addEventListener( 'click', () => {
         speakWord( buckets[ currentBucket ][ 0 ].ar );
       } );
@@ -588,7 +590,12 @@
       } );
 
       addLetterClickListener();
-      fetchNewVocabulary( null === storedBuckets );
+      
+      // Load initial vocabulary if localStorage is empty
+      const isLocalStorageEmpty = ( null === storedBuckets );
+      if ( isLocalStorageEmpty ) {
+        fetchNewVocabulary();
+      }
     }
   };
 
