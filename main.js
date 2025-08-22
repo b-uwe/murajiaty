@@ -41,7 +41,7 @@
    * @param {number} bucketIndex - The bucket index for this word
    * @returns {string} Formatted CSV line
    */
-  const formatWordToCsvLine = ( word, bucketIndex ) => {
+  const formatWordToCSVLine = ( word, bucketIndex ) => {
     return `${word.ar} ; ${word.de} ; ${word.en} ; ${word.es} ; ${bucketIndex}`;
   };
 
@@ -50,7 +50,7 @@
    * @param {string} csvLine - The CSV line to parse
    * @returns {object|null} Parsed word object or null if invalid
    */
-  const parseCsvLineToWord = ( csvLine ) => {
+  const parseCSVLineToWord = ( csvLine ) => {
     if ( !csvLine || csvLine.trim() === '' ) {
       return null;
     }
@@ -448,7 +448,7 @@
               const rows = content.split( '\n' );
 
               rows.forEach( ( row ) => {
-                const parsedWord = parseCsvLineToWord( row );
+                const parsedWord = parseCSVLineToWord( row );
                 
                 if ( parsedWord ) {
                   const { ar, de, en, es, bucketIndex } = parsedWord;
@@ -493,7 +493,7 @@
     for ( let i = 0; i < buckets.length; i++ ) {
       const bucket = buckets[ i ];
       for ( const word of bucket ) {
-        csvContent += formatWordToCsvLine( word, i ) + '\n';
+        csvContent += formatWordToCSVLine( word, i ) + '\n';
       }
     }
 
@@ -575,8 +575,8 @@
   if ( typeof module !== 'undefined' && module.exports ) { 
     module.exports = { 
       stripArabicDiacritics,
-      formatWordToCsvLine,
-      parseCsvLineToWord,
+      formatWordToCSVLine,
+      parseCSVLineToWord,
       shuffleArray,
       flags,
       COMMON_ARABIC_DIACRITICS
