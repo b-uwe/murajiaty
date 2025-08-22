@@ -570,9 +570,8 @@
     }
 
     // Initialize event listeners
-    const allElementsPresent = mainElement && speakButton && successButton && 
-                               failButton && flipButton && letterOverlay && wordsElement;
-    if ( allElementsPresent ) { 
+    // Check that all required DOM elements are present before adding listeners
+    if ( mainElement && speakButton && successButton && failButton && flipButton && letterOverlay && wordsElement ) { 
       speakButton.addEventListener( 'click', () => {
         speakWord( buckets[ currentBucket ][ 0 ].ar );
       } );
@@ -587,8 +586,7 @@
       addLetterClickListener();
       
       // Load initial vocabulary if localStorage is empty
-      const isLocalStorageEmpty = ( null === storedBuckets );
-      if ( isLocalStorageEmpty ) {
+      if ( null === storedBuckets ) {
         fetchInitialVocabulary();
       }
     }
