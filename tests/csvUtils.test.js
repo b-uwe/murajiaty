@@ -61,45 +61,34 @@ describe( 'CSV Utilities', () => {
       } );
     } );
 
-    test( 'should handle missing optional fields', () => {
-      const csvLine = 'مثال ; Beispiel';
+    test( 'should return null for missing required fields', () => {
+      const csvLine = 'مثال ; Beispiel'; // Missing English and Spanish
       const result = parseCSVLineToWord( csvLine );
-      expect( result ).toEqual( {
-        'ar': 'مثال',
-        'de': 'Beispiel',
-        'en': '',
-        'es': '',
-        'bucketIndex': 0
-      } );
+      expect( result ).toBeNull(); // Should return null since not all languages are present
     } );
 
-    test( 'should handle empty translations with explicit bucket index', () => {
-      const csvLine = 'test ; test ;  ;  ; 3';
+    test( 'should require all languages to be filled', () => {
+      const csvLine = 'test ; test ;  ;  ; 3'; // Empty English and Spanish
       const result = parseCSVLineToWord( csvLine );
-      expect( result ).toEqual( {
-        'ar': 'test',
-        'de': 'test',
-        'en': '',
-        'es': '',
-        'bucketIndex': 3
-      } );
+      expect( result ).toBeNull(); // Should return null since all languages must be filled
     } );
 
-    test( 'should return null for invalid lines (missing Arabic or German)', () => {
-      expect( parseCSVLineToWord( '  ;  ;  ;  ; 1' ) ).toBeNull(); // Missing both ar and de
-      expect( parseCSVLineToWord( 'test ;  ;  ;  ; 1' ) ).toBeNull(); // Missing de
-      expect( parseCSVLineToWord( '  ; test ;  ;  ; 1' ) ).toBeNull(); // Missing ar
+    test( 'should return null for invalid lines (missing any language)', () => {
+      expect( parseCSVLineToWord( '  ;  ;  ;  ; 1' ) ).toBeNull(); // Missing all languages
+      expect( parseCSVLineToWord( 'test ;  ;  ;  ; 1' ) ).toBeNull(); // Missing de, en, es
+      expect( parseCSVLineToWord( '  ; test ;  ;  ; 1' ) ).toBeNull(); // Missing ar, en, es
+      expect( parseCSVLineToWord( 'ar ; de ;  ; es ; 1' ) ).toBeNull(); // Missing en
       expect( parseCSVLineToWord( '' ) ).toBeNull(); // Empty line
     } );
 
     test( 'should parse bucket index correctly', () => {
-      expect( parseCSVLineToWord( 'a ; b ;  ;  ; 0' ).bucketIndex ).toBe( 0 );
-      expect( parseCSVLineToWord( 'a ; b ;  ;  ; 5' ).bucketIndex ).toBe( 5 );
-      expect( parseCSVLineToWord( 'a ; b ;  ;  ; -1' ).bucketIndex ).toBe( -1 );
+      expect( parseCSVLineToWord( 'ar ; de ; en ; es ; 0' ).bucketIndex ).toBe( 0 );
+      expect( parseCSVLineToWord( 'ar ; de ; en ; es ; 5' ).bucketIndex ).toBe( 5 );
+      expect( parseCSVLineToWord( 'ar ; de ; en ; es ; -1' ).bucketIndex ).toBe( -1 );
     } );
 
     test( 'should default to bucket index 0 when not provided', () => {
-      const result = parseCSVLineToWord( 'test ; test ;  ; ' );
+      const result = parseCSVLineToWord( 'ar ; de ; en ; es' );
       expect( result.bucketIndex ).toBe( 0 );
     } );
 

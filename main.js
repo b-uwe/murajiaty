@@ -62,8 +62,8 @@
     const es = parts[ 3 ] || '';
     const bucketIndex = parts[ 4 ] ? parseInt( parts[ 4 ] ) : 0;
     
-    // Validate the line - must have both Arabic and German text
-    if ( ar.trim() && de.trim() ) {
+    // Validate the line - must have all language fields filled
+    if ( ar.trim() && de.trim() && en.trim() && es.trim() ) {
       return { 'ar': ar, 'de': de, 'en': en, 'es': es, 'bucketIndex': bucketIndex };
     }
     return null;
