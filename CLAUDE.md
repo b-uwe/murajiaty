@@ -44,19 +44,17 @@ See README.md
 
 ## Key Architecture
 - Single-page application with Vanilla JavaScript
-- Three Core Server Components:
+- Two Core Server Components:
   1. TTS Audio Proxy (proxy/proxy.php)
     - Purpose: Bypass CORS restrictions for Google Translate TTS
     - Caching: Local file-based cache using MD5 hashes
     - Stateless: Each request is independent
     - Simple routing: Single GET parameter (?text=)
-  2. Vocabulary Management (delete.php)
-    - File operations: Backup, append, delete CSV files
-    - Workflow: buckets.csv → buckets.all.csv → cleanup
-    - No authentication: Assumes a trusted environment
-  3. Static File Server
+  2. Static File Server
     - Web server: Serves HTML/CSS/JS assets
-    - CSV hosting: Serves vocabulary files for import
+- Vocabulary Data Source:
+  - Google Sheets: Primary vocabulary source via CSV export
+  - localStorage: Client-side persistence for offline use
 
 ## Tech Stack
 - Vanilla JavaScript (no frameworks)
