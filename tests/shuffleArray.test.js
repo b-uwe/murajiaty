@@ -81,20 +81,24 @@ describe( 'shuffleArray', () => {
   } );
 
   test( 'should produce different arrangements on multiple calls (probabilistic)', () => {
-    // This test checks that shuffling produces variation
-    // Note: There's a small chance this could fail due to randomness
+    // Run shuffle until we get 3 different results, or fail after 100 attempts
     const original = [ 1, 2, 3, 4, 5, 6, 7, 8 ];
-    const results = [];
+    const uniqueResults = new Set();
+    const targetUniqueCount = 3;
+    const maxAttempts = 100;
     
-    // Run shuffle multiple times and collect results
-    for ( let i = 0; i < 10; i++ ) {
+    for ( let attempt = 0; attempt < maxAttempts; attempt++ ) {
       const arr = [ ...original ];
       shuffleArray( arr );
-      results.push( JSON.stringify( arr ) );
+      uniqueResults.add( JSON.stringify( arr ) );
+      
+      // Stop early if we have enough different results
+      if ( uniqueResults.size >= targetUniqueCount ) {
+        break;
+      }
     }
     
-    // Check that we got at least some different arrangements
-    const uniqueResults = new Set( results );
-    expect( uniqueResults.size ).toBeGreaterThan( 1 );
+    // Should have found at least 3 different arrangements
+    expect( uniqueResults.size ).toBeGreaterThanOrEqual( targetUniqueCount );
   } );
 } );
