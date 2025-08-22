@@ -493,12 +493,10 @@
 
           updateStorage();
           currentBucket = 0;
-          pickNextWord();
         }
       } )
       .catch( ( err ) => {
         console.error( 'Error importing vocabulary from Google Sheets: ', err.message );
-        pickNextWord();
       } );
   };
 
@@ -589,6 +587,9 @@
       if ( null === storedBuckets ) {
         fetchInitialVocabulary();
       }
+
+      // Initialize UI with first word regardless of data source
+      pickNextWord();
     }
   };
 
