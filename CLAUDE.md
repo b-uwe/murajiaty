@@ -13,7 +13,7 @@
   4. Break down the task into subtasks
 
   #### 🔧 Preparation Phase (Steps 5-8)
-  5. Familiarize yourself with the Coding style outlined in eslint.config.js, so that you do it right from the beginning and not have to change after running linting tests. Do that WITH CARE and MEMORIZE those rules!
+  5. Familiarize yourself with the Coding style outlined in eslint.config.mjs, so that you do it right from the beginning and not have to change after running linting tests. Do that WITH CARE and MEMORIZE those rules!
   6. Identify the regions of the code you need to work on
   7. Analyze those regions for possible cleanups and improvements according to the Boy Scout rule, explained further below. If there's potential for cleanup, do it AT THIS POINT! NO DELAYING IT! Then MANDATORILY run linting checks AND run all tests and fix issues over and over again until all checks and tests pass. Then commit according to below boyscout rule instructions. NEVER EVER commit code with failing tests or linting errors!
   8. Define what can be tested and WRITE THE TESTS BEFORE writing the implementation! WE WANT TO WORK TEST-FIRST! For EVERY LINE of code that changes BUSINESS LOGIC and can realistically be tested, write a test. Skip only: CSS-only changes, documentation, configuration files, or pure UI markup without logic. ENSURE NO BREAKING BUSINESS LOGIC WHENEVER POSSIBLE! MAKE SURE your tests really test productive code!
