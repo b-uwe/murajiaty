@@ -524,9 +524,10 @@
     initBrowser();
   };
 
-  // Export constants for Node.js environment
+  // Export functions for Node.js testing environment
   if ( typeof module !== 'undefined' && module.exports ) { 
     module.exports = { 
+      stripArabicDiacritics
     };
   };
 } )();
