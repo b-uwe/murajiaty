@@ -4,7 +4,7 @@
 ⚠️ **CRITICAL: These are MANDATORY, not optional guidelines. Claude MUST NOT bypass these:**
 **NO EXCEPTIONS. NO SHORTCUTS. NO "I'll fix it later".**
 
-### EVERY CHANGE DONE TO THE REPOSITORY consists of the following 15 steps:
+### EVERY CHANGE DONE TO THE REPOSITORY consists of the following 16 steps:
 **NO EXCEPTIONS. NO SHORTCUTS. NO SKIPPING STEPS.**
 #### 📋 Planning Phase (Steps 1-4)
   1. Ensure full comprehension of the task at hand! NEVER ASSUME! Ask back, in case! Ask back ONCE AT THIS STEP, not constantly throughout the process!
@@ -26,14 +26,15 @@
      * Pass ALL tests with `npm test`
      * Have NO errors or warnings
      * **MINIMUM 3-5 commits expected for any non-trivial feature**
-  10. Identify the regions that were just changed
-  11. Repeat step 7 and EXPLICITLY clean up! READ step 5 CLOSELY at this point to not miss anything
-  12. Run linting and testing once more. ENSURE NO ERRORS AND NO WARNINGS!
+  10. If main.js has changed, update its inclusion in index.html. Use a unix timestamp to prevent caching.
+  11. Identify the regions that were just changed
+  12. Repeat step 7 and EXPLICITLY clean up! READ step 5 CLOSELY at this point to not miss anything
+  13. Run linting and testing once more. ENSURE NO ERRORS AND NO WARNINGS!
 
   #### 🚀 Delivery Phase (Steps 13-15)
-  13. Push the changes to the repository! Then create a PR!
-  14. After creating a PR, check for merge conflicts and try to fix as much as you can locally, MANDATORILY ENSURE NO LINTING ERRORS AND ALL TESTS PASSING, then push updates. Repeat until there are no merge conflict that could be resolved
-  15. Tick the boxes for "Delete source branch" and "Squash commits" for when the PR is accepted. Assign the PR to b-uwe!
+  14. Push the changes to the repository! Then create a PR!
+  15. After creating a PR, check for merge conflicts and try to fix as much as you can locally, MANDATORILY ENSURE NO LINTING ERRORS AND ALL TESTS PASSING, then push updates. Repeat until there are no merge conflict that could be resolved
+  16. Tick the boxes for "Delete source branch" and "Squash commits" for when the PR is accepted. Assign the PR to b-uwe!
 
 ## Project Overview
 A simple spaced repetition vocabulary trainer for learning Arabic.
