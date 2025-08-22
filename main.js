@@ -17,6 +17,11 @@
 
   // Other global variables
   let buckets = [ [], [], [], [], [], [], [] ];
+  
+  /**
+   * Flag emojis for different languages in order: Spanish, German, English
+   * @constant {string[]}
+   */
   const flags = [ '🇪🇸', '🇩🇪', '🇺🇸' ];
 
   /**
