@@ -464,15 +464,10 @@
   };
 
   /**
-   * Fetches vocabulary from Google Sheets
-   * @param {bool} loadInitialData - Whether to load initial vocabulary data when localStorage is empty
+   * Fetches initial vocabulary from Google Sheets
+   * Only called when localStorage is empty to populate initial vocabulary data
    */
-  const fetchNewVocabulary = ( loadInitialData = false ) => {
-    if ( !loadInitialData ) {
-      // Skip fetching when localStorage has data - Google Sheets is only for initial load
-      return;
-    }
-
+  const fetchInitialVocabulary = () => {
     const googleSheetsUrl = 'https://docs.google.com/spreadsheets/d/1kPsGq3Zo9PPjtcst-T3pfiToeohq82K-yHuLywxtucU/export?format=csv';
     
     fetch( `${googleSheetsUrl}&t=${Date.now()}` )
@@ -594,7 +589,7 @@
       // Load initial vocabulary if localStorage is empty
       const isLocalStorageEmpty = ( null === storedBuckets );
       if ( isLocalStorageEmpty ) {
-        fetchNewVocabulary();
+        fetchInitialVocabulary();
       }
     }
   };
