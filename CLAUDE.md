@@ -55,7 +55,6 @@ See README.md
 - Vocabulary Data Source:
   - Google Sheets: Primary vocabulary source via CSV export
   - localStorage: Client-side persistence for offline use
-  - Fallback: Legacy delete.php remains for potential future use
 
 ## Tech Stack
 - Vanilla JavaScript (no frameworks)
