@@ -17,6 +17,11 @@
 
   // Other global variables
   let buckets = [ [], [], [], [], [], [], [] ];
+  
+  /**
+   * Flag emojis for different languages in order: Spanish, German, English
+   * @constant {string[]}
+   */
   const flags = [ '🇪🇸', '🇩🇪', '🇺🇸' ];
 
   /**
@@ -29,6 +34,53 @@
     'ُ', // Damma
     'ْ'  // Sukun
   ];
+
+  /**
+   * Formats a vocabulary word object into a CSV line
+   * @param {object} word - The vocabulary word with ar, de, en, es properties
+   * @param {number} bucketIndex - The bucket index for this word
+   * @returns {string} Formatted CSV line
+   */
+  const formatWordToCSVLine = ( word, bucketIndex ) => {
+    return `${word.ar} ; ${word.de} ; ${word.en} ; ${word.es} ; ${bucketIndex}`;
+  };
+
+  /**
+   * Parses a CSV line into a vocabulary word object
+   * @param {string} csvLine - The CSV line to parse
+   * @returns {object|null} Parsed word object or null if invalid
+   */
+  const parseCSVLineToWord = ( csvLine ) => {
+    if ( !csvLine || csvLine.trim() === '' ) {
+      return null;
+    }
+    
+    const parts = csvLine.split( ' ; ' );
+    const ar = parts[ 0 ] || '';
+    const de = parts[ 1 ] || '';
+    const en = parts[ 2 ] || '';
+    const es = parts[ 3 ] || '';
+    const bucketIndex = parts[ 4 ] ? parseInt( parts[ 4 ] ) : 0;
+    
+    // Validate the line - must have all language fields filled
+    if ( ar.trim() && de.trim() && en.trim() && es.trim() ) {
+      return { 'ar': ar, 'de': de, 'en': en, 'es': es, 'bucketIndex': bucketIndex };
+    }
+    return null;
+  };
+
+  /**
+   * Shuffles an array in place using Fisher-Yates algorithm
+   * @param {Array} array - The array to shuffle
+   * @returns {Array} The shuffled array (same reference)
+   */
+  const shuffleArray = ( array ) => {
+    for ( let i = array.length - 1; i > 0; i-- ) {
+      const j = Math.floor( Math.random() * ( i + 1 ) );
+      [ array[ i ], array[ j ] ] = [ array[ j ], array[ i ] ];
+    }
+    return array;
+  };
 
   /**
    * Strips Arabic diacritics from a string and normalizes alif forms.
@@ -396,23 +448,23 @@
               const rows = content.split( '\n' );
 
               rows.forEach( ( row ) => {
-                const [ ar, de, en, es, bucketIndex ] = row.split( ' ; ' );
-                const index = bucketIndex ? parseInt( bucketIndex ) : 0; // Default to 0 if not provided
+                const parsedWord = parseCSVLineToWord( row );
                 
-                // If bucketIndex is -1, search for matching entries and remove them
-                if ( index === -1 ) {
-                  buckets.forEach( ( bucket ) => {
-                    const entryIndex = bucket.findIndex( ( item ) => {
-                      return item.ar === ar && item.de === de;
+                if ( parsedWord ) {
+                  const { ar, de, en, es, bucketIndex } = parsedWord;
+                  
+                  // If bucketIndex is -1, search for matching entries and remove them
+                  if ( bucketIndex === -1 ) {
+                    buckets.forEach( ( bucket ) => {
+                      const entryIndex = bucket.findIndex( ( item ) => {
+                        return item.ar === ar && item.de === de;
+                      } );
+                      if ( entryIndex !== -1 ) {
+                        bucket.splice( entryIndex, 1 ); // Remove the matching entry
+                      }
                     } );
-                    if ( entryIndex !== -1 ) {
-                      bucket.splice( entryIndex, 1 ); // Remove the matching entry
-                    }
-                  } );
-                } else {
-                  // Validate the line
-                  if ( ar && de ) {
-                    buckets[ index ].push( { 'de': de, 'ar': ar, 'en': en, 'es': es } );
+                  } else {
+                    buckets[ bucketIndex ].push( { 'de': de, 'ar': ar, 'en': en, 'es': es } );
                   }
                 }
               } );
@@ -429,7 +481,6 @@
       } );
   };
 
-
   /**
    * Export vocabulary to CSV format
    * Format: arabic ; german ; english ; spanish ; bucket
@@ -442,7 +493,7 @@
     for ( let i = 0; i < buckets.length; i++ ) {
       const bucket = buckets[ i ];
       for ( const word of bucket ) {
-        csvContent += `${word.ar} ; ${word.de} ; ${word.en} ; ${word.es} ; ${i}\n`;
+        csvContent += formatWordToCSVLine( word, i ) + '\n';
       }
     }
 
@@ -490,11 +541,7 @@
 
       // Shuffle each inner array
       buckets = buckets.map( ( bucket ) => {
-        for ( let i = bucket.length - 1; i > 0; i-- ) {
-          const j = Math.floor( Math.random() * ( i + 1 ) );
-          [ bucket[ i ], bucket[ j ] ] = [ bucket[ j ], bucket[ i ] ];
-        }
-        return bucket;
+        return shuffleArray( [ ...bucket ] ); // Create copy and shuffle
       } );
 
       // Recalls a word we considered "learned forever"
@@ -527,7 +574,10 @@
   // Export functions for Node.js testing environment
   if ( typeof module !== 'undefined' && module.exports ) { 
     module.exports = { 
-      stripArabicDiacritics
+      stripArabicDiacritics,
+      formatWordToCSVLine,
+      parseCSVLineToWord,
+      shuffleArray
     };
   };
 } )();
