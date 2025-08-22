@@ -481,7 +481,6 @@
       } );
   };
 
-
   /**
    * Export vocabulary to CSV format
    * Format: arabic ; german ; english ; spanish ; bucket
