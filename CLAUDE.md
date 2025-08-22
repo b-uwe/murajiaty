@@ -8,7 +8,7 @@
 **NO EXCEPTIONS. NO SHORTCUTS. NO SKIPPING STEPS.**
 #### 📋 Planning Phase (Steps 1-4)
   1. Ensure full comprehension of the task at hand! NEVER ASSUME! Ask back, in case! Ask back ONCE AT THIS STEP, not constantly throughout the process!
-  2. Check out the main branch freshly, MAKE SURE you're not accidentally working on an old feature branch
+  2. Check out the main branch freshly, MAKE SURE you're not accidentally working on an old feature branch, pull to make sure you have the latest version
   3. Create a feature or bug report branch! NEVER work on the main branch
   4. Break down the task into subtasks
 
