@@ -15,15 +15,17 @@
   #### 🔧 Preparation Phase (Steps 5-8)
   5. Familiarize yourself with the Coding style outlined in eslint.config.mjs, so that you do it right from the beginning and not have to change after running linting tests. Do that WITH CARE and MEMORIZE those rules!
   6. Identify the regions of the code you need to work on
-  7. Analyze those regions for possible cleanups and improvements according to the Boy Scout rule, explained further below. If there's potential for cleanup, do it AT THIS POINT! NO DELAYING IT! Then MANDATORILY run linting checks AND run all tests and fix issues over and over again until all checks and tests pass. Then commit according to below boyscout rule instructions. NEVER EVER commit code with failing tests or linting errors!
+  7. Analyze those regions for possible cleanups and improvements according to the Boy Scout rule, explained further below. If there's potential for cleanup, do it AT THIS POINT! NO DELAYING IT! **MANDATORY: Create a 
+  separate commit for ANY cleanup with "Boy Scout: " prefix.** Then **MANDATORILY** run linting checks AND run all tests and fix issues over and over again until all checks and tests pass. Then commit according to below boyscout rule instructions. NEVER EVER commit code with failing tests or linting errors!
   8. Define what can be tested and WRITE THE TESTS BEFORE writing the implementation! WE WANT TO WORK TEST-FIRST! For EVERY LINE of code that changes BUSINESS LOGIC and can realistically be tested, write a test. Skip only: CSS-only changes, documentation, configuration files, or pure UI markup without logic. ENSURE NO BREAKING BUSINESS LOGIC WHENEVER POSSIBLE! MAKE SURE your tests really test productive code!
 
   #### 🔨 Implementation Phase (Steps 9-12)
-  9. Do the changes! COMMIT OFTEN and IN INTERMEDIATE STEPS, but ONLY when such intermediate step
-    * is expected to fully work (even - and especially - if the functionality isn't final yet) and not break anything
-    * explicit LINTING checks where run with `npm run lint`, and it's GUARANTEED there is NOT A SINGLE linting error or warning on commit
-    * explicit TESTS were run with `npm test` and it's GUARANTEED there is NOT A SINGLE test error or warning on commit. It MUST pass with ALL tests green
-    * If either linting or testing fails, Claude MUST NOT commit and fix the issues first, no exceptions. DO NOT TRY TO SKIP INTERMEDIATE COMMITS, just to save efforts in fixing the issues
+  9. Do the changes! **COMMIT AFTER EACH LOGICAL STEP**, **EACH COMMIT MUST:**
+     * Be a complete, working intermediate step
+     * Pass ALL linting checks with `npm run lint`
+     * Pass ALL tests with `npm test`
+     * Have NO errors or warnings
+     * **MINIMUM 3-5 commits expected for any non-trivial feature**
   10. Identify the regions that were just changed
   11. Repeat step 7 and EXPLICITLY clean up! READ step 5 CLOSELY at this point to not miss anything
   12. Run linting and testing once more. ENSURE NO ERRORS AND NO WARNINGS!
