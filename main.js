@@ -498,7 +498,6 @@
       } )
       .catch( ( err ) => {
         console.error( 'Error importing vocabulary from Google Sheets: ', err.message );
-        pickNextWord();
       } );
   };
 
@@ -556,7 +555,7 @@
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
         return bucket.map( ( { de, ar, en, es } ) => {
-          return  { de, ar, en, es }; 
+          return { de, ar, en, es }; 
         } );
       } );
 
@@ -588,6 +587,13 @@
       // Load initial vocabulary if localStorage is empty
       if ( null === storedBuckets ) {
         fetchInitialVocabulary();
+      }
+
+      // Only initialize UI if we have data to show
+      if ( buckets.some( ( bucket ) => {
+        return bucket.length > 0;
+      } ) ) {
+        pickNextWord();
       }
     }
   };
