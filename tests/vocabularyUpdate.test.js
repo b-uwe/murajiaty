@@ -59,8 +59,8 @@ describe( 'Vocabulary Update System', () => {
       // Mock fetch for testing
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': () => {
-          return Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2' );
+        'text': async () => {
+          return 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2';
         }
       } );
 
@@ -121,8 +121,8 @@ describe( 'Vocabulary Update System', () => {
     test( 'should detect new words and add them to bucket 0', async () => {
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': () => {
-          return Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nجديد,جديد,neu,new,nuevo,hash2' );
+        'text': async () => {
+          return 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nجديد,جديد,neu,new,nuevo,hash2';
         }
       } );
 
@@ -144,8 +144,8 @@ describe( 'Vocabulary Update System', () => {
     test( 'should preserve unchanged words with their progress', async () => {
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': () => {
-          return Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2' );
+        'text': async () => {
+          return 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2';
         }
       } );
 
@@ -199,9 +199,9 @@ describe( 'Vocabulary Update System', () => {
       
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': () => {
+        'text': async () => {
           // Google Sheets now only contains first two words, 'بيت' is deleted
-          return Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2' );
+          return 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2';
         }
       } );
 
