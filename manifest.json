@@ -2,7 +2,7 @@
   "name": "مُرَاجِعَةِي - Arabic Vocabulary Trainer",
   "short_name": "مُرَاجِعَةِي",
   "description": "A spaced repetition vocabulary trainer for learning Arabic",
-  "start_url": "/",
+  "start_url": "/murajiaty/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",
@@ -10,7 +10,7 @@
   "categories": ["education", "productivity"],
   "lang": "en",
   "dir": "ltr",
-  "scope": "/",
+  "scope": "/murajiaty/",
   "icons": [
     {
       "src": "icons/icon-192x192.png",
