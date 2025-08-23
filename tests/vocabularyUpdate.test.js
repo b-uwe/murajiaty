@@ -151,7 +151,7 @@ describe( 'Vocabulary Update System', () => {
 
       const result = await checkForVocabularyUpdates( mockBuckets );
       
-      // Original words should remain in their buckets
+      // Original words should remain in their ORIGINAL buckets (preserving progress)
       expect( result.buckets[ 0 ] ).toContainEqual( {
         'ar': 'كتاب',
         'de': 'Buch',
@@ -163,6 +163,22 @@ describe( 'Vocabulary Update System', () => {
         'de': 'Stift',
         'en': 'pen',
         'es': 'pluma'
+      } );
+      
+      // Verify that the advanced word is NOT moved back to bucket 0 (progress preserved)
+      expect( result.buckets[ 0 ] ).not.toContainEqual( {
+        'ar': 'قلم',
+        'de': 'Stift',
+        'en': 'pen',
+        'es': 'pluma'
+      } );
+      
+      // Verify that the beginner word is NOT moved to bucket 1
+      expect( result.buckets[ 1 ] ).not.toContainEqual( {
+        'ar': 'كتاب',
+        'de': 'Buch',
+        'en': 'book',
+        'es': 'libro'
       } );
     } );
 
