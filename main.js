@@ -105,6 +105,28 @@
   };
 
   /**
+   * Parses CSV content and returns an array of vocabulary words
+   * @param {string} csvContent - The raw CSV content to parse
+   * @returns {Array} Array of parsed vocabulary word objects
+   */
+  const parseGoogleSheetsCSV = ( csvContent ) => {
+    const words = [];
+    
+    if ( csvContent.length > 0 ) {
+      const rows = csvContent.split( '\n' );
+      
+      rows.forEach( ( row ) => {
+        const parsedWord = parseGoogleSheetsCSVLineToWord( row );
+        if ( parsedWord ) {
+          words.push( parsedWord );
+        }
+      } );
+    }
+    
+    return words;
+  };
+
+  /**
    * Shuffles an array in place using Fisher-Yates algorithm
    * @param {Array} array - The array to shuffle
    * @returns {Array} The shuffled array (same reference)
@@ -464,41 +486,136 @@
   };
 
   /**
-   * Fetches initial vocabulary from Google Sheets
-   * Only called when localStorage is empty to populate initial vocabulary data
+   * Initializes the UI by setting current bucket to 0 and picking the first word
+   * Only initializes if buckets contain vocabulary data
    */
-  const fetchInitialVocabulary = () => {
-    const googleSheetsUrl = 'https://docs.google.com/spreadsheets/d/1kPsGq3Zo9PPjtcst-T3pfiToeohq82K-yHuLywxtucU/export?format=csv';
-    
-    fetch( `${googleSheetsUrl}&t=${Date.now()}` )
-      .then( ( response ) => {
-        if ( !response.ok ) {
-          throw new Error( 'Network response was not ok: ' + response.status );
-        }
-        return response.text();
-      } )
-      .then( ( content ) => {
-        if ( content.length > 0 ) {
-          const rows = content.split( '\n' );
+  const initializeUIIfDataExists = () => {
+    if ( buckets.some( ( bucket ) => {
+      return bucket.length > 0;
+    } ) ) {
+      currentBucket = 0;
+      pickNextWord();
+    }
+  };
 
-          rows.forEach( ( row ) => {
-            const parsedWord = parseGoogleSheetsCSVLineToWord( row );
-            
-            if ( parsedWord ) {
-              const { ar, de, en, es } = parsedWord;
-              // Add all words to bucket 0 initially
-              buckets[ 0 ].push( { 'de': de, 'ar': ar, 'en': en, 'es': es } );
-            }
-          } );
+  /**
+   * Simple MD5-like hash function for vocabulary words
+   * Creates a hash from the concatenated ar|de|en|es content
+   * @param {object} word - The vocabulary word with ar, de, en, es properties
+   * @returns {string} Hash string representation of the word
+   */
+  const hashVocabularyWord = ( word ) => {
+    const content = `${word.ar}|${word.de}|${word.en}|${word.es}`;
+    let hash = 0;
+    for ( let i = 0; i < content.length; i++ ) {
+      const char = content.charCodeAt( i );
+      hash = ( ( hash << 5 ) - hash ) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash.toString( 16 );
+  };
 
-          updateStorage();
-          currentBucket = 0;
-          pickNextWord();
-        }
-      } )
-      .catch( ( err ) => {
-        console.error( 'Error importing vocabulary from Google Sheets: ', err.message );
+  /**
+   * Fetches vocabulary data from Google Sheets
+   * @returns {Promise<Array>} Array of vocabulary word objects
+   */
+  const fetchGoogleSheetsData = async () => {
+    try {
+      const response = await fetch( `https://docs.google.com/spreadsheets/d/1kPsGq3Zo9PPjtcst-T3pfiToeohq82K-yHuLywxtucU/export?format=csv&t=${Date.now()}` );
+      
+      if ( !response.ok ) {
+        throw new Error( `Network response was not ok: ${response.status}` );
+      }
+      
+      const content = await response.text();
+      return parseGoogleSheetsCSV( content );
+    } catch ( err ) {
+      console.error( 'Error fetching vocabulary from Google Sheets:', err.message );
+      return [];
+    }
+  };
+
+  /**
+   * Checks for vocabulary updates by comparing local storage with Google Sheets data
+   * Uses hash-based change detection to preserve user progress on unchanged words
+   * @param {Array<Array>} currentBuckets - Current bucket structure from localStorage
+   * @returns {Promise<object>} Object containing updated buckets and change statistics
+   */
+  const checkForVocabularyUpdates = async ( currentBuckets = buckets ) => {
+    try {
+      // 1. Build lookup maps from local vocabulary
+      const localVocabMap = new Map(); // hash -> {word, bucketIndex, arrayIndex}
+      const localHashSet = new Set();
+
+      currentBuckets.forEach( ( bucket, bucketIndex ) => {
+        bucket.forEach( ( word, arrayIndex ) => {
+          const wordHash = hashVocabularyWord( word );
+          localVocabMap.set( wordHash, { word, bucketIndex, arrayIndex } );
+          localHashSet.add( wordHash );
+        } );
       } );
+
+      // 2. Fetch and process Google Sheets data
+      const googleVocab = await fetchGoogleSheetsData();
+      const googleHashSet = new Set();
+      const newWords = [];
+
+      googleVocab.forEach( ( googleWord ) => {
+        const googleHash = hashVocabularyWord( googleWord );
+        googleHashSet.add( googleHash );
+
+        if ( !localHashSet.has( googleHash ) ) {
+          // NEW word - will be added to bucket 0
+          newWords.push( googleWord );
+        }
+        // If hash exists, word is UNCHANGED - preserve with existing progress
+      } );
+
+      // 3. Find DELETED words and collect deletion info
+      const deletionsToProcess = [];
+      localHashSet.forEach( ( localHash ) => {
+        if ( !googleHashSet.has( localHash ) ) {
+          // DELETED word - mark for removal
+          const { bucketIndex, arrayIndex } = localVocabMap.get( localHash );
+          deletionsToProcess.push( { bucketIndex, arrayIndex } );
+        }
+      } );
+
+      // 4. Create new buckets structure with updates
+      const updatedBuckets = currentBuckets.map( ( bucket ) => {
+        return [ ...bucket ]; // Deep copy
+      } );
+
+      // 5. Add new words to bucket 0
+      newWords.forEach( ( word ) => {
+        updatedBuckets[ 0 ].push( { 'ar': word.ar, 'de': word.de, 'en': word.en, 'es': word.es } );
+      } );
+
+      // 6. Process deletions in reverse order to avoid index shifting issues
+      deletionsToProcess
+        .sort( ( a, b ) => {
+          // Sort by bucket first, then by array index (both descending)
+          if ( a.bucketIndex !== b.bucketIndex ) {
+            return b.bucketIndex - a.bucketIndex;
+          }
+          return b.arrayIndex - a.arrayIndex;
+        } )
+        .forEach( ( { bucketIndex, arrayIndex } ) => {
+          updatedBuckets[ bucketIndex ].splice( arrayIndex, 1 );
+        } );
+
+      return {
+        'buckets': updatedBuckets,
+        'changes': {
+          'newWords': newWords.length,
+          'deletedWords': deletionsToProcess.length,
+          'unchangedWords': localHashSet.size - deletionsToProcess.length
+        }
+      };
+    } catch ( err ) {
+      console.error( 'Error checking for vocabulary updates:', err.message );
+      return { 'buckets': currentBuckets, 'changes': { 'newWords': 0, 'deletedWords': 0, 'unchangedWords': 0 } };
+    }
   };
 
   /**
@@ -584,16 +701,32 @@
 
       addLetterClickListener();
       
-      // Load initial vocabulary if localStorage is empty
-      if ( null === storedBuckets ) {
-        fetchInitialVocabulary();
-      }
+      // Load vocabulary (handles both initial load and updates)
+      checkForVocabularyUpdates( buckets )
+        .then( ( updateResult ) => {
+          if ( updateResult.changes.newWords > 0 || updateResult.changes.deletedWords > 0 ) {
+            console.log( `Vocabulary updated: +${updateResult.changes.newWords} new, -${updateResult.changes.deletedWords} deleted, ${updateResult.changes.unchangedWords} unchanged` );
+            buckets = updateResult.buckets;
+            updateStorage();
+            updateHeader();
+          }
+          
+          // Initialize UI for first-time users or after successful updates
+          if ( null === storedBuckets ) {
+            initializeUIIfDataExists();
+          }
+        } )
+        .catch( ( err ) => {
+          console.error( 'Vocabulary update failed:', err.message );
+          // For initial load failures, still try to initialize UI with existing data
+          if ( null === storedBuckets ) {
+            initializeUIIfDataExists();
+          }
+        } );
 
-      // Only initialize UI if we have data to show
-      if ( buckets.some( ( bucket ) => {
-        return bucket.length > 0;
-      } ) ) {
-        pickNextWord();
+      // Initialize UI for returning users (existing localStorage data)
+      if ( null !== storedBuckets ) {
+        initializeUIIfDataExists();
       }
     }
   };
@@ -610,7 +743,11 @@
       formatWordToCSVLine,
       parseCSVLineToWord,
       parseGoogleSheetsCSVLineToWord,
-      shuffleArray
+      parseGoogleSheetsCSV,
+      shuffleArray,
+      hashVocabularyWord,
+      fetchGoogleSheetsData,
+      checkForVocabularyUpdates
     };
   };
 } )();
