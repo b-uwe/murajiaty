@@ -71,6 +71,7 @@ See README.md
 - For the PR, tick the boxes for "Delete source branch" and "Squash commits" for when the PR is accepted.
 - This is a GitHub repository, so use the `gh` tool for PRs
 - Commit in smaller steps, but always with something that works and has been tested
+- Avoid constants for single-use values
 
 ## Boy Scout rule
 - "Leave your code better than you found it."
