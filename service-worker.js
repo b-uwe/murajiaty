@@ -4,11 +4,11 @@
 
 const CACHE_NAME = 'murajiaty-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/main.js',
-  '/styles.css',
-  '/manifest.json'
+  './',
+  './index.html',
+  './main.js',
+  './styles.css',
+  './manifest.json'
 ];
 
 /**
