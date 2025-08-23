@@ -187,21 +187,40 @@ describe( 'Vocabulary Update System', () => {
      * @returns {Promise<void>}
      */
     test( 'should remove deleted words from buckets', async () => {
+      // Setup buckets with multiple words to properly test removal
+      const bucketsWithMultipleWords = [
+        [ { 'ar': 'كتاب', 'de': 'Buch', 'en': 'book', 'es': 'libro' } ],
+        [ 
+          { 'ar': 'قلم', 'de': 'Stift', 'en': 'pen', 'es': 'pluma' },
+          { 'ar': 'بيت', 'de': 'Haus', 'en': 'house', 'es': 'casa' }
+        ],
+        [], [], [], [], []
+      ];
+      
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
         'text': () => {
-          return Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1' ); // Only first word remains
+          // Google Sheets now only contains first two words, 'بيت' is deleted
+          return Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2' );
         }
       } );
 
-      const result = await checkForVocabularyUpdates( mockBuckets );
+      const result = await checkForVocabularyUpdates( bucketsWithMultipleWords );
       
-      // Second word should be deleted from bucket 1
-      expect( result.buckets[ 1 ] ).not.toContainEqual( {
+      // Verify that bucket 1 still contains the non-deleted word
+      expect( result.buckets[ 1 ] ).toContainEqual( {
         'ar': 'قلم',
         'de': 'Stift',
         'en': 'pen',
         'es': 'pluma'
+      } );
+      
+      // Verify that the deleted word 'بيت' is removed from bucket 1
+      expect( result.buckets[ 1 ] ).not.toContainEqual( {
+        'ar': 'بيت',
+        'de': 'Haus',
+        'en': 'house',
+        'es': 'casa'
       } );
     } );
   } );
