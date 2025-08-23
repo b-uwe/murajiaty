@@ -120,16 +120,15 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
     'jsdoc/require-param': 'error',
     'jsdoc/require-returns': 'error',
     'jsdoc/require-param-description': 'error',
-    // Relax JSDoc requirements for test files - only require on named functions
     'jsdoc/require-jsdoc': [
       'error',
       {
         'require': {
-          'FunctionDeclaration': true,      // Named test helper functions need docs
-          'MethodDefinition': false,        // Test methods don't need docs
-          'ClassDeclaration': true,         // Test classes need docs (if any)
-          'ArrowFunctionExpression': false, // Anonymous test functions don't need docs
-          'FunctionExpression': false       // Anonymous callbacks don't need docs
+          'FunctionDeclaration': true,
+          'MethodDefinition': false,
+          'ClassDeclaration': true,
+          'ArrowFunctionExpression': false,
+          'FunctionExpression': false
         }
       }
     ]
