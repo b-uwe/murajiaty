@@ -464,45 +464,6 @@
   };
 
   /**
-   * Fetches initial vocabulary from Google Sheets
-   * Only called when localStorage is empty to populate initial vocabulary data
-   * @returns {void}
-   */
-  const fetchInitialVocabulary = () => {
-    const googleSheetsUrl = 'https://docs.google.com/spreadsheets/d/1kPsGq3Zo9PPjtcst-T3pfiToeohq82K-yHuLywxtucU/export?format=csv';
-    
-    fetch( `${googleSheetsUrl}&t=${Date.now()}` )
-      .then( ( response ) => {
-        if ( !response.ok ) {
-          throw new Error( 'Network response was not ok: ' + response.status );
-        }
-        return response.text();
-      } )
-      .then( ( content ) => {
-        if ( content.length > 0 ) {
-          const rows = content.split( '\n' );
-
-          rows.forEach( ( row ) => {
-            const parsedWord = parseGoogleSheetsCSVLineToWord( row );
-            
-            if ( parsedWord ) {
-              const { ar, de, en, es } = parsedWord;
-              // Add all words to bucket 0 initially
-              buckets[ 0 ].push( { 'de': de, 'ar': ar, 'en': en, 'es': es } );
-            }
-          } );
-
-          updateStorage();
-          currentBucket = 0;
-          pickNextWord();
-        }
-      } )
-      .catch( ( err ) => {
-        console.error( 'Error importing vocabulary from Google Sheets: ', err.message );
-      } );
-  };
-
-  /**
    * Simple MD5-like hash function for vocabulary words
    * Creates a hash from the concatenated ar|de|en|es content
    * @param {object} word - The vocabulary word with ar, de, en, es properties
@@ -719,24 +680,24 @@
 
       addLetterClickListener();
       
-      // Load initial vocabulary if localStorage is empty
-      if ( null === storedBuckets ) {
-        fetchInitialVocabulary();
-      } else {
-        // Background update check for existing vocabulary
-        checkForVocabularyUpdates( buckets )
-          .then( ( updateResult ) => {
-            if ( updateResult.changes.newWords > 0 || updateResult.changes.deletedWords > 0 ) {
-              console.log( `Vocabulary updated: +${updateResult.changes.newWords} new, -${updateResult.changes.deletedWords} deleted, ${updateResult.changes.unchangedWords} unchanged` );
-              buckets = updateResult.buckets;
-              updateStorage();
-              updateHeader();
+      // Load vocabulary (handles both initial load and updates)
+      checkForVocabularyUpdates( buckets )
+        .then( ( updateResult ) => {
+          if ( updateResult.changes.newWords > 0 || updateResult.changes.deletedWords > 0 ) {
+            console.log( `Vocabulary updated: +${updateResult.changes.newWords} new, -${updateResult.changes.deletedWords} deleted, ${updateResult.changes.unchangedWords} unchanged` );
+            buckets = updateResult.buckets;
+            updateStorage();
+            updateHeader();
+            // Only pick next word if this was initial load
+            if ( null === storedBuckets ) {
+              currentBucket = 0;
+              pickNextWord();
             }
-          } )
-          .catch( ( err ) => {
-            console.error( 'Background vocabulary update failed:', err.message );
-          } );
-      }
+          }
+        } )
+        .catch( ( err ) => {
+          console.error( 'Vocabulary update failed:', err.message );
+        } );
 
       // Only initialize UI if we have data to show
       if ( buckets.some( ( bucket ) => {
