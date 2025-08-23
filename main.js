@@ -486,6 +486,19 @@
   };
 
   /**
+   * Initializes the UI by setting current bucket to 0 and picking the first word
+   * Only initializes if buckets contain vocabulary data
+   */
+  const initializeUIIfDataExists = () => {
+    if ( buckets.some( ( bucket ) => {
+      return bucket.length > 0;
+    } ) ) {
+      currentBucket = 0;
+      pickNextWord();
+    }
+  };
+
+  /**
    * Simple MD5-like hash function for vocabulary words
    * Creates a hash from the concatenated ar|de|en|es content
    * @param {object} word - The vocabulary word with ar, de, en, es properties
@@ -699,29 +712,21 @@
           }
           
           // Initialize UI for first-time users or after successful updates
-          if ( null === storedBuckets && buckets.some( ( bucket ) => {
-            return bucket.length > 0;
-          } ) ) {
-            currentBucket = 0;
-            pickNextWord();
+          if ( null === storedBuckets ) {
+            initializeUIIfDataExists();
           }
         } )
         .catch( ( err ) => {
           console.error( 'Vocabulary update failed:', err.message );
           // For initial load failures, still try to initialize UI with existing data
-          if ( null === storedBuckets && buckets.some( ( bucket ) => {
-            return bucket.length > 0;
-          } ) ) {
-            currentBucket = 0;
-            pickNextWord();
+          if ( null === storedBuckets ) {
+            initializeUIIfDataExists();
           }
         } );
 
       // Initialize UI for returning users (existing localStorage data)
-      if ( null !== storedBuckets && buckets.some( ( bucket ) => {
-        return bucket.length > 0;
-      } ) ) {
-        pickNextWord();
+      if ( null !== storedBuckets ) {
+        initializeUIIfDataExists();
       }
     }
   };
