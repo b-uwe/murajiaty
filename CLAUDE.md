@@ -26,7 +26,7 @@
      * Pass ALL tests with `npm test`
      * Have NO errors or warnings
      * **MINIMUM 3-5 commits expected for any non-trivial feature**
-  10. If main.js has changed, update its inclusion in index.html. Use a unix timestamp to prevent caching.
+  10. If main.js has changed, update its inclusion in index.html. Use a unix timestamp to prevent caching. Do the same for styles.css if it has changed
   11. Identify the regions that were just changed
   12. Repeat step 7 and EXPLICITLY clean up! READ step 5 CLOSELY at this point to not miss anything
   13. Run linting and testing once more. ENSURE NO ERRORS AND NO WARNINGS!
