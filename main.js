@@ -105,6 +105,28 @@
   };
 
   /**
+   * Parses CSV content and returns an array of vocabulary words
+   * @param {string} csvContent - The raw CSV content to parse
+   * @returns {Array} Array of parsed vocabulary word objects
+   */
+  const parseGoogleSheetsCSV = ( csvContent ) => {
+    const words = [];
+    
+    if ( csvContent.length > 0 ) {
+      const rows = csvContent.split( '\n' );
+      
+      rows.forEach( ( row ) => {
+        const parsedWord = parseGoogleSheetsCSVLineToWord( row );
+        if ( parsedWord ) {
+          words.push( parsedWord );
+        }
+      } );
+    }
+    
+    return words;
+  };
+
+  /**
    * Shuffles an array in place using Fisher-Yates algorithm
    * @param {Array} array - The array to shuffle
    * @returns {Array} The shuffled array (same reference)
@@ -494,20 +516,7 @@
       }
       
       const content = await response.text();
-      const words = [];
-      
-      if ( content.length > 0 ) {
-        const rows = content.split( '\n' );
-        
-        rows.forEach( ( row ) => {
-          const parsedWord = parseGoogleSheetsCSVLineToWord( row );
-          if ( parsedWord ) {
-            words.push( parsedWord );
-          }
-        } );
-      }
-      
-      return words;
+      return parseGoogleSheetsCSV( content );
     } catch ( err ) {
       console.error( 'Error fetching vocabulary from Google Sheets:', err.message );
       return [];
@@ -720,6 +729,7 @@
       formatWordToCSVLine,
       parseCSVLineToWord,
       parseGoogleSheetsCSVLineToWord,
+      parseGoogleSheetsCSV,
       shuffleArray,
       hashVocabularyWord,
       fetchGoogleSheetsData,
