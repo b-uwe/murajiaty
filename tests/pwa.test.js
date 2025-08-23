@@ -37,7 +37,9 @@ describe( 'PWA functionality', () => {
     expect( manifest.icons.length ).toBeGreaterThan( 0 );
     
     // Check for required icon sizes
-    const iconSizes = manifest.icons.map( icon => icon.sizes );
+    const iconSizes = manifest.icons.map( ( icon ) => {
+      return icon.sizes;
+    } );
     expect( iconSizes ).toContain( '192x192' );
     expect( iconSizes ).toContain( '512x512' );
   } );
