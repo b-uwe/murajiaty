@@ -696,19 +696,29 @@
             buckets = updateResult.buckets;
             updateStorage();
             updateHeader();
-            // Only pick next word if this was initial load
-            if ( null === storedBuckets ) {
-              currentBucket = 0;
-              pickNextWord();
-            }
+          }
+          
+          // Initialize UI for first-time users or after successful updates
+          if ( null === storedBuckets && buckets.some( ( bucket ) => {
+            return bucket.length > 0;
+          } ) ) {
+            currentBucket = 0;
+            pickNextWord();
           }
         } )
         .catch( ( err ) => {
           console.error( 'Vocabulary update failed:', err.message );
+          // For initial load failures, still try to initialize UI with existing data
+          if ( null === storedBuckets && buckets.some( ( bucket ) => {
+            return bucket.length > 0;
+          } ) ) {
+            currentBucket = 0;
+            pickNextWord();
+          }
         } );
 
-      // Only initialize UI if we have data to show
-      if ( buckets.some( ( bucket ) => {
+      // Initialize UI for returning users (existing localStorage data)
+      if ( null !== storedBuckets && buckets.some( ( bucket ) => {
         return bucket.length > 0;
       } ) ) {
         pickNextWord();
