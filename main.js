@@ -466,6 +466,7 @@
   /**
    * Fetches initial vocabulary from Google Sheets
    * Only called when localStorage is empty to populate initial vocabulary data
+   * @returns {void}
    */
   const fetchInitialVocabulary = () => {
     const googleSheetsUrl = 'https://docs.google.com/spreadsheets/d/1kPsGq3Zo9PPjtcst-T3pfiToeohq82K-yHuLywxtucU/export?format=csv';
