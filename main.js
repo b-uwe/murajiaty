@@ -91,29 +91,6 @@
     return fields;
   };
 
-  /**
-   * Parses a CSV line into a vocabulary word object
-   * @param {string} csvLine - The CSV line to parse
-   * @returns {object|null} Parsed word object or null if invalid
-   */
-  const parseCSVLineToWord = ( csvLine ) => {
-    if ( !csvLine || csvLine.trim() === '' ) {
-      return null;
-    }
-    
-    const parts = parseCSVLine( csvLine, ' ; ' );
-    const ar = parts[ 0 ] || '';
-    const de = parts[ 1 ] || '';
-    const en = parts[ 2 ] || '';
-    const es = parts[ 3 ] || '';
-    const bucketIndex = parts[ 4 ] ? parseInt( parts[ 4 ] ) : 0;
-    
-    // Validate the line - must have all language fields filled
-    if ( ar.trim() && de.trim() && en.trim() && es.trim() ) {
-      return { 'ar': ar, 'de': de, 'en': en, 'es': es, 'bucketIndex': bucketIndex };
-    }
-    return null;
-  };
 
   /**
    * Parses a Google Sheets CSV line to extract word data
@@ -786,7 +763,6 @@
       stripArabicDiacritics,
       formatWordToCSVLine,
       parseCSVLine,
-      parseCSVLineToWord,
       parseGoogleSheetsCSVLineToWord,
       parseGoogleSheetsCSV,
       shuffleArray,

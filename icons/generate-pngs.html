@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate PWA Icons from SVG</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .icon-preview { border: 1px solid #ccc; margin: 10px; display: inline-block; }
+        canvas { background: transparent; }
+        .download-section { margin: 20px 0; padding: 20px; border: 2px solid #006633; }
+    </style>
+</head>
+<body>
+    <h1>PWA Icon Generator</h1>
+    <p>Generate the required 192x192 and 512x512 PNG icons from the SVG design.</p>
+    
+    <div class="download-section">
+        <h2>📱 Required Icons:</h2>
+        <div id="icons-container"></div>
+    </div>
+    
+    <script>
+        const sizes = [192, 512];
+        const svgContent = `<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" fill="#006633" rx="32"/>
+  
+  <!-- Back cards (stack effect) -->
+  <rect x="20" y="55" width="140" height="90" fill="white" rx="16" transform="rotate(-6 90 100)" stroke="#ddd" stroke-width="1"/>
+  <rect x="25" y="50" width="140" height="90" fill="#f8f9fa" rx="16" transform="rotate(-3 95 95)" stroke="#ddd" stroke-width="1"/>
+  
+  <!-- Front card -->
+  <rect x="30" y="45" width="140" height="90" fill="white" rx="16" stroke="#ccc" stroke-width="1"/>
+  
+  <!-- Card content: مراجعتي -->
+  <text x="100" y="100" font-family="Tahoma, Arial, sans-serif" font-size="32" font-weight="600" fill="#006633" text-anchor="middle" direction="rtl">مراجعتي</text>
+  
+  <!-- Progress bar showing learning progress -->
+  <rect x="50" y="115" width="100" height="6" fill="#e0e0e0" rx="3"/>
+  <rect x="50" y="115" width="60" height="6" fill="#66cc66" rx="3"/>
+  
+  <!-- Folded corner -->
+  <rect x="145" y="30" width="40" height="40" fill="white" rx="16" stroke="#bbb" stroke-width="1.5"/>
+  <rect x="151" y="4" width="50" height="50" fill="#006633" transform="rotate(45 163 32)"/>
+  
+</svg>`;
+        
+        sizes.forEach(size => {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Create SVG data URL
+            const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(svgBlob);
+            
+            const img = new Image();
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, size, size);
+                URL.revokeObjectURL(url);
+                
+                const div = document.createElement('div');
+                div.className = 'icon-preview';
+                div.innerHTML = `<h3>icon-${size}x${size}.png</h3>`;
+                
+                const previewCanvas = document.createElement('canvas');
+                previewCanvas.width = 64;
+                previewCanvas.height = 64;
+                const previewCtx = previewCanvas.getContext('2d');
+                previewCtx.drawImage(canvas, 0, 0, 64, 64);
+                div.appendChild(previewCanvas);
+                
+                const link = document.createElement('a');
+                link.download = `icon-${size}x${size}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.textContent = 'Download PNG';
+                link.style.display = 'block';
+                link.style.marginTop = '10px';
+                link.style.padding = '5px 10px';
+                link.style.backgroundColor = '#006633';
+                link.style.color = 'white';
+                link.style.textDecoration = 'none';
+                link.style.borderRadius = '4px';
+                link.style.textAlign = 'center';
+                
+                div.appendChild(link);
+                document.getElementById('icons-container').appendChild(div);
+            };
+            
+            img.src = url;
+        });
+    </script>
+    
+    <div style="margin-top: 30px; padding: 20px; background: #f0f8f0; border-radius: 8px;">
+        <h3>📋 Instructions:</h3>
+        <ol>
+            <li>Click the "Download PNG" buttons above</li>
+            <li>Save the files as <code>icon-192x192.png</code> and <code>icon-512x512.png</code></li>
+            <li>Place them in the <code>icons/</code> directory</li>
+            <li>Your PWA icons are ready! 🎉</li>
+        </ol>
+    </div>
+</body>
+</html>
