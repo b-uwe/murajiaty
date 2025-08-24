@@ -17,7 +17,7 @@
   6. Identify the regions of the code you need to work on
   7. Analyze those regions for possible cleanups and improvements according to the Boy Scout rule, explained further below. If there's potential for cleanup, do it AT THIS POINT! NO DELAYING IT! **MANDATORY: Create a 
   separate commit for ANY cleanup with "Boy Scout: " prefix.** Then **MANDATORILY** run linting checks AND run all tests and fix issues over and over again until all checks and tests pass. Then commit according to below boyscout rule instructions. NEVER EVER commit code with failing tests or linting errors!
-  8. Define what can be tested and WRITE THE TESTS BEFORE writing the implementation! WE WANT TO WORK TEST-FIRST! For EVERY LINE of code that changes BUSINESS LOGIC and can realistically be tested, write a test. Skip only: CSS-only changes, documentation, configuration files, or pure UI markup without logic. ENSURE NO BREAKING BUSINESS LOGIC WHENEVER POSSIBLE! MAKE SURE your tests really test productive code!
+  8. Define what can be tested and WRITE THE TESTS BEFORE writing the implementation! WE WANT TO WORK TEST-FIRST! For EVERY LINE of code that changes BUSINESS LOGIC and can realistically be tested, write a test. Skip only: REMOVAL of functionality, CSS-only changes, documentation, configuration files, or pure UI markup without logic. ENSURE NO BREAKING BUSINESS LOGIC WHENEVER POSSIBLE! MAKE SURE your tests really test productive code!
 
   #### 🔨 Implementation Phase (Steps 9-12)
   9. Do the changes! **COMMIT AFTER EACH LOGICAL STEP**, **EACH COMMIT MUST:**
