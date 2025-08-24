@@ -717,39 +717,14 @@
     initBrowser();
 
     // Register Service Worker for PWA functionality
-    console.log( '[PWA] Checking for service worker support...' );
-    console.log( '[PWA] Navigator object:', navigator );
-    console.log( '[PWA] Service worker in navigator:', 'serviceWorker' in navigator );
-    
     if ( 'serviceWorker' in navigator ) {
-      console.log( '[PWA] Service worker is supported, attempting registration...' );
-      console.log( '[PWA] Current URL:', window.location.href );
-      console.log( '[PWA] Service worker URL: ./service-worker.js' );
-      
       navigator.serviceWorker.register( './service-worker.js' )
         .then( ( registration ) => {
-          console.log( '[PWA] Service Worker registered successfully!' );
-          console.log( '[PWA] Registration object:', registration );
-          console.log( '[PWA] Registration scope:', registration.scope );
-          console.log( '[PWA] Registration state:', registration.installing, registration.waiting, registration.active );
-          
-          // Listen for service worker updates
-          registration.addEventListener( 'updatefound', () => {
-            console.log( '[PWA] Service worker update found' );
-            const newWorker = registration.installing;
-            newWorker.addEventListener( 'statechange', () => {
-              console.log( '[PWA] Service worker state changed:', newWorker.state );
-            } );
-          } );
+          console.log( 'Service Worker registered successfully:', registration.scope );
         } )
         .catch( ( error ) => {
-          console.error( '[PWA] Service Worker registration failed!' );
-          console.error( '[PWA] Registration error:', error );
-          console.error( '[PWA] Registration error message:', error.message );
-          console.error( '[PWA] Registration error stack:', error.stack );
+          console.log( 'Service Worker registration failed:', error );
         } );
-    } else {
-      console.warn( '[PWA] Service worker is not supported in this browser' );
     }
   };
 
