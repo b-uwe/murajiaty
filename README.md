@@ -10,7 +10,6 @@
   - Allows text input with real-time feedback for Arabic typing practice
   - Provides audio pronunciation via Google Translate TTS
   - Stores progress locally in your browser
-  - Exports vocabulary to CSV
 
   ## Quick Start
 
@@ -18,7 +17,6 @@
   2. Start learning! Use the buttons to mark words as remembered (👍) or forgotten (👎)
   3. Flip cards with ↩️ to see translations
   4. Click 🔊 to hear Arabic pronunciation provided by Google Translate
-  5. Long-press anywhere for 5 seconds to export your vocabulary
 
   ## How the Buckets Work
 
