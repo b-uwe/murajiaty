@@ -252,9 +252,7 @@
     updateOverlay();
     
     // Auto-focus the input field so user can start typing immediately
-    if ( typeof input.focus === 'function' ) {
-      input.focus();
-    }
+    input.focus();
   };
 
   /**
