@@ -647,6 +647,21 @@
     letterOverlay = document.getElementById( 'letterOverlay' );
     wordsElement = document.getElementById( 'words' );
 
+    // Dynamic viewport height adjustment for PWA system UI
+    const setViewportHeight = () => {
+      const vh = window.innerHeight;
+      const padding = 32; // 2rem in pixels (assuming 1rem = 16px)
+      const adjustedHeight = vh - padding;
+      document.body.style.minHeight = `${adjustedHeight}px`;
+      document.body.style.height = `${adjustedHeight}px`;
+      document.body.style.maxHeight = `${adjustedHeight}px`;
+    };
+
+    // Set viewport height on load and resize
+    setViewportHeight();
+    window.addEventListener( 'resize', setViewportHeight );
+    window.addEventListener( 'orientationchange', setViewportHeight );
+
 
     // On page load, read the buckets from local storage
     const storedBuckets = localStorage.getItem( 'buckets' );
