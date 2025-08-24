@@ -46,6 +46,52 @@
   };
 
   /**
+   * Parses a CSV line with semicolon separators, handling quoted fields containing commas
+   * @param {string} csvLine - The CSV line to parse (format: "field1" ; "field2" ; ...)
+   * @param {string} separator - The field separator (default: ' ; ')
+   * @returns {string[]} Array of parsed fields
+   */
+  const parseCSVLine = ( csvLine, separator = ' ; ' ) => {
+    if ( !csvLine || csvLine.trim() === '' ) {
+      return [];
+    }
+
+    const fields = [];
+    let currentField = '';
+    let inQuotes = false;
+    let i = 0;
+
+    while ( i < csvLine.length ) {
+      const char = csvLine[ i ];
+      const nextChar = csvLine[ i + 1 ];
+
+      if ( char === '"' ) {
+        if ( inQuotes && nextChar === '"' ) {
+          // Escaped quote within quoted field
+          currentField += '"';
+          i += 2; // Skip both quotes
+        } else {
+          // Start or end of quoted field
+          inQuotes = !inQuotes;
+          i++;
+        }
+      } else if ( !inQuotes && csvLine.substring( i, i + separator.length ) === separator ) {
+        // Found separator outside of quotes
+        fields.push( currentField.trim() );
+        currentField = '';
+        i += separator.length;
+      } else {
+        currentField += char;
+        i++;
+      }
+    }
+
+    // Add the last field
+    fields.push( currentField.trim() );
+    return fields;
+  };
+
+  /**
    * Parses a CSV line into a vocabulary word object
    * @param {string} csvLine - The CSV line to parse
    * @returns {object|null} Parsed word object or null if invalid
@@ -55,7 +101,7 @@
       return null;
     }
     
-    const parts = csvLine.split( ' ; ' );
+    const parts = parseCSVLine( csvLine, ' ; ' );
     const ar = parts[ 0 ] || '';
     const de = parts[ 1 ] || '';
     const en = parts[ 2 ] || '';
@@ -85,10 +131,8 @@
       return null;
     }
 
-    // Simple CSV parsing - split by comma and handle quoted fields
-    const parts = csvLine.split( ',' ).map( ( part ) => {
-      return part.replace( /^"(.*)"$/, '$1' ); // Remove surrounding quotes
-    } );
+    // Parse CSV line with comma separators, handling quoted fields properly
+    const parts = parseCSVLine( csvLine, ',' );
 
     // Extract columns: 0=AR, 1=AR(duplicate), 2=DE, 3=EN, 4=ES, 5=md5
     const ar = ( parts[ 0 ] || '' ).trim();
@@ -741,6 +785,7 @@
     module.exports = { 
       stripArabicDiacritics,
       formatWordToCSVLine,
+      parseCSVLine,
       parseCSVLineToWord,
       parseGoogleSheetsCSVLineToWord,
       parseGoogleSheetsCSV,
