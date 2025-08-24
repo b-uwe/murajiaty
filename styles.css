@@ -1,7 +1,7 @@
 body {
   background: #1a1a1a;
   color: #e0e0e0;
-  min-height: calc( 100dvh - 2rem - env( safe-area-inset-top ) - env( safe-area-inset-bottom ) );
+  min-height: calc( 100dvh - 3.5rem );
   margin: 0;
   display: grid;
   grid-template-columns: 25% 25% 25% 25%;
@@ -10,7 +10,7 @@ body {
   align-items: center;
   font-family: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', 'Liberation Mono', Menlo, monospace;
   font-size: 6rem;
-  padding: calc( 1rem + env( safe-area-inset-top ) ) 1rem calc( 1rem + env( safe-area-inset-bottom ) ) 1rem;
+  padding: 1rem;
 }
 
 #main {
