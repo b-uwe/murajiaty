@@ -2,14 +2,14 @@
  * @file Tests for CSV comma handling in translation strings
  */
 
-const { parseGoogleSheetsCSVLineToWord } = require( '../main.js' );
+const { parseCSVLineToWord } = require( '../main.js' );
 
 describe( 'CSV comma handling', () => {
 
-  describe( 'parseGoogleSheetsCSVLineToWord with commas in fields', () => {
+  describe( 'parseCSVLineToWord with commas in fields', () => {
     test( 'should handle comma in Arabic field from Google Sheets', () => {
       const csvLine = '"مرحبا، أهلا","مرحبا، أهلا",hallo,hello,hola,abc123';
-      const result = parseGoogleSheetsCSVLineToWord( csvLine );
+      const result = parseCSVLineToWord( csvLine );
       
       expect( result ).not.toBeNull();
       expect( result.ar ).toBe( 'مرحبا، أهلا' );
@@ -20,7 +20,7 @@ describe( 'CSV comma handling', () => {
 
     test( 'should handle comma in German field from Google Sheets', () => {
       const csvLine = 'مرحبا,مرحبا,"hallo, guten Tag",hello,hola,abc123';
-      const result = parseGoogleSheetsCSVLineToWord( csvLine );
+      const result = parseCSVLineToWord( csvLine );
       
       expect( result ).not.toBeNull();
       expect( result.ar ).toBe( 'مرحبا' );
@@ -31,7 +31,7 @@ describe( 'CSV comma handling', () => {
 
     test( 'should handle comma in English field from Google Sheets', () => {
       const csvLine = 'مرحبا,مرحبا,hallo,"hello, hi",hola,abc123';
-      const result = parseGoogleSheetsCSVLineToWord( csvLine );
+      const result = parseCSVLineToWord( csvLine );
       
       expect( result ).not.toBeNull();
       expect( result.ar ).toBe( 'مرحبا' );
@@ -42,7 +42,7 @@ describe( 'CSV comma handling', () => {
 
     test( 'should handle comma in Spanish field from Google Sheets', () => {
       const csvLine = 'مرحبا,مرحبا,hallo,hello,"hola, buenos días",abc123';
-      const result = parseGoogleSheetsCSVLineToWord( csvLine );
+      const result = parseCSVLineToWord( csvLine );
       
       expect( result ).not.toBeNull();
       expect( result.ar ).toBe( 'مرحبا' );
@@ -53,7 +53,7 @@ describe( 'CSV comma handling', () => {
 
     test( 'should handle multiple fields with commas in Google Sheets format', () => {
       const csvLine = '"word, phrase","word, phrase","Wort, Ausdruck","word, expression","palabra, expresión",abc123';
-      const result = parseGoogleSheetsCSVLineToWord( csvLine );
+      const result = parseCSVLineToWord( csvLine );
       
       expect( result ).not.toBeNull();
       expect( result.ar ).toBe( 'word, phrase' );
@@ -64,7 +64,7 @@ describe( 'CSV comma handling', () => {
 
     test( 'should handle escaped quotes within quoted fields in Google Sheets', () => {
       const csvLine = '"He said ""hello""","He said ""hello""","Er sagte ""hallo""","He said ""hello""","Él dijo ""hola""",abc123';
-      const result = parseGoogleSheetsCSVLineToWord( csvLine );
+      const result = parseCSVLineToWord( csvLine );
       
       expect( result ).not.toBeNull();
       expect( result.ar ).toBe( 'He said "hello"' );

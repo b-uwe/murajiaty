@@ -98,7 +98,7 @@
    * @param {string} csvLine - The CSV line to parse
    * @returns {object|null} Parsed word object or null if invalid
    */
-  const parseGoogleSheetsCSVLineToWord = ( csvLine ) => {
+  const parseCSVLineToWord = ( csvLine ) => {
     if ( !csvLine || csvLine.trim() === '' ) {
       return null;
     }
@@ -137,7 +137,7 @@
       const rows = csvContent.split( '\n' );
       
       rows.forEach( ( row ) => {
-        const parsedWord = parseGoogleSheetsCSVLineToWord( row );
+        const parsedWord = parseCSVLineToWord( row );
         if ( parsedWord ) {
           words.push( parsedWord );
         }
@@ -763,7 +763,7 @@
       stripArabicDiacritics,
       formatWordToCSVLine,
       parseCSVLine,
-      parseGoogleSheetsCSVLineToWord,
+      parseCSVLineToWord,
       parseGoogleSheetsCSV,
       shuffleArray,
       hashVocabularyWord,
