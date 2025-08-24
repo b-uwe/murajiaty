@@ -10,7 +10,7 @@
   1. Ensure full comprehension of the task at hand! NEVER ASSUME! Ask back, in case! Ask back ONCE AT THIS STEP, not constantly throughout the process!
   2. Check out the main branch freshly, MAKE SURE you're not accidentally working on an old feature branch, pull to make sure you have the latest version
   3. Create a feature or bug report branch! NEVER work on the main branch
-  4. Break down the task into subtasks
+  4. Break down the task into subtasks! REMEMBER the subtasks as a good indicator for splitting commits, as we want fine grained commits!
 
   #### 🔧 Preparation Phase (Steps 5-8)
   5. Familiarize yourself with the Coding style outlined in eslint.config.mjs, so that you do it right from the beginning and not have to change after running linting tests. Do that WITH CARE and MEMORIZE those rules!
