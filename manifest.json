@@ -6,7 +6,7 @@
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#006633",
-  "theme_color": "#ffffff",
+  "theme_color": "#006633",
   "categories": ["education", "productivity"],
   "lang": "en",
   "dir": "ltr",
