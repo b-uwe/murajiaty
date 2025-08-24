@@ -110,9 +110,14 @@ const handleActivate = ( event ) => {
     } )
       .then( ( results ) => {
         console.log( '[SW] Cache cleanup completed:', results );
+        console.log( '[SW] Claiming clients to control all open pages...' );
+        return clients.claim();
+      } )
+      .then( () => {
+        console.log( '[SW] Clients claimed successfully - service worker now controls all pages' );
       } )
       .catch( ( error ) => {
-        console.error( '[SW] Error during cache activation:', error );
+        console.error( '[SW] Error during activation (cache cleanup or client claiming):', error );
         console.error( '[SW] Activation error stack:', error.stack );
       } )
   );

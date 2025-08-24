@@ -21,6 +21,7 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
       ...globals.browser,
       ...globals.node,
       ...globals.jest,
+      ...globals.serviceworker,
     },
 
     'ecmaVersion': 'latest',
