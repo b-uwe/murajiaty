@@ -647,6 +647,21 @@
     letterOverlay = document.getElementById( 'letterOverlay' );
     wordsElement = document.getElementById( 'words' );
 
+    // Dynamic viewport height adjustment for PWA system UI
+    const setViewportHeight = () => {
+      const vh = window.innerHeight;
+      const padding = 32; // 2rem in pixels (assuming 1rem = 16px)
+      const adjustedHeight = vh - padding;
+      document.body.style.minHeight = `${adjustedHeight}px`;
+      document.body.style.height = `${adjustedHeight}px`;
+      document.body.style.maxHeight = `${adjustedHeight}px`;
+    };
+
+    // Set viewport height on load and resize
+    setViewportHeight();
+    window.addEventListener( 'resize', setViewportHeight );
+    window.addEventListener( 'orientationchange', setViewportHeight );
+
 
     // On page load, read the buckets from local storage
     const storedBuckets = localStorage.getItem( 'buckets' );
@@ -715,6 +730,17 @@
   // Initialize browser if we're in a browser environment
   if ( typeof window !== 'undefined' ) { 
     initBrowser();
+
+    // Register Service Worker for PWA functionality
+    if ( 'serviceWorker' in navigator ) {
+      navigator.serviceWorker.register( './service-worker.js' )
+        .then( ( registration ) => {
+          console.log( 'Service Worker registered successfully:', registration.scope );
+        } )
+        .catch( ( error ) => {
+          console.log( 'Service Worker registration failed:', error );
+        } );
+    }
   };
 
   // Export functions for Node.js testing environment
