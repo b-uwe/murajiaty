@@ -35,15 +35,6 @@
     'ْ'  // Sukun
   ];
 
-  /**
-   * Formats a vocabulary word object into a CSV line
-   * @param {object} word - The vocabulary word with ar, de, en, es properties
-   * @param {number} bucketIndex - The bucket index for this word
-   * @returns {string} Formatted CSV line
-   */
-  const formatWordToCSVLine = ( word, bucketIndex ) => {
-    return `${word.ar} ; ${word.de} ; ${word.en} ; ${word.es} ; ${bucketIndex}`;
-  };
 
   /**
    * Parses a CSV line handling quoted fields
@@ -639,30 +630,6 @@
     }
   };
 
-  /**
-   * Export vocabulary to CSV format
-   * Format: arabic ; german ; english ; spanish ; bucket
-   */
-  const exportVocabulary = () => {
-    const buckets = JSON.parse( localStorage.getItem( 'buckets' ) );
-    let csvContent = '';
-
-    // Process each bucket
-    for ( let i = 0; i < buckets.length; i++ ) {
-      const bucket = buckets[ i ];
-      for ( const word of bucket ) {
-        csvContent += formatWordToCSVLine( word, i ) + '\n';
-      }
-    }
-
-    // Create a blob and trigger download
-    const blob = new Blob( [ csvContent ], { 'type': 'text/csv;charset=utf-8;' } );
-    const link = document.createElement( 'a' );
-    link.href = URL.createObjectURL( blob );
-    link.download = 'vocabulary.csv';
-    link.click();
-    URL.revokeObjectURL( link.href );
-  };
 
   /**
    * Initializes the browser interface by setting up DOM elements and event listeners
@@ -677,16 +644,6 @@
     letterOverlay = document.getElementById( 'letterOverlay' );
     wordsElement = document.getElementById( 'words' );
 
-    // Implement a loooong click handler to export the vocabulary as CSV
-    let pressTimer;
-    document.addEventListener( 'touchstart', () => {
-      pressTimer = setTimeout( () => {
-        exportVocabulary();
-      }, 5000 ); // 5 seconds
-    } );
-    document.addEventListener( 'touchend', () => {
-      clearTimeout( pressTimer ); // cancel if user lets go early
-    } );
 
     // On page load, read the buckets from local storage
     const storedBuckets = localStorage.getItem( 'buckets' );
@@ -761,7 +718,6 @@
   if ( typeof module !== 'undefined' && module.exports ) { 
     module.exports = { 
       stripArabicDiacritics,
-      formatWordToCSVLine,
       parseCSVLine,
       parseCSVLineToWord,
       parseGoogleSheetsCSV,
