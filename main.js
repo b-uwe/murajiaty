@@ -167,7 +167,7 @@
    */
   const renderArabicInput = ( vocabulary ) => {
     /**
-     * Upates the input overlay that shows the inputted text with color coding for right or wrong
+     * Updates the input overlay that shows the inputted text with color coding for right or wrong
      */
     const updateOverlay = () => {
       const userInput = stripArabicDiacritics( input.value );
@@ -183,7 +183,7 @@
         }
       }
 
-      if ( solution === input.value ) {
+      if ( solution === stripArabicDiacritics( input.value ) ) {
         shownText += '🎉';
         speakWord( vocabulary.ar );
       }
@@ -218,7 +218,7 @@
     input.lang = 'ar';
     input.autocomplete = 'off';
     input.spellcheck = false;
-    input.style.opacity =0;
+    input.style.opacity = 0;
 
     const wrapper = document.createElement( 'div' );
 
