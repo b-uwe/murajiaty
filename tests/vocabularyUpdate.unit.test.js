@@ -6,6 +6,9 @@ const { hashVocabularyWord } = require( '../main.js' );
 
 describe( 'Vocabulary Update System - Unit Tests', () => {
   describe( 'hashVocabularyWord', () => {
+    /**
+     * Test that hashVocabularyWord generates consistent hash for same vocabulary word
+     */
     test( 'should generate consistent hash for same vocabulary word', () => {
       const word = { 'ar': 'كتاب', 'de': 'Buch', 'en': 'book', 'es': 'libro' };
       const hash1 = hashVocabularyWord( word );
@@ -15,12 +18,18 @@ describe( 'Vocabulary Update System - Unit Tests', () => {
       expect( hash1.length ).toBeGreaterThan( 0 );
     } );
 
+    /**
+     * Test that hashVocabularyWord generates different hashes for different vocabulary words
+     */
     test( 'should generate different hashes for different vocabulary words', () => {
       const word1 = { 'ar': 'كتاب', 'de': 'Buch', 'en': 'book', 'es': 'libro' };
       const word2 = { 'ar': 'قلم', 'de': 'Stift', 'en': 'pen', 'es': 'pluma' };
       expect( hashVocabularyWord( word1 ) ).not.toBe( hashVocabularyWord( word2 ) );
     } );
 
+    /**
+     * Test that hashVocabularyWord generates different hashes when any field changes
+     */
     test( 'should generate different hashes when any field changes', () => {
       const baseWord = { 'ar': 'كتاب', 'de': 'Buch', 'en': 'book', 'es': 'libro' };
       const modifiedAr = { 'ar': 'كُتُب', 'de': 'Buch', 'en': 'book', 'es': 'libro' };
@@ -35,6 +44,9 @@ describe( 'Vocabulary Update System - Unit Tests', () => {
       expect( hashVocabularyWord( modifiedEs ) ).not.toBe( baseHash );
     } );
 
+    /**
+     * Test that hashVocabularyWord handles special characters and diacritics
+     */
     test( 'should handle special characters and diacritics', () => {
       const word = { 'ar': 'مُدَرِّس', 'de': 'Lehrer', 'en': 'teacher', 'es': 'maestro' };
       const hash = hashVocabularyWord( word );
@@ -42,6 +54,9 @@ describe( 'Vocabulary Update System - Unit Tests', () => {
       expect( hash.length ).toBeGreaterThan( 0 );
     } );
 
+    /**
+     * Test that hashVocabularyWord handles empty strings in vocabulary fields
+     */
     test( 'should handle empty strings in vocabulary fields', () => {
       const word = { 'ar': '', 'de': '', 'en': '', 'es': '' };
       const hash = hashVocabularyWord( word );

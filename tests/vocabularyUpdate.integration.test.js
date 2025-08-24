@@ -161,7 +161,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
       } );
 
       const result = await checkForVocabularyUpdates( bucketsWithMultipleWords );
-      
+
       // Verify that bucket 1 still contains the non-deleted word
       expect( result.buckets[ 1 ] ).toContainEqual( {
         'ar': 'قلم',
