@@ -647,7 +647,9 @@
     letterOverlay = document.getElementById( 'letterOverlay' );
     wordsElement = document.getElementById( 'words' );
 
-    // Dynamic viewport height adjustment for PWA system UI
+    /**
+     * Dynamic viewport height adjustment for PWA system UI
+     */
     const setViewportHeight = () => {
       const vh = window.innerHeight;
       const padding = 32; // 2rem in pixels (assuming 1rem = 16px)
