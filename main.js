@@ -46,12 +46,12 @@
   };
 
   /**
-   * Parses a CSV line with semicolon separators, handling quoted fields containing commas
-   * @param {string} csvLine - The CSV line to parse (format: "field1" ; "field2" ; ...)
-   * @param {string} separator - The field separator (default: ' ; ')
+   * Parses a CSV line handling quoted fields
+   * @param {string} csvLine - The CSV line to parse (format: "field1","field2",...)
+   * @param {string} separator - The field separator (default: ',')
    * @returns {string[]} Array of parsed fields
    */
-  const parseCSVLine = ( csvLine, separator = ' ; ' ) => {
+  const parseCSVLine = ( csvLine, separator = ',' ) => {
     if ( !csvLine || csvLine.trim() === '' ) {
       return [];
     }
@@ -108,8 +108,8 @@
       return null;
     }
 
-    // Parse CSV line with comma separators, handling quoted fields properly
-    const parts = parseCSVLine( csvLine, ',' );
+    // Parse CSV line with default comma separators, handling quoted fields properly
+    const parts = parseCSVLine( csvLine );
 
     // Extract columns: 0=AR, 1=AR(duplicate), 2=DE, 3=EN, 4=ES, 5=md5
     const ar = ( parts[ 0 ] || '' ).trim();
