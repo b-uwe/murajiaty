@@ -3,7 +3,7 @@
   "short_name": "مُرَاجِعَةِي",
   "description": "A spaced repetition vocabulary trainer for learning Arabic",
   "start_url": "/murajiaty/",
-  "display": "minimal-ui",
+  "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#006633",
   "theme_color": "#006633",
