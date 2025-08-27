@@ -633,6 +633,64 @@
     }
   };
 
+  /**
+   * Detects if the app is running as a PWA
+   * @returns {boolean} True if running as PWA
+   */
+  const isPWA = () => {
+    if ( typeof window === 'undefined' || !window.matchMedia ) {
+      return false; // Not in browser environment or matchMedia not available
+    }
+    return window.matchMedia( '(display-mode: standalone)' ).matches ||
+           window.navigator.standalone === true;
+  };
+
+  /**
+   * Shows error message and prevents app from starting
+   * @param {string} message - Error message to display
+   */
+  const showStorageError = ( message ) => {
+    document.body.innerHTML = `
+      <div style="padding: 20px; text-align: center; color: #333; font-family: Arial, sans-serif;">
+        <h2>Storage Permission Required</h2>
+        <p>${message}</p>
+        <p>Please grant persistent storage permission and restart the app.</p>
+        <p><em>Note: This requirement only applies when running as a PWA to prevent data loss.</em></p>
+      </div>
+    `;
+  };
+
+  /**
+   * Requests persistent storage for PWA and initializes the app
+   * @returns {Promise<boolean>} True if initialization can proceed
+   */
+  const ensurePersistentStorage = async () => {
+    // Only require persistent storage for PWA mode
+    if ( !isPWA() ) {
+      console.log( 'Running in browser mode - persistent storage not required' );
+      return true;
+    }
+
+    console.log( 'PWA detected - checking persistent storage permission' );
+
+    if ( !( 'storage' in navigator && 'persist' in navigator.storage ) ) {
+      showStorageError( 'Persistent storage is not supported in this browser.' );
+      return false;
+    }
+
+    try {
+      const persistent = await navigator.storage.persist();
+      if ( !persistent ) {
+        showStorageError( 'Persistent storage permission was denied. This PWA requires persistent storage to prevent vocabulary data loss.' );
+        return false;
+      }
+      console.log( 'Persistent storage permission granted for PWA' );
+      return true;
+    } catch ( error ) {
+      showStorageError( `Error requesting persistent storage: ${error.message}` );
+      return false;
+    }
+  };
 
   /**
    * Initializes the browser interface by setting up DOM elements and event listeners
@@ -647,7 +705,9 @@
     letterOverlay = document.getElementById( 'letterOverlay' );
     wordsElement = document.getElementById( 'words' );
 
-    // Dynamic viewport height adjustment for PWA system UI
+    /**
+     * Dynamic viewport height adjustment for PWA system UI
+     */
     const setViewportHeight = () => {
       const vh = window.innerHeight;
       const padding = 32; // 2rem in pixels (assuming 1rem = 16px)
@@ -729,19 +789,27 @@
 
   // Initialize browser if we're in a browser environment
   if ( typeof window !== 'undefined' ) { 
-    initBrowser();
+    // Check persistent storage requirements before initializing
+    ensurePersistentStorage().then( ( canProceed ) => {
+      if ( canProceed ) {
+        initBrowser();
 
-    // Register Service Worker for PWA functionality
-    if ( 'serviceWorker' in navigator ) {
-      navigator.serviceWorker.register( './service-worker.js' )
-        .then( ( registration ) => {
-          console.log( 'Service Worker registered successfully:', registration.scope );
-        } )
-        .catch( ( error ) => {
-          console.log( 'Service Worker registration failed:', error );
-        } );
-    }
-  };
+        // Register Service Worker for PWA functionality
+        if ( 'serviceWorker' in navigator ) {
+          navigator.serviceWorker.register( './service-worker.js' )
+            .then( ( registration ) => {
+              console.log( 'Service Worker registered successfully:', registration.scope );
+            } )
+            .catch( ( error ) => {
+              console.log( 'Service Worker registration failed:', error );
+            } );
+        }
+      }
+    } ).catch( ( error ) => {
+      console.error( 'Failed to initialize app:', error );
+      showStorageError( 'Application failed to initialize due to storage requirements.' );
+    } );
+  }
 
   // Export functions for Node.js testing environment
   if ( typeof module !== 'undefined' && module.exports ) { 
