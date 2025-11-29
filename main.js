@@ -572,6 +572,16 @@
 
       // 2. Fetch and process Google Sheets data
       const googleVocab = await fetchGoogleSheetsData();
+
+      // 3. CRITICAL: If fetch returned empty data, preserve existing buckets
+      // This handles offline scenarios and prevents progress loss
+      if ( googleVocab.length === 0 ) {
+        return {
+          'buckets': currentBuckets,
+          'changes': { 'newWords': 0, 'deletedWords': 0, 'unchangedWords': 0 }
+        };
+      }
+
       const googleHashSet = new Set();
       const newWords = [];
 
@@ -586,7 +596,7 @@
         // If hash exists, word is UNCHANGED - preserve with existing progress
       } );
 
-      // 3. Find DELETED words and collect deletion info
+      // 4. Find DELETED words and collect deletion info
       const deletionsToProcess = [];
       localHashSet.forEach( ( localHash ) => {
         if ( !googleHashSet.has( localHash ) ) {
@@ -596,17 +606,17 @@
         }
       } );
 
-      // 4. Create new buckets structure with updates
+      // 5. Create new buckets structure with updates
       const updatedBuckets = currentBuckets.map( ( bucket ) => {
         return [ ...bucket ]; // Deep copy
       } );
 
-      // 5. Add new words to bucket 0
+      // 6. Add new words to bucket 0
       newWords.forEach( ( word ) => {
         updatedBuckets[ 0 ].push( { 'ar': word.ar, 'de': word.de, 'en': word.en, 'es': word.es } );
       } );
 
-      // 6. Process deletions in reverse order to avoid index shifting issues
+      // 7. Process deletions in reverse order to avoid index shifting issues
       deletionsToProcess
         .sort( ( a, b ) => {
           // Sort by bucket first, then by array index (both descending)
