@@ -138,6 +138,44 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     } );
 
     /**
+     * Test preservation of existing buckets when fetch fails (offline scenario)
+     * @returns {Promise<void>}
+     */
+    test( 'should preserve existing buckets when fetch fails (offline)', async () => {
+      global.fetch = jest.fn().mockRejectedValue( new Error( 'Network error' ) );
+
+      const result = await checkForVocabularyUpdates( mockBuckets );
+
+      // Buckets should remain unchanged
+      expect( result.buckets ).toEqual( mockBuckets );
+      // Changes should indicate no modifications
+      expect( result.changes ).toEqual( {
+        'newWords': 0,
+        'deletedWords': 0,
+        'unchangedWords': 0
+      } );
+    } );
+
+    /**
+     * Test preservation of existing buckets when Google Sheets returns empty data
+     * @returns {Promise<void>}
+     */
+    test( 'should preserve existing buckets when Google Sheets returns empty data', async () => {
+      global.fetch = jest.fn().mockResolvedValue( {
+        'ok': true,
+        'text': async () => {
+          return ''; // Empty response
+        }
+      } );
+
+      const result = await checkForVocabularyUpdates( mockBuckets );
+
+      // Buckets should remain unchanged - NOT treated as "all words deleted"
+      expect( result.buckets ).toEqual( mockBuckets );
+      expect( result.changes.deletedWords ).toBe( 0 );
+    } );
+
+    /**
      * Test removal of deleted words from vocabulary buckets
      * @returns {Promise<void>}
      */
