@@ -32,7 +32,10 @@ const handleInstall = ( event ) => {
  */
 const handleFetch = ( event ) => {
   event.respondWith(
-    caches.match( event.request )
+    caches.open( CACHE_NAME )
+      .then( ( cache ) => {
+        return cache.match( event.request );
+      } )
       .then( ( response ) => {
         if ( response ) {
           return response;
