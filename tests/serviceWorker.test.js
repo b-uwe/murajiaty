@@ -1,6 +1,152 @@
 /**
- * @file Tests for service worker cache cleanup functionality
+ * @file Tests for service worker functionality
  */
+
+describe( 'service worker fetch handler', () => {
+  const originalSelf = global.self;
+
+  afterAll( () => {
+    global.self = originalSelf;
+  } );
+
+  test( 'should only search murajiaty cache, not all caches', async () => {
+    let capturedFetchHandler;
+    const mockCacheMatch = jest.fn().mockResolvedValue( undefined );
+    const mockCacheOpen = jest.fn().mockResolvedValue( { 'match': mockCacheMatch } );
+    const mockResponse = { 'body': 'test response' };
+
+    global.caches = {
+      'keys': jest.fn().mockResolvedValue( [] ),
+      'delete': jest.fn().mockResolvedValue( true ),
+      'open': mockCacheOpen,
+      'match': jest.fn().mockResolvedValue( undefined )
+    };
+    global.clients = { 'claim': jest.fn().mockResolvedValue( undefined ) };
+    global.fetch = jest.fn().mockResolvedValue( mockResponse );
+
+    Object.defineProperty( global, 'self', {
+      'value': {
+        'addEventListener': jest.fn( ( eventType, handler ) => {
+          if ( eventType === 'fetch' ) {
+            capturedFetchHandler = handler;
+          }
+        } )
+      },
+      'writable': true,
+      'configurable': true
+    } );
+
+    jest.resetModules();
+    require( '../service-worker.js' );
+
+    let respondWithPromise;
+    const mockRequest = { 'url': 'https://example.com/test.js' };
+    const mockEvent = {
+      'request': mockRequest,
+      'respondWith': jest.fn( ( promise ) => {
+        respondWithPromise = promise;
+      } )
+    };
+
+    capturedFetchHandler( mockEvent );
+    await respondWithPromise;
+
+    // Verify caches.open was called with the specific murajiaty cache name
+    expect( mockCacheOpen ).toHaveBeenCalledWith( 'murajiaty-v1' );
+    // Verify we used the specific cache's match, not the global caches.match
+    expect( mockCacheMatch ).toHaveBeenCalledWith( mockRequest );
+    expect( global.caches.match ).not.toHaveBeenCalled();
+  } );
+
+  test( 'should return cached response when available', async () => {
+    let capturedFetchHandler;
+    const cachedResponse = { 'body': 'cached content' };
+    const mockCacheMatch = jest.fn().mockResolvedValue( cachedResponse );
+
+    global.caches = {
+      'keys': jest.fn().mockResolvedValue( [] ),
+      'delete': jest.fn().mockResolvedValue( true ),
+      'open': jest.fn().mockResolvedValue( { 'match': mockCacheMatch } ),
+      'match': jest.fn().mockResolvedValue( undefined )
+    };
+    global.clients = { 'claim': jest.fn().mockResolvedValue( undefined ) };
+    global.fetch = jest.fn();
+
+    Object.defineProperty( global, 'self', {
+      'value': {
+        'addEventListener': jest.fn( ( eventType, handler ) => {
+          if ( eventType === 'fetch' ) {
+            capturedFetchHandler = handler;
+          }
+        } )
+      },
+      'writable': true,
+      'configurable': true
+    } );
+
+    jest.resetModules();
+    require( '../service-worker.js' );
+
+    let respondWithPromise;
+    const mockEvent = {
+      'request': { 'url': 'https://example.com/test.js' },
+      'respondWith': jest.fn( ( promise ) => {
+        respondWithPromise = promise;
+      } )
+    };
+
+    capturedFetchHandler( mockEvent );
+    const response = await respondWithPromise;
+
+    expect( response ).toBe( cachedResponse );
+    expect( global.fetch ).not.toHaveBeenCalled();
+  } );
+
+  test( 'should fetch from network when not in cache', async () => {
+    let capturedFetchHandler;
+    const networkResponse = { 'body': 'network content' };
+    const mockCacheMatch = jest.fn().mockResolvedValue( undefined );
+
+    global.caches = {
+      'keys': jest.fn().mockResolvedValue( [] ),
+      'delete': jest.fn().mockResolvedValue( true ),
+      'open': jest.fn().mockResolvedValue( { 'match': mockCacheMatch } ),
+      'match': jest.fn().mockResolvedValue( undefined )
+    };
+    global.clients = { 'claim': jest.fn().mockResolvedValue( undefined ) };
+    global.fetch = jest.fn().mockResolvedValue( networkResponse );
+
+    Object.defineProperty( global, 'self', {
+      'value': {
+        'addEventListener': jest.fn( ( eventType, handler ) => {
+          if ( eventType === 'fetch' ) {
+            capturedFetchHandler = handler;
+          }
+        } )
+      },
+      'writable': true,
+      'configurable': true
+    } );
+
+    jest.resetModules();
+    require( '../service-worker.js' );
+
+    let respondWithPromise;
+    const mockRequest = { 'url': 'https://example.com/test.js' };
+    const mockEvent = {
+      'request': mockRequest,
+      'respondWith': jest.fn( ( promise ) => {
+        respondWithPromise = promise;
+      } )
+    };
+
+    capturedFetchHandler( mockEvent );
+    const response = await respondWithPromise;
+
+    expect( response ).toBe( networkResponse );
+    expect( global.fetch ).toHaveBeenCalledWith( mockRequest );
+  } );
+} );
 
 describe( 'service worker cache cleanup', () => {
   const originalSelf = global.self;
