@@ -497,7 +497,7 @@
    * Updates the local storage with the current buckets
    */
   const updateStorage = () => {
-    localStorage.setItem( 'buckets', JSON.stringify( buckets ) );
+    localStorage.setItem( 'murajiaty-buckets', JSON.stringify( buckets ) );
   };
 
   /**
@@ -734,7 +734,7 @@
 
 
     // On page load, read the buckets from local storage
-    const storedBuckets = localStorage.getItem( 'buckets' );
+    const storedBuckets = localStorage.getItem( 'murajiaty-buckets' );
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
         return bucket.map( ( { de, ar, en, es } ) => {
