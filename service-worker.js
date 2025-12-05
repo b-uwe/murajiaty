@@ -2,7 +2,7 @@
  * @file Service worker for PWA offline functionality
  */
 
-const CACHE_NAME = 'murajiaty-v1';
+const CACHE_NAME = 'murajiaty-v2';
 const urlsToCache = [
   './',
   './index.html',
