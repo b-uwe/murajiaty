@@ -387,6 +387,11 @@
     // Determine the next bucket
     const nextBucket = currentBucket < buckets.length - 1 ? currentBucket + 1 : buckets.length - 1;
 
+    // Record when the word graduated to the DONE bucket for oldest-first recycling
+    if ( nextBucket === buckets.length - 1 ) {
+      currentWord.doneAt = Date.now();
+    }
+
     // Add the word to the end of the next bucket
     buckets[ nextBucket ].push( currentWord );
 
@@ -737,8 +742,12 @@
     const storedBuckets = localStorage.getItem( 'murajiaty-buckets' );
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
-        return bucket.map( ( { de, ar, en, es } ) => {
-          return { de, ar, en, es }; 
+        return bucket.map( ( { de, ar, en, es, doneAt } ) => {
+          const word = { de, ar, en, es };
+          if ( doneAt ) {
+            word.doneAt = doneAt;
+          }
+          return word;
         } );
       } );
 
