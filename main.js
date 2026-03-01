@@ -223,7 +223,7 @@
     const labelLang = Math.floor( Math.random() * 3 );
     const label = document.createElement( 'div' );
     label.className = 'arabic-label';
-    label.innerHTML = flags[ labelLang ] + '<br/>' + vocabulary[ [ 'es','de','en' ][ labelLang ] ];
+    label.innerHTML = flags[ labelLang ] + '<br/>' + vocabulary[ [ 'es', 'de', 'en' ][ labelLang ] ];
 
     // Relative container for overlay + input
     const relativeDiv = document.createElement( 'div' );
