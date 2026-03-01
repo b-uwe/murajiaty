@@ -291,13 +291,13 @@
 
       switch ( currentBucket ) {
       case 0:
-        mainElement.innerHTML = flags[ 1 ] + '<br/>' +  word.de;
+        mainElement.innerHTML = flags[ 1 ] + '<br/>' + word.de;
         break;
       case 1:
         mainElement.innerHTML = flags[ 2 ] + '<br/>' + word.en;
         break;
       case 2:
-        mainElement.innerHTML = flags[ 0 ] + '<br/>' +  word.es;
+        mainElement.innerHTML = flags[ 0 ] + '<br/>' + word.es;
         break;
       case 3:
         mainElement.textContent = word.ar;
@@ -321,7 +321,7 @@
         pickNextWord(); // Try again in the new bucket
       } else {
         // Handle overflow
-        mainElement.textContent = '😵'; 
+        mainElement.textContent = '😵';
         flipButton.disabled = true;
       }
     }
