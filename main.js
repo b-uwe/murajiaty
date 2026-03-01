@@ -37,7 +37,7 @@
 
 
   /**
-   * Arabic font families for reading practice: empty string represents the system default
+   * Arabic font families for recognition practice: empty string represents the system default
    * (Noto Naskh Arabic on Android), the rest are self-hosted woff2 fonts declared in styles.css.
    * @constant {string[]}
    */
@@ -325,7 +325,7 @@
     }
 
     updateHeader();
-    if ( currentBucket === 3 || currentBucket === 5 ) {
+    if ( currentBucket >= 3 ) {
       currentSide = 'ar';
       mainElement.classList.add( 'ar' );
       mainElement.classList.remove( 'de' );
