@@ -38,7 +38,7 @@
 
   /**
    * Arabic font families for reading practice: null represents the system default
-   * (Noto Naskh Arabic on Android), the rest are Google Fonts loaded in index.html.
+   * (Noto Naskh Arabic on Android), the rest are self-hosted woff2 fonts declared in styles.css.
    * @constant {Array<string|null>}
    */
   const ARABIC_FONTS = [
