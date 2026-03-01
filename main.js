@@ -387,6 +387,11 @@
     // Determine the next bucket
     const nextBucket = currentBucket < buckets.length - 1 ? currentBucket + 1 : buckets.length - 1;
 
+    // Record when the word graduated to the DONE bucket for oldest-first recycling
+    if ( nextBucket === buckets.length - 1 ) {
+      currentWord.doneAt = Date.now();
+    }
+
     // Add the word to the end of the next bucket
     buckets[ nextBucket ].push( currentWord );
 
@@ -400,7 +405,7 @@
   };
 
   /**
-   * When the user signals a wrongly remembered word, put the card two buckets back
+   * When the user signals a wrongly remembered word, put the card one bucket back
    */
   const rememberedIncorrectly = () => {
     const currentWord = buckets[ currentBucket ][ 0 ]; // Get the first word from the current bucket
@@ -463,19 +468,42 @@
   };
 
   /**
-   * Recalls one word from the last bucket and puts it into the first bucket
+   * Recalls words from the DONE bucket into the first bucket to maintain
+   * 25 actively-cycling words. Picks the oldest-graduated words first
+   * (by doneAt timestamp) and strips doneAt before recycling.
+   * @param {Array<Array>} targetBuckets - The bucket structure to operate on
+   * @returns {void}
    */
-  const recallOneWord = () => {
-    const lastBucket = buckets[ buckets.length - 1 ];
+  const recallWords = ( targetBuckets ) => {
+    const lastBucket = targetBuckets[ targetBuckets.length - 1 ];
     if ( lastBucket.length === 0 ) {
       return;
     }
 
-    const randomPos = Math.floor( Math.random() * lastBucket.length );
-    const word = lastBucket[ randomPos ];
-    
-    buckets[ 0 ].push( word );
-    lastBucket.splice( randomPos, 1 );
+    // 25 = target number of words actively cycling through non-DONE buckets
+    const activeWordCount = targetBuckets
+      .slice( 0, -1 )
+      .reduce( ( sum, bucket ) => {
+        return sum + bucket.length;
+      }, 0 );
+
+    const wordsNeeded = 25 - activeWordCount;
+    if ( wordsNeeded <= 0 ) {
+      return;
+    }
+
+    const sorted = [ ...lastBucket ].sort( ( a, b ) => {
+      return a.doneAt - b.doneAt;
+    } );
+
+    const toRecycle = sorted.slice( 0, wordsNeeded );
+
+    toRecycle.forEach( ( word ) => {
+      const idx = lastBucket.indexOf( word );
+      lastBucket.splice( idx, 1 );
+      delete word.doneAt;
+      targetBuckets[ 0 ].push( word );
+    } );
   };
 
   /**
@@ -737,8 +765,12 @@
     const storedBuckets = localStorage.getItem( 'murajiaty-buckets' );
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
-        return bucket.map( ( { de, ar, en, es } ) => {
-          return { de, ar, en, es }; 
+        return bucket.map( ( { de, ar, en, es, doneAt } ) => {
+          const word = { de, ar, en, es };
+          if ( doneAt ) {
+            word.doneAt = doneAt;
+          }
+          return word;
         } );
       } );
 
@@ -747,8 +779,8 @@
         return shuffleArray( [ ...bucket ] );
       } );
 
-      // Recalls a word we considered "learned forever"
-      recallOneWord();
+      // Recycle oldest-graduated words from DONE back into active rotation
+      recallWords( buckets );
     }
 
     // Initialize event listeners
@@ -823,7 +855,7 @@
 
   // Export functions for Node.js testing environment
   if ( typeof module !== 'undefined' && module.exports ) { 
-    module.exports = { 
+    module.exports = {
       stripArabicDiacritics,
       parseCSVLine,
       parseCSVLineToWord,
@@ -832,7 +864,8 @@
       hashVocabularyWord,
       fetchGoogleSheetsData,
       checkForVocabularyUpdates,
-      renderArabicInput
+      renderArabicInput,
+      recallWords
     };
   };
 } )();
