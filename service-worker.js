@@ -58,11 +58,13 @@ const handleActivate = ( event ) => {
   event.waitUntil(
     caches.keys().then( ( cacheNames ) => {
       return Promise.all(
-        cacheNames.map( ( cacheName ) => {
-          if ( cacheName.startsWith( 'murajiaty-' ) && cacheName !== CACHE_NAME ) {
+        cacheNames
+          .filter( ( cacheName ) => {
+            return cacheName.startsWith( 'murajiaty-' ) && cacheName !== CACHE_NAME;
+          } )
+          .map( ( cacheName ) => {
             return caches.delete( cacheName );
-          }
-        } )
+          } )
       );
     } )
       .then( () => {

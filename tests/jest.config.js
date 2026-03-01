@@ -6,7 +6,7 @@ module.exports = {
   'testEnvironment': 'jsdom',
   'roots': [ '<rootDir>/../tests' ],
   'testMatch': [ '**/*.test.js' ],
-  'collectCoverageFrom': [ 
+  'collectCoverageFrom': [
     '<rootDir>/../*.js',
     '!<rootDir>/../node_modules/**',
     '!<rootDir>/../tests/**'

@@ -17,7 +17,7 @@
 
   // Other global variables
   let buckets = [ [], [], [], [], [], [], [] ];
-  
+
   /**
    * Flag emojis for different languages in order: Spanish, German, English
    * @constant {string[]}
@@ -32,7 +32,7 @@
     'َ', // Fatha
     'ِ', // Kasra
     'ُ', // Damma
-    'ْ'  // Sukun
+    'ْ' // Sukun
   ];
 
 
@@ -145,10 +145,10 @@
    */
   const parseGoogleSheetsCSV = ( csvContent ) => {
     const words = [];
-    
+
     if ( csvContent.length > 0 ) {
       const rows = csvContent.split( '\n' );
-      
+
       rows.forEach( ( row ) => {
         const parsedWord = parseCSVLineToWord( row );
         if ( parsedWord ) {
@@ -156,7 +156,7 @@
         }
       } );
     }
-    
+
     return words;
   };
 
@@ -194,7 +194,7 @@
     const updateOverlay = () => {
       const userInput = stripArabicDiacritics( input.value );
       let shownText = '';
-      
+
       for ( let i = 0; i < userInput.length || i < solution.length; i++ ) {
         const uc = userInput[ i ] || '';
         const sc = solution[ i ] || '';
@@ -270,9 +270,9 @@
     input.addEventListener( 'input', () => {
       updateOverlay();
     } );
-    
+
     updateOverlay();
-    
+
     // Auto-focus the input field so user can start typing immediately
     input.focus();
   };
@@ -309,21 +309,19 @@
         mainElement.textContent = stripArabicDiacritics( word.ar );
         break;
       }
-    } else {
+    } else if ( currentBucket < buckets.length - 2 ) {
       // If no words in the current bucket, check the next higher bucket. But leave out the last one!
-      if ( currentBucket < buckets.length - 2 ) {
-        currentBucket++; // Move to the next bucket
+      currentBucket++; // Move to the next bucket
 
-        // On the last visible level, replace '👍' with '✨'
-        if ( currentBucket === buckets.length - 2 ) {
-          successButton.textContent = '✨';
-        }
-        pickNextWord(); // Try again in the new bucket
-      } else {
-        // Handle overflow
-        mainElement.textContent = '😵';
-        flipButton.disabled = true;
+      // On the last visible level, replace '👍' with '✨'
+      if ( currentBucket === buckets.length - 2 ) {
+        successButton.textContent = '✨';
       }
+      pickNextWord(); // Try again in the new bucket
+    } else {
+      // Handle overflow
+      mainElement.textContent = '😵';
+      flipButton.disabled = true;
     }
 
     updateHeader();
@@ -393,7 +391,7 @@
         audioContext.decodeAudioData( arrayBuffer, ( buffer ) => {
           const source = audioContext.createBufferSource();
           source.buffer = buffer;
-          //source.playbackRate.value = 1; // Adjust playback rate if necessary
+          // source.playbackRate.value = 1; // Adjust playback rate if necessary
           source.connect( audioContext.destination );
           source.start( 0 );
         } );
@@ -452,7 +450,7 @@
   /**
    * Adds click event listeners to each letter in the word.
    */
-  const addLetterClickListener = () => { 
+  const addLetterClickListener = () => {
     document.getElementById( 'main' ).addEventListener( 'click', function ( event ) {
       const div = event.target;
 
@@ -462,7 +460,7 @@
 
       const text = div.textContent;
       let clickedLetter;
-    
+
       // Click- oder Touch-Position bestimmen
       const clientX = event.touches ? event.touches[ 0 ].clientX : event.clientX;
 
@@ -540,9 +538,9 @@
       return idx !== buckets.length - 1;
     } ).map( ( bucket, idx ) => {
       return ( idx === currentBucket ) ? `<${bucket.filter( ( el ) => {
-        return !el.touched; 
+        return !el.touched;
       } ).length + '/' + bucket.length}>` : bucket.filter( ( el ) => {
-        return !el.touched; 
+        return !el.touched;
       } ).length + '/' + bucket.length;
     } ).join( ' ' ) + ' (' + buckets[ buckets.length - 1 ].length + ')';
   };
@@ -579,7 +577,7 @@
     for ( let i = 0; i < content.length; i++ ) {
       const char = content.charCodeAt( i );
       hash = ( ( hash << 5 ) - hash ) + char;
-      hash = hash & hash; // Convert to 32bit integer
+      hash &= hash; // Convert to 32bit integer
     }
     return hash.toString( 16 );
   };
@@ -591,11 +589,11 @@
   const fetchGoogleSheetsData = async () => {
     try {
       const response = await fetch( `https://docs.google.com/spreadsheets/d/1kPsGq3Zo9PPjtcst-T3pfiToeohq82K-yHuLywxtucU/export?format=csv&t=${Date.now()}` );
-      
+
       if ( !response.ok ) {
         throw new Error( `Network response was not ok: ${response.status}` );
       }
-      
+
       const content = await response.text();
       return parseGoogleSheetsCSV( content );
     } catch ( err ) {
@@ -759,7 +757,7 @@
   /**
    * Initializes the browser interface by setting up DOM elements and event listeners
    */
-  const initBrowser = () => { 
+  const initBrowser = () => {
     // Get DOM elements
     mainElement = document.getElementById( 'main' );
     speakButton = document.getElementById( 'speakButton' );
@@ -811,7 +809,7 @@
 
     // Initialize event listeners
     // Check that all required DOM elements are present before adding listeners
-    if ( mainElement && speakButton && successButton && failButton && flipButton && letterOverlay && wordsElement ) { 
+    if ( mainElement && speakButton && successButton && failButton && flipButton && letterOverlay && wordsElement ) {
       speakButton.addEventListener( 'click', () => {
         speakWord( buckets[ currentBucket ][ 0 ].ar );
       } );
@@ -824,7 +822,7 @@
       } );
 
       addLetterClickListener();
-      
+
       // Load vocabulary (handles both initial load and updates)
       checkForVocabularyUpdates( buckets )
         .then( ( updateResult ) => {
@@ -834,7 +832,7 @@
             updateStorage();
             updateHeader();
           }
-          
+
           // Initialize UI for first-time users or after successful updates
           if ( null === storedBuckets ) {
             initializeUIIfDataExists();
@@ -856,7 +854,7 @@
   };
 
   // Initialize browser if we're in a browser environment
-  if ( typeof window !== 'undefined' ) { 
+  if ( typeof window !== 'undefined' ) {
     // Check persistent storage requirements before initializing
     ensurePersistentStorage().then( ( canProceed ) => {
       if ( canProceed ) {
@@ -880,7 +878,7 @@
   }
 
   // Export functions for Node.js testing environment
-  if ( typeof module !== 'undefined' && module.exports ) { 
+  if ( typeof module !== 'undefined' && module.exports ) {
     module.exports = {
       stripArabicDiacritics,
       parseCSVLine,

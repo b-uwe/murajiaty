@@ -5,6 +5,7 @@
 const { recallWords } = require( '../main.js' );
 
 /**
+ * Creates a test vocabulary word with sensible defaults.
  * @param {object} overrides - Optional field overrides for the word
  * @returns {object} A vocabulary word object
  */
