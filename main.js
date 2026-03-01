@@ -37,6 +37,28 @@
 
 
   /**
+   * Arabic font families for reading practice: null represents the system default
+   * (Noto Naskh Arabic on Android), the rest are Google Fonts loaded in index.html.
+   * @constant {Array<string|null>}
+   */
+  const ARABIC_FONTS = [
+    null,
+    'Fustat',
+    'Reem Kufi',
+    'Cairo',
+    'Changa'
+  ];
+
+  /**
+   * Picks a random Arabic font family from ARABIC_FONTS.
+   * Returns null for the system default or a Google Font family name.
+   * @returns {string|null} Font family name or null for default
+   */
+  const pickRandomArabicFont = () => {
+    return ARABIC_FONTS[ Math.floor( Math.random() * ARABIC_FONTS.length ) ];
+  };
+
+  /**
    * Parses a CSV line handling quoted fields
    * @param {string} csvLine - The CSV line to parse (format: "field1","field2",...)
    * @param {string} separator - The field separator (default: ',')
@@ -309,11 +331,14 @@
       currentSide = 'ar';
       mainElement.classList.add( 'ar' );
       mainElement.classList.remove( 'de' );
+      const font = pickRandomArabicFont();
+      mainElement.style.fontFamily = font || '';
       speakButton.disabled = false;
     } else {
       currentSide = 'de';
       mainElement.classList.add( 'de' );
       mainElement.classList.remove( 'ar' );
+      mainElement.style.fontFamily = '';
       speakButton.disabled = true;
     }
 
@@ -326,7 +351,7 @@
    */
   const flipWord = () => {
     const currentWord = buckets[ currentBucket ][ 0 ]; // Get the first word in the current bucket
-    
+
     if ( currentWord ) {
       // Toggle between 'de' and 'ar' representation
       if ( currentSide === 'de' ) {
@@ -334,12 +359,15 @@
         currentSide = 'ar';
         mainElement.classList.add( 'ar' );
         mainElement.classList.remove( 'de' );
+        const font = pickRandomArabicFont();
+        mainElement.style.fontFamily = font || '';
         speakWord( currentWord.ar );
       } else {
         mainElement.textContent = currentWord.de; // Show German
         currentSide = 'de';
         mainElement.classList.add( 'de' );
         mainElement.classList.remove( 'ar' );
+        mainElement.style.fontFamily = '';
       }
     }
 
@@ -865,7 +893,9 @@
       fetchGoogleSheetsData,
       checkForVocabularyUpdates,
       renderArabicInput,
-      recallWords
+      recallWords,
+      ARABIC_FONTS,
+      pickRandomArabicFont
     };
   };
 } )();
