@@ -228,6 +228,7 @@
     // Relative container for overlay + input
     const relativeDiv = document.createElement( 'div' );
     relativeDiv.className = 'arabic-input-relative';
+    relativeDiv.style.fontFamily = pickRandomArabicFont();
 
     // Overlay
     const overlay = document.createElement( 'div' );
@@ -325,7 +326,7 @@
     }
 
     updateHeader();
-    if ( currentBucket >= 3 ) {
+    if ( currentBucket === 3 || currentBucket === 5 ) {
       currentSide = 'ar';
       mainElement.classList.add( 'ar' );
       mainElement.classList.remove( 'de' );
