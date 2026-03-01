@@ -1,39 +1,12 @@
 /* Arabic font variants for reading practice (Arabic subset only) */
-@font-face {
-  font-family: 'Cairo';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(fonts/cairo-arabic.woff2) format('woff2');
-  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
-}
-
-@font-face {
-  font-family: 'Changa';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(fonts/changa-arabic.woff2) format('woff2');
-  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
-}
-
-@font-face {
-  font-family: 'Fustat';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(fonts/fustat-arabic.woff2) format('woff2');
-  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
-}
-
-@font-face {
-  font-family: 'Reem Kufi';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(fonts/reem-kufi-arabic.woff2) format('woff2');
-  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
-}
+@font-face { font-family: 'Cairo'; font-display: swap; src: url(fonts/cairo-arabic.woff2) format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFC; }
+@font-face { font-family: 'Changa'; font-display: swap; src: url(fonts/changa-arabic.woff2) format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFC; }
+@font-face { font-family: 'Fustat'; font-display: swap; src: url(fonts/fustat-arabic.woff2) format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFC; }
+@font-face { font-family: 'Reem Kufi'; font-display: swap; src: url(fonts/reem-kufi-arabic.woff2) format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFC; }
 
 body {
   background: #1a1a1a;
