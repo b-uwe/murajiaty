@@ -400,7 +400,7 @@
   };
 
   /**
-   * When the user signals a wrongly remembered word, put the card two buckets back
+   * When the user signals a wrongly remembered word, put the card one bucket back
    */
   const rememberedIncorrectly = () => {
     const currentWord = buckets[ currentBucket ][ 0 ]; // Get the first word from the current bucket
