@@ -37,12 +37,12 @@
 
 
   /**
-   * Arabic font families for reading practice: null represents the system default
+   * Arabic font families for reading practice: empty string represents the system default
    * (Noto Naskh Arabic on Android), the rest are self-hosted woff2 fonts declared in styles.css.
-   * @constant {Array<string|null>}
+   * @constant {string[]}
    */
   const ARABIC_FONTS = [
-    null,
+    '',
     'Fustat',
     'Reem Kufi',
     'Cairo',
@@ -51,8 +51,8 @@
 
   /**
    * Picks a random Arabic font family from ARABIC_FONTS.
-   * Returns null for the system default or a Google Font family name.
-   * @returns {string|null} Font family name or null for default
+   * Returns an empty string for the system default or a font family name.
+   * @returns {string} Font family name or empty string for default
    */
   const pickRandomArabicFont = () => {
     return ARABIC_FONTS[ Math.floor( Math.random() * ARABIC_FONTS.length ) ];
@@ -331,8 +331,7 @@
       currentSide = 'ar';
       mainElement.classList.add( 'ar' );
       mainElement.classList.remove( 'de' );
-      const font = pickRandomArabicFont();
-      mainElement.style.fontFamily = font || '';
+      mainElement.style.fontFamily = pickRandomArabicFont();
       speakButton.disabled = false;
     } else {
       currentSide = 'de';
@@ -359,8 +358,7 @@
         currentSide = 'ar';
         mainElement.classList.add( 'ar' );
         mainElement.classList.remove( 'de' );
-        const font = pickRandomArabicFont();
-        mainElement.style.fontFamily = font || '';
+        mainElement.style.fontFamily = pickRandomArabicFont();
         speakWord( currentWord.ar );
       } else {
         mainElement.textContent = currentWord.de; // Show German

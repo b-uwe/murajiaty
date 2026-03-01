@@ -5,15 +5,15 @@
 const { ARABIC_FONTS, pickRandomArabicFont } = require( '../main.js' );
 
 describe( 'ARABIC_FONTS', () => {
-  test( 'should contain exactly 5 entries (4 Google Fonts + default)', () => {
+  test( 'should contain exactly 5 entries (4 fonts + default)', () => {
     expect( ARABIC_FONTS ).toHaveLength( 5 );
   } );
 
-  test( 'should include null as the default font option', () => {
-    expect( ARABIC_FONTS ).toContain( null );
+  test( 'should include empty string as the default font option', () => {
+    expect( ARABIC_FONTS ).toContain( '' );
   } );
 
-  test( 'should include the four selected Google Fonts', () => {
+  test( 'should include the four selected Arabic fonts', () => {
     expect( ARABIC_FONTS ).toContain( 'Fustat' );
     expect( ARABIC_FONTS ).toContain( 'Reem Kufi' );
     expect( ARABIC_FONTS ).toContain( 'Cairo' );
@@ -29,43 +29,38 @@ describe( 'pickRandomArabicFont', () => {
     }
   } );
 
-  test( 'should produce different fonts over multiple calls (probabilistic)', () => {
-    const uniqueResults = new Set();
-    const maxAttempts = 100;
+  test( 'should select fonts based on Math.random value', () => {
+    const spy = jest.spyOn( Math, 'random' );
 
-    for ( let attempt = 0; attempt < maxAttempts; attempt++ ) {
-      uniqueResults.add( pickRandomArabicFont() );
-      if ( uniqueResults.size >= 3 ) {
-        break;
-      }
-    }
+    spy.mockReturnValue( 0 );
+    expect( pickRandomArabicFont() ).toBe( '' );
 
-    expect( uniqueResults.size ).toBeGreaterThanOrEqual( 3 );
+    spy.mockReturnValue( 0.25 );
+    expect( pickRandomArabicFont() ).toBe( 'Fustat' );
+
+    spy.mockReturnValue( 0.5 );
+    expect( pickRandomArabicFont() ).toBe( 'Reem Kufi' );
+
+    spy.mockReturnValue( 0.75 );
+    expect( pickRandomArabicFont() ).toBe( 'Cairo' );
+
+    spy.mockReturnValue( 0.99 );
+    expect( pickRandomArabicFont() ).toBe( 'Changa' );
+
+    spy.mockRestore();
   } );
 
-  test( 'should eventually return null (default font)', () => {
-    let foundNull = false;
-
-    for ( let i = 0; i < 200; i++ ) {
-      if ( pickRandomArabicFont() === null ) {
-        foundNull = true;
-        break;
-      }
-    }
-
-    expect( foundNull ).toBe( true );
+  test( 'should return empty string for system default font', () => {
+    const spy = jest.spyOn( Math, 'random' ).mockReturnValue( 0 );
+    expect( pickRandomArabicFont() ).toBe( '' );
+    spy.mockRestore();
   } );
 
-  test( 'should eventually return a named Google Font', () => {
-    let foundNamed = false;
-
-    for ( let i = 0; i < 200; i++ ) {
-      if ( pickRandomArabicFont() !== null ) {
-        foundNamed = true;
-        break;
-      }
-    }
-
-    expect( foundNamed ).toBe( true );
+  test( 'should return a named font for non-zero random values', () => {
+    const spy = jest.spyOn( Math, 'random' ).mockReturnValue( 0.5 );
+    const font = pickRandomArabicFont();
+    expect( font ).not.toBe( '' );
+    expect( ARABIC_FONTS ).toContain( font );
+    spy.mockRestore();
   } );
 } );
