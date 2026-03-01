@@ -37,6 +37,28 @@
 
 
   /**
+   * Arabic font families for reading practice: empty string represents the system default
+   * (Noto Naskh Arabic on Android), the rest are self-hosted woff2 fonts declared in styles.css.
+   * @constant {string[]}
+   */
+  const ARABIC_FONTS = [
+    '',
+    'Fustat',
+    'Reem Kufi',
+    'Cairo',
+    'Changa'
+  ];
+
+  /**
+   * Picks a random Arabic font family from ARABIC_FONTS.
+   * Returns an empty string for the system default or a font family name.
+   * @returns {string} Font family name or empty string for default
+   */
+  const pickRandomArabicFont = () => {
+    return ARABIC_FONTS[ Math.floor( Math.random() * ARABIC_FONTS.length ) ];
+  };
+
+  /**
    * Parses a CSV line handling quoted fields
    * @param {string} csvLine - The CSV line to parse (format: "field1","field2",...)
    * @param {string} separator - The field separator (default: ',')
@@ -269,13 +291,13 @@
 
       switch ( currentBucket ) {
       case 0:
-        mainElement.innerHTML = flags[ 1 ] + '<br/>' +  word.de;
+        mainElement.innerHTML = flags[ 1 ] + '<br/>' + word.de;
         break;
       case 1:
         mainElement.innerHTML = flags[ 2 ] + '<br/>' + word.en;
         break;
       case 2:
-        mainElement.innerHTML = flags[ 0 ] + '<br/>' +  word.es;
+        mainElement.innerHTML = flags[ 0 ] + '<br/>' + word.es;
         break;
       case 3:
         mainElement.textContent = word.ar;
@@ -299,7 +321,7 @@
         pickNextWord(); // Try again in the new bucket
       } else {
         // Handle overflow
-        mainElement.textContent = '😵'; 
+        mainElement.textContent = '😵';
         flipButton.disabled = true;
       }
     }
@@ -309,11 +331,13 @@
       currentSide = 'ar';
       mainElement.classList.add( 'ar' );
       mainElement.classList.remove( 'de' );
+      mainElement.style.fontFamily = pickRandomArabicFont();
       speakButton.disabled = false;
     } else {
       currentSide = 'de';
       mainElement.classList.add( 'de' );
       mainElement.classList.remove( 'ar' );
+      mainElement.style.fontFamily = '';
       speakButton.disabled = true;
     }
 
@@ -326,7 +350,7 @@
    */
   const flipWord = () => {
     const currentWord = buckets[ currentBucket ][ 0 ]; // Get the first word in the current bucket
-    
+
     if ( currentWord ) {
       // Toggle between 'de' and 'ar' representation
       if ( currentSide === 'de' ) {
@@ -334,12 +358,14 @@
         currentSide = 'ar';
         mainElement.classList.add( 'ar' );
         mainElement.classList.remove( 'de' );
+        mainElement.style.fontFamily = pickRandomArabicFont();
         speakWord( currentWord.ar );
       } else {
         mainElement.textContent = currentWord.de; // Show German
         currentSide = 'de';
         mainElement.classList.add( 'de' );
         mainElement.classList.remove( 'ar' );
+        mainElement.style.fontFamily = '';
       }
     }
 
@@ -865,7 +891,9 @@
       fetchGoogleSheetsData,
       checkForVocabularyUpdates,
       renderArabicInput,
-      recallWords
+      recallWords,
+      ARABIC_FONTS,
+      pickRandomArabicFont
     };
   };
 } )();
