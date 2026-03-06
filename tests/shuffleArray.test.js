@@ -15,7 +15,7 @@ describe( 'shuffleArray', () => {
     const arr = [ 'a', 'b', 'c', 'd', 'e' ];
     const original = [ ...arr ];
     shuffleArray( arr );
-    
+
     // Check that all original elements are still present
     expect( arr ).toHaveLength( original.length );
     original.forEach( ( element ) => {
@@ -49,7 +49,7 @@ describe( 'shuffleArray', () => {
     const arr = [ 1, 'string', { 'key': 'value' }, null, true ];
     const original = [ ...arr ];
     shuffleArray( arr );
-    
+
     expect( arr ).toHaveLength( 5 );
     original.forEach( ( element ) => {
       expect( arr ).toContain( element );
@@ -64,7 +64,7 @@ describe( 'shuffleArray', () => {
     ];
     const original = [ ...words ];
     shuffleArray( words );
-    
+
     expect( words ).toHaveLength( 3 );
     original.forEach( ( word ) => {
       expect( words ).toContainEqual( word );
@@ -75,7 +75,7 @@ describe( 'shuffleArray', () => {
     const arr = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
     const originalReference = arr;
     shuffleArray( arr );
-    
+
     expect( arr ).toBe( originalReference );
     expect( arr ).toHaveLength( 10 );
   } );
@@ -86,18 +86,18 @@ describe( 'shuffleArray', () => {
     const uniqueResults = new Set();
     const targetUniqueCount = 3;
     const maxAttempts = 100;
-    
+
     for ( let attempt = 0; attempt < maxAttempts; attempt++ ) {
       const arr = [ ...original ];
       shuffleArray( arr );
       uniqueResults.add( JSON.stringify( arr ) );
-      
+
       // Stop early if we have enough different results
       if ( uniqueResults.size >= targetUniqueCount ) {
         break;
       }
     }
-    
+
     // Should have found at least 3 different arrangements
     expect( uniqueResults.size ).toBeGreaterThanOrEqual( targetUniqueCount );
   } );

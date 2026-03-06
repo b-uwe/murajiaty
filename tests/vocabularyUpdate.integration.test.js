@@ -24,7 +24,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
       expect( result ).toHaveLength( 2 );
       expect( result[ 0 ] ).toEqual( {
         'ar': 'كتاب',
-        'de': 'Buch', 
+        'de': 'Buch',
         'en': 'book',
         'es': 'libro',
         'bucketIndex': 0
@@ -37,7 +37,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
      */
     test( 'should handle fetch errors gracefully', async () => {
       global.fetch = jest.fn().mockRejectedValue( new Error( 'Network error' ) );
-      
+
       const result = await fetchGoogleSheetsData();
       expect( result ).toEqual( [] );
     } );
@@ -51,7 +51,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
         'ok': false,
         'status': 404
       } );
-      
+
       const result = await fetchGoogleSheetsData();
       expect( result ).toEqual( [] );
     } );
@@ -59,7 +59,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
 
   describe( 'checkForVocabularyUpdates integration', () => {
     let mockBuckets;
-    
+
     beforeEach( () => {
       // Setup mock buckets structure
       mockBuckets = [
@@ -82,11 +82,11 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
       } );
 
       const result = await checkForVocabularyUpdates( mockBuckets );
-      
+
       // Should add the new word 'جديد' to bucket 0
       expect( result.buckets[ 0 ] ).toContainEqual( {
         'ar': 'جديد',
-        'de': 'neu', 
+        'de': 'neu',
         'en': 'new',
         'es': 'nuevo'
       } );
@@ -105,12 +105,12 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
       } );
 
       const result = await checkForVocabularyUpdates( mockBuckets );
-      
+
       // Original words should remain in their ORIGINAL buckets (preserving progress)
       expect( result.buckets[ 0 ] ).toContainEqual( {
         'ar': 'كتاب',
         'de': 'Buch',
-        'en': 'book', 
+        'en': 'book',
         'es': 'libro'
       } );
       expect( result.buckets[ 1 ] ).toContainEqual( {
@@ -119,7 +119,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
         'en': 'pen',
         'es': 'pluma'
       } );
-      
+
       // Verify that the advanced word is NOT moved back to bucket 0 (progress preserved)
       expect( result.buckets[ 0 ] ).not.toContainEqual( {
         'ar': 'قلم',
@@ -127,7 +127,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
         'en': 'pen',
         'es': 'pluma'
       } );
-      
+
       // Verify that the beginner word is NOT moved to bucket 1
       expect( result.buckets[ 1 ] ).not.toContainEqual( {
         'ar': 'كتاب',
@@ -183,13 +183,13 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
       // Setup buckets with multiple words to properly test removal
       const bucketsWithMultipleWords = [
         [ { 'ar': 'كتاب', 'de': 'Buch', 'en': 'book', 'es': 'libro' } ],
-        [ 
+        [
           { 'ar': 'قلم', 'de': 'Stift', 'en': 'pen', 'es': 'pluma' },
           { 'ar': 'بيت', 'de': 'Haus', 'en': 'house', 'es': 'casa' }
         ],
         [], [], [], [], []
       ];
-      
+
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
         'text': async () => {
@@ -207,7 +207,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
         'en': 'pen',
         'es': 'pluma'
       } );
-      
+
       // Verify that the deleted word 'بيت' is removed from bucket 1
       expect( result.buckets[ 1 ] ).not.toContainEqual( {
         'ar': 'بيت',
