@@ -106,7 +106,6 @@ body {
 .letter-diacritics-row {
   font-size: clamp( 2.5rem, 10vw, 6rem );
   padding: 0.2rem 0;
-  letter-spacing: 0.3em;
 }
 
 .arabic-input-relative {

@@ -468,7 +468,7 @@
       const style = font ? ` style="font-family: ${font}"` : '';
       const forms = diacritics.map( ( d ) => {
         return letter + d;
-      } ).join( ' ' );
+      } ).join( '' );
       return `<div class="letter-diacritics-row"${style}>${forms}</div>`;
     } ).join( '' );
 
