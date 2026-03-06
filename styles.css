@@ -77,13 +77,36 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  font-size: clamp( 6rem, 35vh, 35vw );
   color: #ccc;
   background-color: rgba(0, 0, 0);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   text-align: center;
   display: none;
+  overflow-y: auto;
+}
+
+.letter-top-row {
+  font-size: clamp( 3rem, 12vw, 8rem );
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #333;
+}
+
+.letter-font-sample {
+  display: inline-block;
+}
+
+.letter-spacer {
+  color: #555;
+  margin: 0 0.3rem;
+  font-size: 0.5em;
+  vertical-align: middle;
+}
+
+.letter-diacritics-row {
+  font-size: clamp( 2.5rem, 10vw, 6rem );
+  padding: 0.2rem 0;
+  letter-spacing: 0.3em;
 }
 
 .arabic-input-relative {
