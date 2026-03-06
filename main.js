@@ -449,7 +449,8 @@
   };
 
   /**
-   * Adds click event listeners to each letter in the word.
+   * Adds a click listener to #main that detects which Arabic letter was tapped
+   * and shows it with common diacritics in all available fonts on the overlay.
    */
   const addLetterClickListener = () => {
     document.getElementById( 'main' ).addEventListener( 'click', function ( event ) {
@@ -462,10 +463,10 @@
       const text = div.textContent;
       let clickedLetter;
 
-      // Click- oder Touch-Position bestimmen
+      // Determine click or touch position
       const clientX = event.touches ? event.touches[ 0 ].clientX : event.clientX;
 
-      // Jedes Zeichen einzeln durchgehen
+      // Walk through each character individually
       for ( let i = 0; i < text.length; i++ ) {
         const range = document.createRange();
         range.setStart( div.firstChild, i );
@@ -473,7 +474,7 @@
 
         const rect = range.getBoundingClientRect();
 
-        // Prüfen, ob der Klick innerhalb dieses Zeichenbereichs war
+        // Check if the click falls within this character's bounding box
         if ( clientX >= rect.left && clientX <= rect.right ) {
           clickedLetter = text[ i ];
           break;
