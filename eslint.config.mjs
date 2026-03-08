@@ -24,7 +24,7 @@ export default [ js.configs.recommended, {
     'no-self-compare': 'error',
 
     // --- Suggestions ---
-    'arrow-body-style': [ 'error', 'always' ],
+    'arrow-body-style': 'error',
     'block-scoped-var': 'error',
     'curly': 'error',
     'default-case': 'error',
@@ -173,7 +173,7 @@ export default [ js.configs.recommended, {
     'no-self-compare': 'error',
 
     // --- Suggestions ---
-    'arrow-body-style': [ 'error', 'always' ],
+    'arrow-body-style': 'error',
     'block-scoped-var': 'error',
     'curly': 'error',
     'default-case': 'error',

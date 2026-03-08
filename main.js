@@ -54,9 +54,7 @@
    * Returns an empty string for the system default or a font family name.
    * @returns {string} Font family name or empty string for default
    */
-  const pickRandomArabicFont = () => {
-    return ARABIC_FONTS[ Math.floor( Math.random() * ARABIC_FONTS.length ) ];
-  };
+  const pickRandomArabicFont = () => ARABIC_FONTS[ Math.floor( Math.random() * ARABIC_FONTS.length ) ];
 
   /**
    * Parses a CSV line handling quoted fields
@@ -182,10 +180,9 @@
    * @param {string} str - The text with diacritics
    * @returns {string} The cleaned text without diacritics and with normalized alifs
    */
-  const stripArabicDiacritics = ( str ) => {
+  const stripArabicDiacritics = ( str ) =>
     // Covers Arabic vowels and sukun, shadda, etc.
-    return str.replace( /[\u064B-\u0652\u0670]/g, '' ).replace( /[أإ]/g, 'ا' );
-  };
+    str.replace( /[\u064B-\u0652\u0670]/g, '' ).replace( /[أإ]/g, 'ا' );
 
   /**
    * Renders all elements needed for the input of Arabic text
@@ -291,9 +288,7 @@
    */
   const pickNextWord = () => {
     // Check if the current bucket has words
-    if ( buckets[ currentBucket ].filter( ( item ) => {
-      return !item.touched;
-    } ).length > 0 ) {
+    if ( buckets[ currentBucket ].filter( ( item ) => !item.touched ).length > 0 ) {
       const word = buckets[ currentBucket ][ 0 ]; // Get the first word
 
       switch ( currentBucket ) {
@@ -403,9 +398,7 @@
           source.start( 0 );
         } );
       } ).
-      catch( ( error ) => {
-        return console.error( 'Error fetching audio:', error );
-      } );
+      catch( ( error ) => console.error( 'Error fetching audio:', error ) );
   };
 
   /**
@@ -472,9 +465,7 @@
     // One row per font showing fatha, kasra, damma
     const diacriticRows = fonts.map( ( font ) => {
       const style = font ? ` style="font-family: ${font}"` : '';
-      const forms = diacritics.map( ( d ) => {
-        return letter + d;
-      } ).join( '' );
+      const forms = diacritics.map( ( d ) => letter + d ).join( '' );
       return `<div class="letter-diacritics-row"${style}>${forms}</div>`;
     } ).join( '' );
 
@@ -542,18 +533,14 @@
     // 25 = target number of words actively cycling through non-DONE buckets
     const activeWordCount = targetBuckets.
       slice( 0, -1 ).
-      reduce( ( sum, bucket ) => {
-        return sum + bucket.length;
-      }, 0 );
+      reduce( ( sum, bucket ) => sum + bucket.length, 0 );
 
     const wordsNeeded = 25 - activeWordCount;
     if ( wordsNeeded <= 0 ) {
       return;
     }
 
-    const sorted = [ ...lastBucket ].sort( ( a, b ) => {
-      return a.doneAt - b.doneAt;
-    } );
+    const sorted = [ ...lastBucket ].sort( ( a, b ) => a.doneAt - b.doneAt );
 
     const toRecycle = sorted.slice( 0, wordsNeeded );
 
@@ -569,15 +556,7 @@
    * Updates the header with the current bucket and word count
    */
   const updateHeader = () => {
-    wordsElement.textContent = `${buckets.filter( ( bucket, idx ) => {
-      return idx !== buckets.length - 1;
-    } ).map( ( bucket, idx ) => {
-      return ( idx === currentBucket ) ? `<${`${bucket.filter( ( el ) => {
-        return !el.touched;
-      } ).length}/${bucket.length}`}>` : `${bucket.filter( ( el ) => {
-        return !el.touched;
-      } ).length}/${bucket.length}`;
-    } ).join( ' ' )} (${buckets[ buckets.length - 1 ].length})`;
+    wordsElement.textContent = `${buckets.filter( ( bucket, idx ) => idx !== buckets.length - 1 ).map( ( bucket, idx ) => ( ( idx === currentBucket ) ? `<${`${bucket.filter( ( el ) => !el.touched ).length}/${bucket.length}`}>` : `${bucket.filter( ( el ) => !el.touched ).length}/${bucket.length}` ) ).join( ' ' )} (${buckets[ buckets.length - 1 ].length})`;
   };
 
   /**
@@ -592,9 +571,7 @@
    * Only initializes if buckets contain vocabulary data
    */
   const initializeUIIfDataExists = () => {
-    if ( buckets.some( ( bucket ) => {
-      return bucket.length > 0;
-    } ) ) {
+    if ( buckets.some( ( bucket ) => bucket.length > 0 ) ) {
       currentBucket = 0;
       pickNextWord();
     }
@@ -699,9 +676,9 @@
       } );
 
       // 5. Create new buckets structure with updates
-      const updatedBuckets = currentBuckets.map( ( bucket ) => {
-        return [ ...bucket ]; // Deep copy
-      } );
+      const updatedBuckets = currentBuckets.map( ( bucket ) =>
+        [ ...bucket ] // Deep copy
+      );
 
       // 6. Add new words to bucket 0
       newWords.forEach( ( word ) => {
@@ -834,23 +811,19 @@
     // On page load, read the buckets from local storage
     const storedBuckets = localStorage.getItem( 'murajiaty-buckets' );
     if ( storedBuckets ) {
-      buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
-        return bucket.map( ( { de, ar, en, es, doneAt } ) => {
-          const word = { de,
-            ar,
-            en,
-            es };
-          if ( doneAt ) {
-            word.doneAt = doneAt;
-          }
-          return word;
-        } );
-      } );
+      buckets = JSON.parse( storedBuckets ).map( ( bucket ) => bucket.map( ( { de, ar, en, es, doneAt } ) => {
+        const word = { de,
+          ar,
+          en,
+          es };
+        if ( doneAt ) {
+          word.doneAt = doneAt;
+        }
+        return word;
+      } ) );
 
       // Shuffle each inner array (create copy to avoid modifying original)
-      buckets = buckets.map( ( bucket ) => {
-        return shuffleArray( [ ...bucket ] );
-      } );
+      buckets = buckets.map( ( bucket ) => shuffleArray( [ ...bucket ] ) );
 
       // Recycle oldest-graduated words from DONE back into active rotation
       recallWords( buckets );
