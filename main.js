@@ -132,7 +132,11 @@
 
     // Validate that all required fields are present and non-empty
     if ( ar && de && en && es && parts.length >= 5 ) {
-      return { 'ar': ar, 'de': de, 'en': en, 'es': es, 'bucketIndex': 0 };
+      return { 'ar': ar,
+        'de': de,
+        'en': en,
+        'es': es,
+        'bucketIndex': 0 };
     }
 
     return null;
@@ -218,7 +222,9 @@
 
     // Remove previous inputs
     const existing = document.getElementById( 'arabicInputWrapper' );
-    if ( existing ) existing.remove();
+    if ( existing ) {
+      existing.remove();
+    }
 
     const labelLang = Math.floor( Math.random() * 3 );
     const label = document.createElement( 'div' );
@@ -381,14 +387,14 @@
     const audioContext = new ( window.AudioContext || window.webkitAudioContext )();
     const url = `https://bernitt.biz/murajiaty/proxy/proxy.php?text=${encodeURIComponent( word )}`;
 
-    fetch( url )
-      .then( ( response ) => {
+    fetch( url ).
+      then( ( response ) => {
         if ( !response.ok ) {
           throw new Error( 'Network response was not ok' );
         }
         return response.arrayBuffer();
-      } )
-      .then( ( arrayBuffer ) => {
+      } ).
+      then( ( arrayBuffer ) => {
         audioContext.decodeAudioData( arrayBuffer, ( buffer ) => {
           const source = audioContext.createBufferSource();
           source.buffer = buffer;
@@ -396,8 +402,8 @@
           source.connect( audioContext.destination );
           source.start( 0 );
         } );
-      } )
-      .catch( ( error ) => {
+      } ).
+      catch( ( error ) => {
         return console.error( 'Error fetching audio:', error );
       } );
   };
@@ -534,9 +540,9 @@
     }
 
     // 25 = target number of words actively cycling through non-DONE buckets
-    const activeWordCount = targetBuckets
-      .slice( 0, -1 )
-      .reduce( ( sum, bucket ) => {
+    const activeWordCount = targetBuckets.
+      slice( 0, -1 ).
+      reduce( ( sum, bucket ) => {
         return sum + bucket.length;
       }, 0 );
 
@@ -646,7 +652,9 @@
       currentBuckets.forEach( ( bucket, bucketIndex ) => {
         bucket.forEach( ( word, arrayIndex ) => {
           const wordHash = hashVocabularyWord( word );
-          localVocabMap.set( wordHash, { word, bucketIndex, arrayIndex } );
+          localVocabMap.set( wordHash, { word,
+            bucketIndex,
+            arrayIndex } );
           localHashSet.add( wordHash );
         } );
       } );
@@ -659,7 +667,9 @@
       if ( googleVocab.length === 0 ) {
         return {
           'buckets': currentBuckets,
-          'changes': { 'newWords': 0, 'deletedWords': 0, 'unchangedWords': 0 }
+          'changes': { 'newWords': 0,
+            'deletedWords': 0,
+            'unchangedWords': 0 }
         };
       }
 
@@ -683,7 +693,8 @@
         if ( !googleHashSet.has( localHash ) ) {
           // DELETED word - mark for removal
           const { bucketIndex, arrayIndex } = localVocabMap.get( localHash );
-          deletionsToProcess.push( { bucketIndex, arrayIndex } );
+          deletionsToProcess.push( { bucketIndex,
+            arrayIndex } );
         }
       } );
 
@@ -694,19 +705,22 @@
 
       // 6. Add new words to bucket 0
       newWords.forEach( ( word ) => {
-        updatedBuckets[ 0 ].push( { 'ar': word.ar, 'de': word.de, 'en': word.en, 'es': word.es } );
+        updatedBuckets[ 0 ].push( { 'ar': word.ar,
+          'de': word.de,
+          'en': word.en,
+          'es': word.es } );
       } );
 
       // 7. Process deletions in reverse order to avoid index shifting issues
-      deletionsToProcess
-        .sort( ( a, b ) => {
+      deletionsToProcess.
+        sort( ( a, b ) => {
           // Sort by bucket first, then by array index (both descending)
           if ( a.bucketIndex !== b.bucketIndex ) {
             return b.bucketIndex - a.bucketIndex;
           }
           return b.arrayIndex - a.arrayIndex;
-        } )
-        .forEach( ( { bucketIndex, arrayIndex } ) => {
+        } ).
+        forEach( ( { bucketIndex, arrayIndex } ) => {
           updatedBuckets[ bucketIndex ].splice( arrayIndex, 1 );
         } );
 
@@ -720,7 +734,10 @@
       };
     } catch ( err ) {
       console.error( 'Error checking for vocabulary updates:', err.message );
-      return { 'buckets': currentBuckets, 'changes': { 'newWords': 0, 'deletedWords': 0, 'unchangedWords': 0 } };
+      return { 'buckets': currentBuckets,
+        'changes': { 'newWords': 0,
+          'deletedWords': 0,
+          'unchangedWords': 0 } };
     }
   };
 
@@ -819,7 +836,10 @@
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
         return bucket.map( ( { de, ar, en, es, doneAt } ) => {
-          const word = { de, ar, en, es };
+          const word = { de,
+            ar,
+            en,
+            es };
           if ( doneAt ) {
             word.doneAt = doneAt;
           }
@@ -853,8 +873,8 @@
       addLetterClickListener();
 
       // Load vocabulary (handles both initial load and updates)
-      checkForVocabularyUpdates( buckets )
-        .then( ( updateResult ) => {
+      checkForVocabularyUpdates( buckets ).
+        then( ( updateResult ) => {
           if ( updateResult.changes.newWords > 0 || updateResult.changes.deletedWords > 0 ) {
             console.log( `Vocabulary updated: +${updateResult.changes.newWords} new, -${updateResult.changes.deletedWords} deleted, ${updateResult.changes.unchangedWords} unchanged` );
             buckets = updateResult.buckets;
@@ -866,8 +886,8 @@
           if ( null === storedBuckets ) {
             initializeUIIfDataExists();
           }
-        } )
-        .catch( ( err ) => {
+        } ).
+        catch( ( err ) => {
           console.error( 'Vocabulary update failed:', err.message );
           // For initial load failures, still try to initialize UI with existing data
           if ( null === storedBuckets ) {
@@ -891,11 +911,11 @@
 
         // Register Service Worker for PWA functionality
         if ( 'serviceWorker' in navigator ) {
-          navigator.serviceWorker.register( './service-worker.js' )
-            .then( ( registration ) => {
+          navigator.serviceWorker.register( './service-worker.js' ).
+            then( ( registration ) => {
               console.log( 'Service Worker registered successfully:', registration.scope );
-            } )
-            .catch( ( error ) => {
+            } ).
+            catch( ( error ) => {
               console.log( 'Service Worker registration failed:', error );
             } );
         }

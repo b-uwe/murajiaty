@@ -22,8 +22,8 @@ const urlsToCache = [
  */
 const handleInstall = ( event ) => {
   event.waitUntil(
-    caches.open( CACHE_NAME )
-      .then( ( cache ) => {
+    caches.open( CACHE_NAME ).
+      then( ( cache ) => {
         return cache.addAll( urlsToCache );
       } )
   );
@@ -36,11 +36,11 @@ const handleInstall = ( event ) => {
  */
 const handleFetch = ( event ) => {
   event.respondWith(
-    caches.open( CACHE_NAME )
-      .then( ( cache ) => {
+    caches.open( CACHE_NAME ).
+      then( ( cache ) => {
         return cache.match( event.request );
-      } )
-      .then( ( response ) => {
+      } ).
+      then( ( response ) => {
         if ( response ) {
           return response;
         }
@@ -58,16 +58,16 @@ const handleActivate = ( event ) => {
   event.waitUntil(
     caches.keys().then( ( cacheNames ) => {
       return Promise.all(
-        cacheNames
-          .filter( ( cacheName ) => {
+        cacheNames.
+          filter( ( cacheName ) => {
             return cacheName.startsWith( 'murajiaty-' ) && cacheName !== CACHE_NAME;
-          } )
-          .map( ( cacheName ) => {
+          } ).
+          map( ( cacheName ) => {
             return caches.delete( cacheName );
           } )
       );
-    } )
-      .then( () => {
+    } ).
+      then( () => {
         return clients.claim();
       } )
   );

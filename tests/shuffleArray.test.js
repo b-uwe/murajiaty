@@ -58,9 +58,12 @@ describe( 'shuffleArray', () => {
 
   test( 'should work with vocabulary word objects', () => {
     const words = [
-      { 'ar': 'كتاب', 'de': 'Buch' },
-      { 'ar': 'قلم', 'de': 'Stift' },
-      { 'ar': 'بيت', 'de': 'Haus' }
+      { 'ar': 'كتاب',
+        'de': 'Buch' },
+      { 'ar': 'قلم',
+        'de': 'Stift' },
+      { 'ar': 'بيت',
+        'de': 'Haus' }
     ];
     const original = [ ...words ];
     shuffleArray( words );

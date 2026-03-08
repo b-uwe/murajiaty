@@ -63,9 +63,23 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     beforeEach( () => {
       // Setup mock buckets structure
       mockBuckets = [
-        [ { 'ar': 'كتاب', 'de': 'Buch', 'en': 'book', 'es': 'libro' } ],
-        [ { 'ar': 'قلم', 'de': 'Stift', 'en': 'pen', 'es': 'pluma' } ],
-        [], [], [], [], []
+        [
+          { 'ar': 'كتاب',
+            'de': 'Buch',
+            'en': 'book',
+            'es': 'libro' }
+        ],
+        [
+          { 'ar': 'قلم',
+            'de': 'Stift',
+            'en': 'pen',
+            'es': 'pluma' }
+        ],
+        [],
+        [],
+        [],
+        [],
+        []
       ];
     } );
 
@@ -182,12 +196,27 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     test( 'should remove deleted words from buckets', async () => {
       // Setup buckets with multiple words to properly test removal
       const bucketsWithMultipleWords = [
-        [ { 'ar': 'كتاب', 'de': 'Buch', 'en': 'book', 'es': 'libro' } ],
         [
-          { 'ar': 'قلم', 'de': 'Stift', 'en': 'pen', 'es': 'pluma' },
-          { 'ar': 'بيت', 'de': 'Haus', 'en': 'house', 'es': 'casa' }
+          { 'ar': 'كتاب',
+            'de': 'Buch',
+            'en': 'book',
+            'es': 'libro' }
         ],
-        [], [], [], [], []
+        [
+          { 'ar': 'قلم',
+            'de': 'Stift',
+            'en': 'pen',
+            'es': 'pluma' },
+          { 'ar': 'بيت',
+            'de': 'Haus',
+            'en': 'house',
+            'es': 'casa' }
+        ],
+        [],
+        [],
+        [],
+        [],
+        []
       ];
 
       global.fetch = jest.fn().mockResolvedValue( {
