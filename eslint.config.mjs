@@ -1,19 +1,8 @@
 import globals from 'globals';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
-import { FlatCompat } from '@eslint/eslintrc';
 import jsdocPlugin from 'eslint-plugin-jsdoc';
 
-const __filename = fileURLToPath( import.meta.url );
-const __dirname = path.dirname( __filename );
-const compat = new FlatCompat( {
-  'baseDirectory': __dirname,
-  'recommendedConfig': js.configs.recommended,
-  'allConfig': js.configs.all
-} );
-
-export default [ ...compat.extends( 'eslint:recommended' ), {
+export default [ js.configs.recommended, {
   'files': [ '**/*.js' ],
   'ignores': [ 'tests/**/*.js' ],
   'languageOptions': {
@@ -31,12 +20,8 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
   'rules': {
     // --- Possible Problems ---
     'array-callback-return': 'error',
-    'no-constant-condition': 'error',
     'no-duplicate-imports': 'error',
     'no-self-compare': 'error',
-    'no-undef': 'error',
-    'no-unsafe-optional-chaining': 'error',
-    'no-unused-vars': 'error',
 
     // --- Suggestions ---
     'arrow-body-style': [ 'error', 'always' ],
@@ -52,7 +37,6 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
     'no-extend-native': 'error',
     'no-implicit-coercion': 'error',
     'no-implied-eval': 'error',
-    'no-irregular-whitespace': 'error',
     'no-iterator': 'error',
     'no-labels': 'error',
     'no-lone-blocks': 'error',
@@ -66,8 +50,6 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
     'no-new-wrappers': 'error',
     'no-octal-escape': 'error',
     'no-proto': 'error',
-    'no-redeclare': 'error',
-    'no-regex-spaces': 'error',
     'no-return-assign': 'error',
     'no-undef-init': 'error',
     'no-unneeded-ternary': 'error',
@@ -86,18 +68,18 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
     'radix': 'error',
 
     // --- Layout & Formatting ---
-    'arrow-parens': [ 'error', 'always' ],
+    'arrow-parens': 'error',
     'arrow-spacing': 'error',
     'array-bracket-spacing': [ 'error', 'always' ],
     'block-spacing': 'error',
-    'brace-style': [ 'error', '1tbs', { 'allowSingleLine': false } ],
+    'brace-style': 'error',
     'comma-dangle': 'error',
     'comma-spacing': 'error',
     'comma-style': 'error',
     'computed-property-spacing': [ 'error', 'always' ],
     'indent': [ 'error', 2 ],
     'key-spacing': 'error',
-    'keyword-spacing': [ 'error', { 'before': true, 'after': true } ],
+    'keyword-spacing': 'error',
     'linebreak-style': [ 'error', 'unix' ],
     'max-depth': [ 'error', 5 ],
     'max-nested-callbacks': 'error',
@@ -109,13 +91,13 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
     'no-whitespace-before-property': 'error',
     'object-curly-spacing': [ 'error', 'always' ],
     'one-var-declaration-per-line': 'error',
-    'quote-props': [ 'error', 'always' ],
+    'quote-props': 'error',
     'quotes': [ 'error', 'single' ],
     'rest-spread-spacing': 'error',
     'semi': [ 'error', 'always' ],
     'semi-spacing': 'error',
     'semi-style': 'error',
-    'space-before-blocks': [ 'error', 'always' ],
+    'space-before-blocks': 'error',
     'space-in-parens': [ 'error', 'always' ],
     'space-infix-ops': 'error',
     'space-unary-ops': 'error',
@@ -166,12 +148,8 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
   'rules': {
     // --- Possible Problems ---
     'array-callback-return': 'error',
-    'no-constant-condition': 'error',
     'no-duplicate-imports': 'error',
     'no-self-compare': 'error',
-    'no-undef': 'error',
-    'no-unsafe-optional-chaining': 'error',
-    'no-unused-vars': 'error',
 
     // --- Suggestions ---
     'arrow-body-style': [ 'error', 'always' ],
@@ -187,7 +165,6 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
     'no-extend-native': 'error',
     'no-implicit-coercion': 'error',
     'no-implied-eval': 'error',
-    'no-irregular-whitespace': 'error',
     'no-iterator': 'error',
     'no-labels': 'error',
     'no-lone-blocks': 'error',
@@ -201,8 +178,6 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
     'no-new-wrappers': 'error',
     'no-octal-escape': 'error',
     'no-proto': 'error',
-    'no-redeclare': 'error',
-    'no-regex-spaces': 'error',
     'no-return-assign': 'error',
     'no-undef-init': 'error',
     'no-unneeded-ternary': 'error',
@@ -221,18 +196,18 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
     'radix': 'error',
 
     // --- Layout & Formatting ---
-    'arrow-parens': [ 'error', 'always' ],
+    'arrow-parens': 'error',
     'arrow-spacing': 'error',
     'array-bracket-spacing': [ 'error', 'always' ],
     'block-spacing': 'error',
-    'brace-style': [ 'error', '1tbs', { 'allowSingleLine': false } ],
+    'brace-style': 'error',
     'comma-dangle': 'error',
     'comma-spacing': 'error',
     'comma-style': 'error',
     'computed-property-spacing': [ 'error', 'always' ],
     'indent': [ 'error', 2 ],
     'key-spacing': 'error',
-    'keyword-spacing': [ 'error', { 'before': true, 'after': true } ],
+    'keyword-spacing': 'error',
     'linebreak-style': [ 'error', 'unix' ],
     'max-depth': [ 'error', 5 ],
     'max-nested-callbacks': 'error',
@@ -244,13 +219,13 @@ export default [ ...compat.extends( 'eslint:recommended' ), {
     'no-whitespace-before-property': 'error',
     'object-curly-spacing': [ 'error', 'always' ],
     'one-var-declaration-per-line': 'error',
-    'quote-props': [ 'error', 'always' ],
+    'quote-props': 'error',
     'quotes': [ 'error', 'single' ],
     'rest-spread-spacing': 'error',
     'semi': [ 'error', 'always' ],
     'semi-spacing': 'error',
     'semi-style': 'error',
-    'space-before-blocks': [ 'error', 'always' ],
+    'space-before-blocks': 'error',
     'space-in-parens': [ 'error', 'always' ],
     'space-infix-ops': 'error',
     'space-unary-ops': 'error',
