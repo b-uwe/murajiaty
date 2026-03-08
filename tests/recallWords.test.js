@@ -9,18 +9,22 @@ const { recallWords } = require( '../main.js' );
  * @param {object} overrides - Optional field overrides for the word
  * @returns {object} A vocabulary word object
  */
-const makeWord = ( overrides = {} ) => ( {
-  'ar': 'كتاب',
-  'de': 'Buch',
-  'en': 'book',
-  'es': 'libro',
-  ...overrides
-} );
+const makeWord = ( overrides = {} ) => {
+  return {
+    'ar': 'كتاب',
+    'de': 'Buch',
+    'en': 'book',
+    'es': 'libro',
+    ...overrides
+  };
+};
 
 describe( 'recallWords', () => {
   test( 'should not pull any words when non-DONE buckets have 25 or more words', () => {
     const buckets = [
-      Array.from( { 'length': 25 }, ( _, i ) => makeWord( { 'de': `word${i}` } ) ),
+      Array.from( { 'length': 25 }, ( _, i ) => {
+        return makeWord( { 'de': `word${i}` } );
+      } ),
       [],
       [],
       [],
@@ -39,11 +43,15 @@ describe( 'recallWords', () => {
   } );
 
   test( 'should pull words to reach 25 active when below target', () => {
-    const doneWords = Array.from( { 'length': 10 }, ( _, i ) => makeWord( { 'de': `done${i}`,
-      'doneAt': 1000 + i } ) );
+    const doneWords = Array.from( { 'length': 10 }, ( _, i ) => {
+      return makeWord( { 'de': `done${i}`,
+        'doneAt': 1000 + i } );
+    } );
 
     const buckets = [
-      Array.from( { 'length': 20 }, ( _, i ) => makeWord( { 'de': `active${i}` } ) ),
+      Array.from( { 'length': 20 }, ( _, i ) => {
+        return makeWord( { 'de': `active${i}` } );
+      } ),
       [],
       [],
       [],
@@ -89,7 +97,9 @@ describe( 'recallWords', () => {
 
   test( 'should pull all available when DONE bucket has fewer than needed', () => {
     const buckets = [
-      Array.from( { 'length': 22 }, ( _, i ) => makeWord( { 'de': `active${i}` } ) ),
+      Array.from( { 'length': 22 }, ( _, i ) => {
+        return makeWord( { 'de': `active${i}` } );
+      } ),
       [],
       [],
       [],
@@ -129,14 +139,28 @@ describe( 'recallWords', () => {
 
   test( 'should count words across all non-DONE buckets', () => {
     const buckets = [
-      Array.from( { 'length': 5 }, ( _, i ) => makeWord( { 'de': `b0_${i}` } ) ),
-      Array.from( { 'length': 5 }, ( _, i ) => makeWord( { 'de': `b1_${i}` } ) ),
-      Array.from( { 'length': 5 }, ( _, i ) => makeWord( { 'de': `b2_${i}` } ) ),
-      Array.from( { 'length': 5 }, ( _, i ) => makeWord( { 'de': `b3_${i}` } ) ),
-      Array.from( { 'length': 3 }, ( _, i ) => makeWord( { 'de': `b4_${i}` } ) ),
-      Array.from( { 'length': 2 }, ( _, i ) => makeWord( { 'de': `b5_${i}` } ) ),
-      Array.from( { 'length': 10 }, ( _, i ) => makeWord( { 'de': `done_${i}`,
-        'doneAt': 1000 + i } ) )
+      Array.from( { 'length': 5 }, ( _, i ) => {
+        return makeWord( { 'de': `b0_${i}` } );
+      } ),
+      Array.from( { 'length': 5 }, ( _, i ) => {
+        return makeWord( { 'de': `b1_${i}` } );
+      } ),
+      Array.from( { 'length': 5 }, ( _, i ) => {
+        return makeWord( { 'de': `b2_${i}` } );
+      } ),
+      Array.from( { 'length': 5 }, ( _, i ) => {
+        return makeWord( { 'de': `b3_${i}` } );
+      } ),
+      Array.from( { 'length': 3 }, ( _, i ) => {
+        return makeWord( { 'de': `b4_${i}` } );
+      } ),
+      Array.from( { 'length': 2 }, ( _, i ) => {
+        return makeWord( { 'de': `b5_${i}` } );
+      } ),
+      Array.from( { 'length': 10 }, ( _, i ) => {
+        return makeWord( { 'de': `done_${i}`,
+          'doneAt': 1000 + i } );
+      } )
     ];
 
     // 5+5+5+5+3+2 = 25 active, should not pull any
@@ -167,14 +191,20 @@ describe( 'recallWords', () => {
 
   test( 'should pull exactly enough to reach 25 active words', () => {
     const buckets = [
-      Array.from( { 'length': 10 }, ( _, i ) => makeWord( { 'de': `active${i}` } ) ),
+      Array.from( { 'length': 10 }, ( _, i ) => {
+        return makeWord( { 'de': `active${i}` } );
+      } ),
       [],
       [],
-      Array.from( { 'length': 8 }, ( _, i ) => makeWord( { 'de': `mid${i}` } ) ),
+      Array.from( { 'length': 8 }, ( _, i ) => {
+        return makeWord( { 'de': `mid${i}` } );
+      } ),
       [],
       [],
-      Array.from( { 'length': 20 }, ( _, i ) => makeWord( { 'de': `done${i}`,
-        'doneAt': 1000 + i } ) )
+      Array.from( { 'length': 20 }, ( _, i ) => {
+        return makeWord( { 'de': `done${i}`,
+          'doneAt': 1000 + i } );
+      } )
     ];
 
     // 10 + 8 = 18 active, need 7 more
@@ -192,7 +222,9 @@ describe( 'recallWords', () => {
 
   test( 'should not modify the DONE bucket sort order for remaining items', () => {
     const buckets = [
-      Array.from( { 'length': 23 }, ( _, i ) => makeWord( { 'de': `active${i}` } ) ),
+      Array.from( { 'length': 23 }, ( _, i ) => {
+        return makeWord( { 'de': `active${i}` } );
+      } ),
       [],
       [],
       [],

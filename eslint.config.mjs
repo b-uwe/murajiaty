@@ -14,7 +14,7 @@ const sharedRules = {
   'no-useless-backreference': 'error',
 
   // --- Suggestions ---
-  'arrow-body-style': 'error',
+  'arrow-body-style': [ 'error', 'always' ],
   'block-scoped-var': 'error',
   'camelcase': 'error',
   'consistent-this': 'error',
