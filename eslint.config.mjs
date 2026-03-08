@@ -121,6 +121,10 @@ export default [ js.configs.recommended, {
 
     // --- ES6+ ---
     'no-confusing-arrow': 'error',
+    'object-shorthand': 'error',
+    'prefer-arrow-callback': 'error',
+    'prefer-spread': 'error',
+    'prefer-template': 'error',
 
     // --- JSDoc ---
     'jsdoc/check-alignment': 'error',
@@ -266,6 +270,10 @@ export default [ js.configs.recommended, {
 
     // --- ES6+ ---
     'no-confusing-arrow': 'error',
+    'object-shorthand': 'error',
+    'prefer-arrow-callback': 'error',
+    'prefer-spread': 'error',
+    'prefer-template': 'error',
 
     // --- JSDoc (relaxed for tests) ---
     'jsdoc/check-alignment': 'error',

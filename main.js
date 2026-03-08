@@ -132,10 +132,10 @@
 
     // Validate that all required fields are present and non-empty
     if ( ar && de && en && es && parts.length >= 5 ) {
-      return { 'ar': ar,
-        'de': de,
-        'en': en,
-        'es': es,
+      return { ar,
+        de,
+        en,
+        es,
         'bucketIndex': 0 };
     }
 
@@ -229,7 +229,7 @@
     const labelLang = Math.floor( Math.random() * 3 );
     const label = document.createElement( 'div' );
     label.className = 'arabic-label';
-    label.innerHTML = flags[ labelLang ] + '<br/>' + vocabulary[ [ 'es', 'de', 'en' ][ labelLang ] ];
+    label.innerHTML = `${flags[ labelLang ]}<br/>${vocabulary[ [ 'es', 'de', 'en' ][ labelLang ] ]}`;
 
     // Relative container for overlay + input
     const relativeDiv = document.createElement( 'div' );
@@ -298,13 +298,13 @@
 
       switch ( currentBucket ) {
       case 0:
-        mainElement.innerHTML = flags[ 1 ] + '<br/>' + word.de;
+        mainElement.innerHTML = `${flags[ 1 ]}<br/>${word.de}`;
         break;
       case 1:
-        mainElement.innerHTML = flags[ 2 ] + '<br/>' + word.en;
+        mainElement.innerHTML = `${flags[ 2 ]}<br/>${word.en}`;
         break;
       case 2:
-        mainElement.innerHTML = flags[ 0 ] + '<br/>' + word.es;
+        mainElement.innerHTML = `${flags[ 0 ]}<br/>${word.es}`;
         break;
       case 3:
         mainElement.textContent = word.ar;
@@ -486,7 +486,7 @@
    * and shows it with common diacritics in all available fonts on the overlay.
    */
   const addLetterClickListener = () => {
-    document.getElementById( 'main' ).addEventListener( 'click', function ( event ) {
+    document.getElementById( 'main' ).addEventListener( 'click', ( event ) => {
       const div = event.target;
 
       if ( currentSide === 'de' ) {
@@ -521,7 +521,7 @@
         const fatha = clickedLetter + COMMON_ARABIC_DIACRITICS[ 0 ];
         const damma = clickedLetter + COMMON_ARABIC_DIACRITICS[ 1 ];
         const kasra = clickedLetter + COMMON_ARABIC_DIACRITICS[ 2 ];
-        speakWord( clickedLetter + ', . ' + fatha + ', ' + damma + ', ' + kasra );
+        speakWord( `${clickedLetter}, . ${fatha}, ${damma}, ${kasra}` );
       }
     } );
   };
@@ -569,15 +569,15 @@
    * Updates the header with the current bucket and word count
    */
   const updateHeader = () => {
-    wordsElement.textContent = buckets.filter( ( bucket, idx ) => {
+    wordsElement.textContent = `${buckets.filter( ( bucket, idx ) => {
       return idx !== buckets.length - 1;
     } ).map( ( bucket, idx ) => {
-      return ( idx === currentBucket ) ? `<${bucket.filter( ( el ) => {
+      return ( idx === currentBucket ) ? `<${`${bucket.filter( ( el ) => {
         return !el.touched;
-      } ).length + '/' + bucket.length}>` : bucket.filter( ( el ) => {
+      } ).length}/${bucket.length}`}>` : `${bucket.filter( ( el ) => {
         return !el.touched;
-      } ).length + '/' + bucket.length;
-    } ).join( ' ' ) + ' (' + buckets[ buckets.length - 1 ].length + ')';
+      } ).length}/${bucket.length}`;
+    } ).join( ' ' )} (${buckets[ buckets.length - 1 ].length})`;
   };
 
   /**
