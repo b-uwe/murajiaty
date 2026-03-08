@@ -291,10 +291,10 @@
    */
   const pickNextWord = () => {
     // Check if the current bucket has words
-    if ( buckets[ currentBucket ].filter( ( item ) => {
+    if ( buckets[ currentBucket ].some( ( item ) => {
       return !item.touched;
-    } ).length > 0 ) {
-      const word = buckets[ currentBucket ][ 0 ]; // Get the first word
+    } ) ) {
+      const word = buckets[ currentBucket ][ 0 ];
 
       switch ( currentBucket ) {
         case 0:
@@ -354,7 +354,7 @@
    * Flips the displayed word between its Arabic and German representations.
    */
   const flipWord = () => {
-    const currentWord = buckets[ currentBucket ][ 0 ]; // Get the first word in the current bucket
+    const currentWord = buckets[ currentBucket ][ 0 ];
 
     if ( currentWord ) {
       // Toggle between 'de' and 'ar' representation
@@ -412,7 +412,7 @@
    * When the user signals a correctly remembered word, put the card one bucket further out
    */
   const rememberedCorrectly = () => {
-    const currentWord = buckets[ currentBucket ][ 0 ]; // Get the first word from the current bucket
+    const currentWord = buckets[ currentBucket ][ 0 ];
     currentWord.touched = true; // Add the "touched" attribute
 
     // Determine the next bucket
@@ -439,7 +439,7 @@
    * When the user signals a wrongly remembered word, put the card one bucket back
    */
   const rememberedIncorrectly = () => {
-    const currentWord = buckets[ currentBucket ][ 0 ]; // Get the first word from the current bucket
+    const currentWord = buckets[ currentBucket ][ 0 ];
     const trgtBucket = currentBucket > 0 ? currentBucket - 1 : 0;
 
     // Add the word to the end of the next bucket
