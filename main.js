@@ -294,7 +294,7 @@
     if ( buckets[ currentBucket ].some( ( item ) => {
       return !item.touched;
     } ) ) {
-      const word = buckets[ currentBucket ][ 0 ];
+      const [ word ] = buckets[ currentBucket ];
 
       switch ( currentBucket ) {
         case 0:
@@ -354,7 +354,7 @@
    * Flips the displayed word between its Arabic and German representations.
    */
   const flipWord = () => {
-    const currentWord = buckets[ currentBucket ][ 0 ];
+    const [ currentWord ] = buckets[ currentBucket ];
 
     if ( currentWord ) {
       // Toggle between 'de' and 'ar' representation
@@ -412,7 +412,7 @@
    * When the user signals a correctly remembered word, put the card one bucket further out
    */
   const rememberedCorrectly = () => {
-    const currentWord = buckets[ currentBucket ][ 0 ];
+    const [ currentWord ] = buckets[ currentBucket ];
     currentWord.touched = true; // Add the "touched" attribute
 
     // Determine the next bucket
@@ -439,7 +439,7 @@
    * When the user signals a wrongly remembered word, put the card one bucket back
    */
   const rememberedIncorrectly = () => {
-    const currentWord = buckets[ currentBucket ][ 0 ];
+    const [ currentWord ] = buckets[ currentBucket ];
     const trgtBucket = currentBucket > 0 ? currentBucket - 1 : 0;
 
     // Add the word to the end of the next bucket
@@ -878,7 +878,7 @@
         then( ( updateResult ) => {
           if ( updateResult.changes.newWords > 0 || updateResult.changes.deletedWords > 0 ) {
             console.log( `Vocabulary updated: +${updateResult.changes.newWords} new, -${updateResult.changes.deletedWords} deleted, ${updateResult.changes.unchangedWords} unchanged` );
-            buckets = updateResult.buckets;
+            ( { buckets } = updateResult );
             updateStorage();
             updateHeader();
           }

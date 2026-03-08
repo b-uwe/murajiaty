@@ -86,6 +86,7 @@ const sharedRules = {
   'no-warning-comments': 'warn',
   'operator-assignment': 'error',
   'prefer-const': 'error',
+  'prefer-destructuring': 'error',
   'prefer-named-capture-group': 'error',
   'prefer-promise-reject-errors': 'error',
   'prefer-regex-literals': 'error',
