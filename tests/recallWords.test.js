@@ -25,8 +25,15 @@ describe( 'recallWords', () => {
       Array.from( { 'length': 25 }, ( _, i ) => {
         return makeWord( { 'de': `word${i}` } );
       } ),
-      [], [], [], [], [],
-      [ makeWord( { 'de': 'done1', 'doneAt': 1000 } ) ]
+      [],
+      [],
+      [],
+      [],
+      [],
+      [
+        makeWord( { 'de': 'done1',
+          'doneAt': 1000 } )
+      ]
     ];
 
     recallWords( buckets );
@@ -37,14 +44,19 @@ describe( 'recallWords', () => {
 
   test( 'should pull words to reach 25 active when below target', () => {
     const doneWords = Array.from( { 'length': 10 }, ( _, i ) => {
-      return makeWord( { 'de': `done${i}`, 'doneAt': 1000 + i } );
+      return makeWord( { 'de': `done${i}`,
+        'doneAt': 1000 + i } );
     } );
 
     const buckets = [
       Array.from( { 'length': 20 }, ( _, i ) => {
         return makeWord( { 'de': `active${i}` } );
       } ),
-      [], [], [], [], [],
+      [],
+      [],
+      [],
+      [],
+      [],
       [ ...doneWords ]
     ];
 
@@ -57,11 +69,19 @@ describe( 'recallWords', () => {
 
   test( 'should pull words with the oldest doneAt timestamps first', () => {
     const buckets = [
-      [], [], [], [], [], [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
       [
-        makeWord( { 'de': 'newest', 'doneAt': 3000 } ),
-        makeWord( { 'de': 'oldest', 'doneAt': 1000 } ),
-        makeWord( { 'de': 'middle', 'doneAt': 2000 } )
+        makeWord( { 'de': 'newest',
+          'doneAt': 3000 } ),
+        makeWord( { 'de': 'oldest',
+          'doneAt': 1000 } ),
+        makeWord( { 'de': 'middle',
+          'doneAt': 2000 } )
       ]
     ];
 
@@ -80,10 +100,16 @@ describe( 'recallWords', () => {
       Array.from( { 'length': 22 }, ( _, i ) => {
         return makeWord( { 'de': `active${i}` } );
       } ),
-      [], [], [], [], [],
+      [],
+      [],
+      [],
+      [],
+      [],
       [
-        makeWord( { 'de': 'done1', 'doneAt': 1000 } ),
-        makeWord( { 'de': 'done2', 'doneAt': 2000 } )
+        makeWord( { 'de': 'done1',
+          'doneAt': 1000 } ),
+        makeWord( { 'de': 'done2',
+          'doneAt': 2000 } )
       ]
     ];
 
@@ -97,7 +123,11 @@ describe( 'recallWords', () => {
   test( 'should do nothing when DONE bucket is empty', () => {
     const buckets = [
       [ makeWord( { 'de': 'active1' } ) ],
-      [], [], [], [], [],
+      [],
+      [],
+      [],
+      [],
+      [],
       []
     ];
 
@@ -128,7 +158,8 @@ describe( 'recallWords', () => {
         return makeWord( { 'de': `b5_${i}` } );
       } ),
       Array.from( { 'length': 10 }, ( _, i ) => {
-        return makeWord( { 'de': `done_${i}`, 'doneAt': 1000 + i } );
+        return makeWord( { 'de': `done_${i}`,
+          'doneAt': 1000 + i } );
       } )
     ];
 
@@ -140,9 +171,15 @@ describe( 'recallWords', () => {
 
   test( 'should remove doneAt from recycled words', () => {
     const buckets = [
-      [], [], [], [], [], [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
       [
-        makeWord( { 'de': 'recycled', 'doneAt': 1000 } )
+        makeWord( { 'de': 'recycled',
+          'doneAt': 1000 } )
       ]
     ];
 
@@ -157,13 +194,16 @@ describe( 'recallWords', () => {
       Array.from( { 'length': 10 }, ( _, i ) => {
         return makeWord( { 'de': `active${i}` } );
       } ),
-      [], [],
+      [],
+      [],
       Array.from( { 'length': 8 }, ( _, i ) => {
         return makeWord( { 'de': `mid${i}` } );
       } ),
-      [], [],
+      [],
+      [],
       Array.from( { 'length': 20 }, ( _, i ) => {
-        return makeWord( { 'de': `done${i}`, 'doneAt': 1000 + i } );
+        return makeWord( { 'de': `done${i}`,
+          'doneAt': 1000 + i } );
       } )
     ];
 
@@ -185,11 +225,18 @@ describe( 'recallWords', () => {
       Array.from( { 'length': 23 }, ( _, i ) => {
         return makeWord( { 'de': `active${i}` } );
       } ),
-      [], [], [], [], [],
+      [],
+      [],
+      [],
+      [],
+      [],
       [
-        makeWord( { 'de': 'newest', 'doneAt': 3000 } ),
-        makeWord( { 'de': 'oldest', 'doneAt': 1000 } ),
-        makeWord( { 'de': 'middle', 'doneAt': 2000 } )
+        makeWord( { 'de': 'newest',
+          'doneAt': 3000 } ),
+        makeWord( { 'de': 'oldest',
+          'doneAt': 1000 } ),
+        makeWord( { 'de': 'middle',
+          'doneAt': 2000 } )
       ]
     ];
 

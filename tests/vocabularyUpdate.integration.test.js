@@ -14,8 +14,8 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
       // Mock fetch for testing
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': async () => {
-          return 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2';
+        'text': () => {
+          return Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2' );
         }
       } );
 
@@ -63,9 +63,23 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     beforeEach( () => {
       // Setup mock buckets structure
       mockBuckets = [
-        [ { 'ar': 'كتاب', 'de': 'Buch', 'en': 'book', 'es': 'libro' } ],
-        [ { 'ar': 'قلم', 'de': 'Stift', 'en': 'pen', 'es': 'pluma' } ],
-        [], [], [], [], []
+        [
+          { 'ar': 'كتاب',
+            'de': 'Buch',
+            'en': 'book',
+            'es': 'libro' }
+        ],
+        [
+          { 'ar': 'قلم',
+            'de': 'Stift',
+            'en': 'pen',
+            'es': 'pluma' }
+        ],
+        [],
+        [],
+        [],
+        [],
+        []
       ];
     } );
 
@@ -76,8 +90,8 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     test( 'should detect new words and add them to bucket 0', async () => {
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': async () => {
-          return 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nجديد,جديد,neu,new,nuevo,hash2';
+        'text': () => {
+          return Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nجديد,جديد,neu,new,nuevo,hash2' );
         }
       } );
 
@@ -99,8 +113,8 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     test( 'should preserve unchanged words with their progress', async () => {
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': async () => {
-          return 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2';
+        'text': () => {
+          return Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2' );
         }
       } );
 
@@ -163,9 +177,9 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     test( 'should preserve existing buckets when Google Sheets returns empty data', async () => {
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': async () => {
-          return ''; // Empty response
-        }
+        'text': () => {
+          return Promise.resolve( '' );
+        } // Empty response
       } );
 
       const result = await checkForVocabularyUpdates( mockBuckets );
@@ -182,19 +196,36 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     test( 'should remove deleted words from buckets', async () => {
       // Setup buckets with multiple words to properly test removal
       const bucketsWithMultipleWords = [
-        [ { 'ar': 'كتاب', 'de': 'Buch', 'en': 'book', 'es': 'libro' } ],
         [
-          { 'ar': 'قلم', 'de': 'Stift', 'en': 'pen', 'es': 'pluma' },
-          { 'ar': 'بيت', 'de': 'Haus', 'en': 'house', 'es': 'casa' }
+          { 'ar': 'كتاب',
+            'de': 'Buch',
+            'en': 'book',
+            'es': 'libro' }
         ],
-        [], [], [], [], []
+        [
+          { 'ar': 'قلم',
+            'de': 'Stift',
+            'en': 'pen',
+            'es': 'pluma' },
+          { 'ar': 'بيت',
+            'de': 'Haus',
+            'en': 'house',
+            'es': 'casa' }
+        ],
+        [],
+        [],
+        [],
+        [],
+        []
       ];
 
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': async () => {
+        'text': () => {
+          return Promise.resolve(
           // Google Sheets now only contains first two words, 'بيت' is deleted
-          return 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2';
+            'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2'
+          );
         }
       } );
 
