@@ -292,24 +292,24 @@
       const word = buckets[ currentBucket ][ 0 ]; // Get the first word
 
       switch ( currentBucket ) {
-      case 0:
-        mainElement.innerHTML = `${flags[ 1 ]}<br/>${word.de}`;
-        break;
-      case 1:
-        mainElement.innerHTML = `${flags[ 2 ]}<br/>${word.en}`;
-        break;
-      case 2:
-        mainElement.innerHTML = `${flags[ 0 ]}<br/>${word.es}`;
-        break;
-      case 3:
-        mainElement.textContent = word.ar;
-        break;
-      case 4:
-        renderArabicInput( word );
-        break;
-      default:
-        mainElement.textContent = stripArabicDiacritics( word.ar );
-        break;
+        case 0:
+          mainElement.innerHTML = `${flags[ 1 ]}<br/>${word.de}`;
+          break;
+        case 1:
+          mainElement.innerHTML = `${flags[ 2 ]}<br/>${word.en}`;
+          break;
+        case 2:
+          mainElement.innerHTML = `${flags[ 0 ]}<br/>${word.es}`;
+          break;
+        case 3:
+          mainElement.textContent = word.ar;
+          break;
+        case 4:
+          renderArabicInput( word );
+          break;
+        default:
+          mainElement.textContent = stripArabicDiacritics( word.ar );
+          break;
       }
     } else if ( currentBucket < buckets.length - 2 ) {
       // If no words in the current bucket, check the next higher bucket. But leave out the last one!
