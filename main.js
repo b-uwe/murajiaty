@@ -184,7 +184,7 @@
    */
   const stripArabicDiacritics = ( str ) => {
     // Covers Arabic vowels and sukun, shadda, etc.
-    return str.replace( /[\u064B-\u0652\u0670]/g, '' ).replace( /[أإ]/g, 'ا' );
+    return str.replace( /[\u064B-\u0652\u0670]/gu, '' ).replace( /[أإ]/gu, 'ا' );
   };
 
   /**

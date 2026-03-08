@@ -93,6 +93,7 @@ const sharedRules = {
   'prefer-rest-params': 'error',
   'radix': 'error',
   'require-await': 'error',
+  'require-unicode-regexp': 'error',
   'sort-imports': 'error',
   'vars-on-top': 'error',
   'wrap-iife': 'error',
