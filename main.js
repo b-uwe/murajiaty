@@ -856,20 +856,20 @@
           }
 
           // Initialize UI for first-time users or after successful updates
-          if ( null === storedBuckets ) {
+          if ( storedBuckets === null ) {
             initializeUIIfDataExists();
           }
         } ).
         catch( ( err ) => {
           console.error( 'Vocabulary update failed:', err.message );
           // For initial load failures, still try to initialize UI with existing data
-          if ( null === storedBuckets ) {
+          if ( storedBuckets === null ) {
             initializeUIIfDataExists();
           }
         } );
 
       // Initialize UI for returning users (existing localStorage data)
-      if ( null !== storedBuckets ) {
+      if ( storedBuckets !== null ) {
         initializeUIIfDataExists();
       }
     }

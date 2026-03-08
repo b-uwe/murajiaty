@@ -14,7 +14,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
       // Mock fetch for testing
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': async () => 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2'
+        'text': () => Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2' )
       } );
 
       const result = await fetchGoogleSheetsData();
@@ -88,7 +88,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     test( 'should detect new words and add them to bucket 0', async () => {
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': async () => 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nجديد,جديد,neu,new,nuevo,hash2'
+        'text': () => Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nجديد,جديد,neu,new,nuevo,hash2' )
       } );
 
       const result = await checkForVocabularyUpdates( mockBuckets );
@@ -109,7 +109,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     test( 'should preserve unchanged words with their progress', async () => {
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': async () => 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2'
+        'text': () => Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2' )
       } );
 
       const result = await checkForVocabularyUpdates( mockBuckets );
@@ -171,9 +171,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     test( 'should preserve existing buckets when Google Sheets returns empty data', async () => {
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': async () =>
-          '' // Empty response
-
+        'text': () => Promise.resolve( '' ) // Empty response
       } );
 
       const result = await checkForVocabularyUpdates( mockBuckets );
@@ -215,10 +213,10 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
 
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
-        'text': async () =>
+        'text': () => Promise.resolve(
           // Google Sheets now only contains first two words, 'بيت' is deleted
           'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2'
-
+        )
       } );
 
       const result = await checkForVocabularyUpdates( bucketsWithMultipleWords );
