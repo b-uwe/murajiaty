@@ -449,7 +449,35 @@
   };
 
   /**
-   * Adds click event listeners to each letter in the word.
+   * Builds the HTML for the letter overlay showing the isolated letter and its
+   * diacritical forms across all available Arabic fonts.
+   * @param {string} letter - The isolated Arabic letter
+   * @param {string[]} diacritics - Array of diacritical marks to combine with the letter
+   * @param {string[]} fonts - Array of font family names (empty string = system default)
+   * @returns {string} HTML string for the overlay content
+   */
+  const buildLetterOverlayHTML = ( letter, diacritics, fonts ) => {
+    // Top row: isolated letter side by side in all fonts
+    const topLetters = fonts.map( ( font ) => {
+      const style = font ? ` style="font-family: ${font}"` : '';
+      return `<span class="letter-font-sample"${style}>${letter}</span>`;
+    } ).join( '<span class="letter-spacer">\u00B7</span>' );
+
+    // One row per font showing fatha, kasra, damma
+    const diacriticRows = fonts.map( ( font ) => {
+      const style = font ? ` style="font-family: ${font}"` : '';
+      const forms = diacritics.map( ( d ) => {
+        return letter + d;
+      } ).join( '' );
+      return `<div class="letter-diacritics-row"${style}>${forms}</div>`;
+    } ).join( '' );
+
+    return `<div class="letter-top-row">${topLetters}</div>${diacriticRows}`;
+  };
+
+  /**
+   * Adds a click listener to #main that detects which Arabic letter was tapped
+   * and shows it with common diacritics in all available fonts on the overlay.
    */
   const addLetterClickListener = () => {
     document.getElementById( 'main' ).addEventListener( 'click', function ( event ) {
@@ -462,10 +490,10 @@
       const text = div.textContent;
       let clickedLetter;
 
-      // Click- oder Touch-Position bestimmen
+      // Determine click or touch position
       const clientX = event.touches ? event.touches[ 0 ].clientX : event.clientX;
 
-      // Jedes Zeichen einzeln durchgehen
+      // Walk through each character individually
       for ( let i = 0; i < text.length; i++ ) {
         const range = document.createRange();
         range.setStart( div.firstChild, i );
@@ -473,7 +501,7 @@
 
         const rect = range.getBoundingClientRect();
 
-        // Prüfen, ob der Klick innerhalb dieses Zeichenbereichs war
+        // Check if the click falls within this character's bounding box
         if ( clientX >= rect.left && clientX <= rect.right ) {
           clickedLetter = text[ i ];
           break;
@@ -481,12 +509,12 @@
       }
 
       if ( clickedLetter ) {
+        letterOverlay.innerHTML = buildLetterOverlayHTML( clickedLetter, COMMON_ARABIC_DIACRITICS.slice( 0, 3 ), ARABIC_FONTS );
+        letterOverlay.style.display = 'block';
+
         const fatha = clickedLetter + COMMON_ARABIC_DIACRITICS[ 0 ];
         const damma = clickedLetter + COMMON_ARABIC_DIACRITICS[ 1 ];
         const kasra = clickedLetter + COMMON_ARABIC_DIACRITICS[ 2 ];
-
-        letterOverlay.innerHTML = `${clickedLetter}<br/>${fatha}${damma}${kasra}`;
-        letterOverlay.style.display = 'block';
         speakWord( clickedLetter + ', . ' + fatha + ', ' + damma + ', ' + kasra );
       }
     } );
@@ -892,7 +920,8 @@
       renderArabicInput,
       recallWords,
       ARABIC_FONTS,
-      pickRandomArabicFont
+      pickRandomArabicFont,
+      buildLetterOverlayHTML
     };
   };
 } )();
