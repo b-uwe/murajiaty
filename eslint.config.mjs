@@ -49,6 +49,7 @@ const sharedRules = {
   'no-lone-blocks': 'error',
   'no-lonely-if': 'error',
   'no-loop-func': 'error',
+  'no-bitwise': [ 'error', { 'allow': [ '~', '<<', '&=' ] } ],
   'no-mixed-operators': 'error',
   'no-multi-assign': 'error',
   'no-multi-spaces': 'error',
