@@ -33,7 +33,7 @@ export default [ js.configs.recommended, {
     'dot-location': 'error',
     'dot-notation': 'error',
     'eqeqeq': 'error',
-    'func-style': [ 'error', 'expression', { 'allowArrowFunctions': true } ],
+    'func-style': [ 'error', 'expression' ],
     'no-array-constructor': 'error',
     'no-else-return': 'error',
     'no-eval': 'error',
@@ -53,6 +53,13 @@ export default [ js.configs.recommended, {
     'no-new-wrappers': 'error',
     'no-octal-escape': 'error',
     'no-proto': 'error',
+    'no-restricted-syntax': [
+      'error',
+      {
+        'selector': 'FunctionExpression',
+        'message': 'Use arrow functions instead of function expressions'
+      }
+    ],
     'no-return-assign': 'error',
     'no-undef-init': 'error',
     'no-unneeded-ternary': 'error',
@@ -182,7 +189,7 @@ export default [ js.configs.recommended, {
     'dot-location': 'error',
     'dot-notation': 'error',
     'eqeqeq': 'error',
-    'func-style': [ 'error', 'expression', { 'allowArrowFunctions': true } ],
+    'func-style': [ 'error', 'expression' ],
     'no-array-constructor': 'error',
     'no-else-return': 'error',
     'no-eval': 'error',
@@ -202,6 +209,13 @@ export default [ js.configs.recommended, {
     'no-new-wrappers': 'error',
     'no-octal-escape': 'error',
     'no-proto': 'error',
+    'no-restricted-syntax': [
+      'error',
+      {
+        'selector': 'FunctionExpression',
+        'message': 'Use arrow functions instead of function expressions'
+      }
+    ],
     'no-return-assign': 'error',
     'no-undef-init': 'error',
     'no-unneeded-ternary': 'error',
