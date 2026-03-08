@@ -699,10 +699,10 @@
       } );
 
       // 5. Create new buckets structure with updates
+      // Deep copy
       const updatedBuckets = currentBuckets.map( ( bucket ) => {
         return [ ...bucket ];
-      } // Deep copy
-      );
+      } );
 
       // 6. Add new words to bucket 0
       newWords.forEach( ( word ) => {

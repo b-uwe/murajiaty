@@ -110,6 +110,7 @@ const sharedRules = {
   'comma-style': 'error',
   'computed-property-spacing': [ 'error', 'always' ],
   'func-call-spacing': 'error',
+  'function-paren-newline': 'error',
   'indent': [ 'error', 2, { 'SwitchCase': 1 } ],
   'key-spacing': 'error',
   'keyword-spacing': 'error',
