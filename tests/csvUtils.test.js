@@ -19,7 +19,12 @@ describe( 'CSV Utilities', () => {
     } );
 
     test( 'should handle quoted fields in Google Sheets CSV', () => {
-      const csvLine = '"أَبُوك جَاي مَعَايَا بُكْرَة؟","أَبُوك جَاي مَعَايَا بُكْرَة؟","Kommt dein Vater morgen mit mir?","Is your father coming with me tomorrow?","¿Viene tu padre conmigo mañana?","9b7e2fc1cdb6ce3c487c04387c0563b2"';
+      const csvLine = '"أَبُوك جَاي مَعَايَا بُكْرَة؟",' +
+        '"أَبُوك جَاي مَعَايَا بُكْرَة؟",' +
+        '"Kommt dein Vater morgen mit mir?",' +
+        '"Is your father coming with me tomorrow?",' +
+        '"¿Viene tu padre conmigo mañana?",' +
+        '"9b7e2fc1cdb6ce3c487c04387c0563b2"';
       const result = parseCSVLineToWord( csvLine );
       expect( result ).toEqual( {
         'ar': 'أَبُوك جَاي مَعَايَا بُكْرَة؟',

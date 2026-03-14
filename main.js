@@ -891,7 +891,8 @@
       checkForVocabularyUpdates( buckets ).
         then( ( updateResult ) => {
           if ( updateResult.changes.newWords > 0 || updateResult.changes.deletedWords > 0 ) {
-            console.log( `Vocabulary updated: +${updateResult.changes.newWords} new, -${updateResult.changes.deletedWords} deleted, ${updateResult.changes.unchangedWords} unchanged` );
+            const { newWords, deletedWords, unchangedWords } = updateResult.changes;
+            console.log( `Vocabulary updated: +${newWords} new, -${deletedWords} deleted, ${unchangedWords} unchanged` );
             ( { buckets } = updateResult );
             updateStorage();
             updateHeader();
