@@ -645,7 +645,7 @@
   const checkForVocabularyUpdates = async ( currentBuckets = buckets ) => {
     try {
       // 1. Build lookup maps from local vocabulary
-      const localVocabMap = new Map(); // hash -> {word, bucketIndex, arrayIndex}
+      const localVocabMap = new Map(); // Hash -> {word, bucketIndex, arrayIndex}
       const localHashSet = new Set();
 
       currentBuckets.forEach( ( bucket, bucketIndex ) => {
@@ -661,8 +661,10 @@
       // 2. Fetch and process Google Sheets data
       const googleVocab = await fetchGoogleSheetsData();
 
-      // 3. CRITICAL: If fetch returned empty data, preserve existing buckets
-      // This handles offline scenarios and prevents progress loss
+      /*
+       * 3. CRITICAL: If fetch returned empty data, preserve existing buckets
+       * This handles offline scenarios and prevents progress loss
+       */
       if ( googleVocab.length === 0 ) {
         return {
           'buckets': currentBuckets,
@@ -697,8 +699,10 @@
         }
       } );
 
-      // 5. Create new buckets structure with updates
-      // Deep copy
+      /*
+       * 5. Create new buckets structure with updates
+       * Deep copy
+       */
       const updatedBuckets = currentBuckets.map( ( bucket ) => {
         return [ ...bucket ];
       } );
@@ -856,8 +860,10 @@
       recallWords( buckets );
     }
 
-    // Initialize event listeners
-    // Check that all required DOM elements are present before adding listeners
+    /*
+     * Initialize event listeners
+     * Check that all required DOM elements are present before adding listeners
+     */
     if ( mainElement && speakButton && successButton && failButton && flipButton && letterOverlay && wordsElement ) {
       speakButton.addEventListener( 'click', () => {
         speakWord( buckets[ currentBucket ][ 0 ].ar );
