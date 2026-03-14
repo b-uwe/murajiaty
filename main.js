@@ -193,6 +193,34 @@
   };
 
   /**
+   * Speaks the given word using the Google Translate.
+   * @param {string} word - The word to be spoken.
+   */
+  const speakWord = ( word ) => {
+    const audioContext = new ( window.AudioContext || window.webkitAudioContext )();
+    const url = `https://bernitt.biz/murajiaty/proxy/proxy.php?text=${encodeURIComponent( word )}`;
+
+    fetch( url ).
+      then( ( response ) => {
+        if ( !response.ok ) {
+          throw new Error( 'Network response was not ok' );
+        }
+        return response.arrayBuffer();
+      } ).
+      then( ( arrayBuffer ) => {
+        audioContext.decodeAudioData( arrayBuffer, ( buffer ) => {
+          const source = audioContext.createBufferSource();
+          source.buffer = buffer;
+          source.connect( audioContext.destination );
+          source.start( 0 );
+        } );
+      } ).
+      catch( ( error ) => {
+        return console.error( 'Error fetching audio:', error );
+      } );
+  };
+
+  /**
    * Renders all elements needed for the input of Arabic text
    * @param {object} vocabulary - the word or phrase to learn as an object with all translations
    */
@@ -281,6 +309,28 @@
 
     // Auto-focus the input field so user can start typing immediately
     input.focus();
+  };
+
+  /**
+   * Updates the header with the current bucket and word count
+   */
+  const updateHeader = () => {
+    wordsElement.textContent = `${buckets.filter( ( bucket, idx ) => {
+      return idx !== buckets.length - 1;
+    } ).map( ( bucket, idx ) => {
+      return ( ( idx === currentBucket ) ? `<${`${bucket.filter( ( el ) => {
+        return !el.touched;
+      } ).length}/${bucket.length}`}>` : `${bucket.filter( ( el ) => {
+        return !el.touched;
+      } ).length}/${bucket.length}` );
+    } ).join( ' ' )} (${buckets[ buckets.length - 1 ].length})`;
+  };
+
+  /**
+   * Updates the local storage with the current buckets
+   */
+  const updateStorage = () => {
+    localStorage.setItem( 'murajiaty-buckets', JSON.stringify( buckets ) );
   };
 
   /**
@@ -379,34 +429,6 @@
     speakButton.disabled = false;
     successButton.disabled = false;
     failButton.disabled = false;
-  };
-
-  /**
-   * Speaks the given word using the Google Translate.
-   * @param {string} word - The word to be spoken.
-   */
-  const speakWord = ( word ) => {
-    const audioContext = new ( window.AudioContext || window.webkitAudioContext )();
-    const url = `https://bernitt.biz/murajiaty/proxy/proxy.php?text=${encodeURIComponent( word )}`;
-
-    fetch( url ).
-      then( ( response ) => {
-        if ( !response.ok ) {
-          throw new Error( 'Network response was not ok' );
-        }
-        return response.arrayBuffer();
-      } ).
-      then( ( arrayBuffer ) => {
-        audioContext.decodeAudioData( arrayBuffer, ( buffer ) => {
-          const source = audioContext.createBufferSource();
-          source.buffer = buffer;
-          source.connect( audioContext.destination );
-          source.start( 0 );
-        } );
-      } ).
-      catch( ( error ) => {
-        return console.error( 'Error fetching audio:', error );
-      } );
   };
 
   /**
@@ -565,28 +587,6 @@
       delete word.doneAt;
       targetBuckets[ 0 ].push( word );
     } );
-  };
-
-  /**
-   * Updates the header with the current bucket and word count
-   */
-  const updateHeader = () => {
-    wordsElement.textContent = `${buckets.filter( ( bucket, idx ) => {
-      return idx !== buckets.length - 1;
-    } ).map( ( bucket, idx ) => {
-      return ( ( idx === currentBucket ) ? `<${`${bucket.filter( ( el ) => {
-        return !el.touched;
-      } ).length}/${bucket.length}`}>` : `${bucket.filter( ( el ) => {
-        return !el.touched;
-      } ).length}/${bucket.length}` );
-    } ).join( ' ' )} (${buckets[ buckets.length - 1 ].length})`;
-  };
-
-  /**
-   * Updates the local storage with the current buckets
-   */
-  const updateStorage = () => {
-    localStorage.setItem( 'murajiaty-buckets', JSON.stringify( buckets ) );
   };
 
   /**
