@@ -29,10 +29,14 @@
    * @constant {string[]}
    */
   const COMMON_ARABIC_DIACRITICS = [
-    'َ', // Fatha
-    'ِ', // Kasra
-    'ُ', // Damma
-    'ْ' // Sukun
+    // Fatha
+    'َ',
+    // Kasra
+    'ِ',
+    // Damma
+    'ُ',
+    // Sukun
+    'ْ'
   ];
 
 
@@ -82,7 +86,8 @@
         if ( inQuotes && nextChar === '"' ) {
           // Escaped quote within quoted field
           currentField += '"';
-          i += 2; // Skip both quotes
+          // Skip both quotes
+          i += 2;
         } else {
           // Start or end of quoted field
           inQuotes = !inQuotes;
@@ -318,13 +323,14 @@
       }
     } else if ( currentBucket < buckets.length - 2 ) {
       // If no words in the current bucket, check the next higher bucket. But leave out the last one!
-      currentBucket++; // Move to the next bucket
+      currentBucket++;
 
       // On the last visible level, replace '👍' with '✨'
       if ( currentBucket === buckets.length - 2 ) {
         successButton.textContent = '✨';
       }
-      pickNextWord(); // Try again in the new bucket
+      // Try again in the new bucket
+      pickNextWord();
     } else {
       // Handle overflow
       mainElement.textContent = '😵';
@@ -359,14 +365,16 @@
     if ( currentWord ) {
       // Toggle between 'de' and 'ar' representation
       if ( currentSide === 'de' ) {
-        mainElement.textContent = currentWord.ar; // Show Arabic
+        // Show Arabic
+        mainElement.textContent = currentWord.ar;
         currentSide = 'ar';
         mainElement.classList.add( 'ar' );
         mainElement.classList.remove( 'de' );
         mainElement.style.fontFamily = pickRandomArabicFont();
         speakWord( currentWord.ar );
       } else {
-        mainElement.textContent = currentWord.de; // Show German
+        // Show German
+        mainElement.textContent = currentWord.de;
         currentSide = 'de';
         mainElement.classList.add( 'de' );
         mainElement.classList.remove( 'ar' );
@@ -412,7 +420,8 @@
    */
   const rememberedCorrectly = () => {
     const [ currentWord ] = buckets[ currentBucket ];
-    currentWord.touched = true; // Add the "touched" attribute
+    // Mark word as touched
+    currentWord.touched = true;
 
     // Determine the next bucket
     const nextBucket = currentBucket < buckets.length - 1 ? currentBucket + 1 : buckets.length - 1;
@@ -611,7 +620,8 @@
     for ( let i = 0; i < content.length; i++ ) {
       const char = content.charCodeAt( i );
       hash = ( ( hash << 5 ) - hash ) + char;
-      hash &= hash; // Convert to 32bit integer
+      // Convert to 32bit integer
+      hash &= hash;
     }
     return hash.toString( 16 );
   };
@@ -644,8 +654,11 @@
    */
   const checkForVocabularyUpdates = async ( currentBuckets = buckets ) => {
     try {
-      // 1. Build lookup maps from local vocabulary
-      const localVocabMap = new Map(); // Hash -> {word, bucketIndex, arrayIndex}
+      /*
+       * 1. Build lookup maps from local vocabulary
+       * Hash -> {word, bucketIndex, arrayIndex}
+       */
+      const localVocabMap = new Map();
       const localHashSet = new Set();
 
       currentBuckets.forEach( ( bucket, bucketIndex ) => {
@@ -751,7 +764,8 @@
    */
   const isPWA = () => {
     if ( typeof window === 'undefined' || !window.matchMedia ) {
-      return false; // Not in browser environment or matchMedia not available
+      // Not in browser environment or matchMedia not available
+      return false;
     }
     return window.matchMedia( '(display-mode: standalone)' ).matches ||
            window.navigator.standalone === true;
@@ -822,7 +836,8 @@
      */
     const setViewportHeight = () => {
       const vh = window.innerHeight;
-      const padding = 32; // 2rem in pixels (assuming 1rem = 16px)
+      // 2rem in pixels (assuming 1rem = 16px)
+      const padding = 32;
       const adjustedHeight = vh - padding;
       document.body.style.minHeight = `${adjustedHeight}px`;
       document.body.style.height = `${adjustedHeight}px`;
