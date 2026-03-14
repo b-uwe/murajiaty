@@ -398,7 +398,6 @@
         audioContext.decodeAudioData( arrayBuffer, ( buffer ) => {
           const source = audioContext.createBufferSource();
           source.buffer = buffer;
-          // source.playbackRate.value = 1; // Adjust playback rate if necessary
           source.connect( audioContext.destination );
           source.start( 0 );
         } );
