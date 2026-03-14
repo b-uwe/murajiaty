@@ -225,34 +225,6 @@
    * @param {object} vocabulary - the word or phrase to learn as an object with all translations
    */
   const renderArabicInput = ( vocabulary ) => {
-    /**
-     * Updates the input overlay that shows the inputted text with color coding for right or wrong
-     */
-    const updateOverlay = () => {
-      const userInput = stripArabicDiacritics( input.value );
-      let shownText = '';
-
-      for ( let i = 0; i < userInput.length || i < solution.length; i++ ) {
-        const uc = userInput[ i ] || '';
-        const sc = solution[ i ] || '';
-        if ( uc === sc ) {
-          shownText += `<span class="input-correct">${uc}</span>`;
-        } else {
-          shownText += `<span class="input-wrong">${uc}</span>`;
-        }
-      }
-
-      if ( solution === stripArabicDiacritics( input.value ) ) {
-        shownText += '🎉';
-        speakWord( vocabulary.ar );
-      }
-
-      overlay.innerHTML = shownText;
-      overlay.style.color = 'inherit';
-
-      relativeDiv.scrollTo( -overlay.scrollWidth, 0 );
-    };
-
     const labelLang = Math.floor( Math.random() * 3 );
     const label = document.createElement( 'div' );
     label.className = 'arabic-label';
@@ -300,6 +272,34 @@
     } );
 
     const solution = stripArabicDiacritics( vocabulary.ar );
+
+    /**
+     * Updates the input overlay that shows the inputted text with color coding for right or wrong
+     */
+    const updateOverlay = () => {
+      const userInput = stripArabicDiacritics( input.value );
+      let shownText = '';
+
+      for ( let i = 0; i < userInput.length || i < solution.length; i++ ) {
+        const uc = userInput[ i ] || '';
+        const sc = solution[ i ] || '';
+        if ( uc === sc ) {
+          shownText += `<span class="input-correct">${uc}</span>`;
+        } else {
+          shownText += `<span class="input-wrong">${uc}</span>`;
+        }
+      }
+
+      if ( solution === stripArabicDiacritics( input.value ) ) {
+        shownText += '🎉';
+        speakWord( vocabulary.ar );
+      }
+
+      overlay.innerHTML = shownText;
+      overlay.style.color = 'inherit';
+
+      relativeDiv.scrollTo( -overlay.scrollWidth, 0 );
+    };
 
     input.addEventListener( 'input', () => {
       updateOverlay();
