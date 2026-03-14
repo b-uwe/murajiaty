@@ -271,7 +271,8 @@
   };
 
   /**
-   * Renders all elements needed for the input of Arabic text
+   * Wires event listeners and input behavior for the Arabic text input interface.
+   * Delegates DOM creation to setupArabicInputDOM.
    * @param {object} vocabulary - the word or phrase to learn as an object with all translations
    */
   const renderArabicInput = ( vocabulary ) => {
@@ -630,8 +631,8 @@
   };
 
   /**
-   * Simple MD5-like hash function for vocabulary words
-   * Creates a hash from the concatenated ar|de|en|es content
+   * DJB2-variant hash for vocabulary word identity comparison.
+   * Creates a 32-bit hash from the concatenated ar|de|en|es content.
    * @param {object} word - The vocabulary word with ar, de, en, es properties
    * @returns {string} Hash string representation of the word
    */
