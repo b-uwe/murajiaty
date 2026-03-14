@@ -47,7 +47,6 @@
     'ْ'
   ];
 
-
   /**
    * Arabic font families for recognition practice: empty string represents the system default
    * (Noto Naskh Arabic on Android), the rest are self-hosted woff2 fonts declared in styles.css.
@@ -116,7 +115,6 @@
     fields.push( currentField.trim() );
     return fields;
   };
-
 
   /**
    * Parses a Google Sheets CSV line to extract word data
