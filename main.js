@@ -158,7 +158,7 @@
   /**
    * Parses CSV content and returns an array of vocabulary words
    * @param {string} csvContent - The raw CSV content to parse
-   * @returns {Array} Array of parsed vocabulary word objects
+   * @returns {Array<object>} Array of parsed vocabulary word objects
    */
   const parseGoogleSheetsCSV = ( csvContent ) => {
     const words = [];
@@ -650,7 +650,7 @@
 
   /**
    * Fetches vocabulary data from Google Sheets
-   * @returns {Promise<Array>} Array of vocabulary word objects
+   * @returns {Promise<Array<object>>} Array of vocabulary word objects
    */
   const fetchGoogleSheetsData = async () => {
     try {
