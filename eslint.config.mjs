@@ -76,6 +76,7 @@ const sharedRules = {
   'no-shadow': 'error',
   'no-undef-init': 'error',
   'no-unneeded-ternary': 'error',
+  'no-use-before-define': 'error',
   'no-useless-call': 'error',
   'no-useless-computed-key': 'error',
   'no-useless-concat': 'error',
