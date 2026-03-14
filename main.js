@@ -3,19 +3,27 @@
    * @file Main JavaScript file for Murajiaty application
    */
 
-  // DOM elements
+  /** @type {HTMLElement} Main content area for displaying words */
   let mainElement;
+  /** @type {HTMLButtonElement} Button to trigger text-to-speech */
   let speakButton;
+  /** @type {HTMLButtonElement} Button for marking a word as correctly remembered */
   let successButton;
+  /** @type {HTMLButtonElement} Button for marking a word as incorrectly remembered */
   let failButton;
+  /** @type {HTMLButtonElement} Button for flipping between Arabic and translation */
   let flipButton;
+  /** @type {HTMLElement} Overlay for showing Arabic letter diacritics */
   let letterOverlay;
+  /** @type {HTMLElement} Header element showing bucket word counts */
   let wordsElement;
 
+  /** @type {number} Index of the currently active spaced-repetition bucket */
   let currentBucket = 0;
+  /** @type {string} Current display language side: 'de' or 'ar' */
   let currentSide = 'de';
 
-  // Other global variables
+  /** @type {Array<Array<object>>} Spaced-repetition buckets holding vocabulary words */
   let buckets = [ [], [], [], [], [], [], [] ];
 
   /**
