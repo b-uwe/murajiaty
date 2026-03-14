@@ -221,10 +221,12 @@
   };
 
   /**
-   * Renders all elements needed for the input of Arabic text
-   * @param {object} vocabulary - the word or phrase to learn as an object with all translations
+   * Sets up the Arabic input interface by creating DOM elements and
+   * rendering them into mainElement.
+   * @param {object} vocabulary - the word or phrase with all translations
+   * @returns {object} Key DOM elements for event wiring: { relativeDiv, overlay, input }
    */
-  const renderArabicInput = ( vocabulary ) => {
+  const setupArabicInputDOM = ( vocabulary ) => {
     const labelLang = Math.floor( Math.random() * 3 );
     const label = document.createElement( 'div' );
     label.className = 'arabic-label';
@@ -235,11 +237,9 @@
     relativeDiv.className = 'arabic-input-relative';
     relativeDiv.style.fontFamily = pickRandomArabicFont();
 
-    // Overlay
     const overlay = document.createElement( 'div' );
     overlay.id = 'arabicInputOverlay';
 
-    // Input
     const input = document.createElement( 'input' );
     input.type = 'text';
     input.id = 'arabicInput';
@@ -256,6 +256,18 @@
     wrapper.appendChild( relativeDiv );
     mainElement.innerHTML = '';
     mainElement.appendChild( wrapper );
+
+    return { relativeDiv,
+      overlay,
+      input };
+  };
+
+  /**
+   * Renders all elements needed for the input of Arabic text
+   * @param {object} vocabulary - the word or phrase to learn as an object with all translations
+   */
+  const renderArabicInput = ( vocabulary ) => {
+    const { relativeDiv, overlay, input } = setupArabicInputDOM( vocabulary );
 
     input.addEventListener( 'focus', () => {
       input.style.position = 'fixed';
@@ -274,7 +286,7 @@
     const solution = stripArabicDiacritics( vocabulary.ar );
 
     /**
-     * Updates the input overlay that shows the inputted text with color coding for right or wrong
+     * Updates the input overlay with color-coded comparison of user input vs solution
      */
     const updateOverlay = () => {
       const userInput = stripArabicDiacritics( input.value );
@@ -334,6 +346,29 @@
   };
 
   /**
+   * Configures UI state after picking a word (language direction, button states)
+   */
+  const configureUIAfterPick = () => {
+    updateHeader();
+    if ( currentBucket === 3 || currentBucket === 5 ) {
+      currentSide = 'ar';
+      mainElement.classList.add( 'ar' );
+      mainElement.classList.remove( 'de' );
+      mainElement.style.fontFamily = pickRandomArabicFont();
+      speakButton.disabled = false;
+    } else {
+      currentSide = 'de';
+      mainElement.classList.add( 'de' );
+      mainElement.classList.remove( 'ar' );
+      mainElement.style.fontFamily = '';
+      speakButton.disabled = true;
+    }
+
+    successButton.disabled = true;
+    failButton.disabled = true;
+  };
+
+  /**
    * Picks the first word in the current bucket and shows it in #main.
    * If there is none, it goes one bucket higher and tries there.
    * Handles overflow in case there are no more buckets available.
@@ -381,23 +416,7 @@
       flipButton.disabled = true;
     }
 
-    updateHeader();
-    if ( currentBucket === 3 || currentBucket === 5 ) {
-      currentSide = 'ar';
-      mainElement.classList.add( 'ar' );
-      mainElement.classList.remove( 'de' );
-      mainElement.style.fontFamily = pickRandomArabicFont();
-      speakButton.disabled = false;
-    } else {
-      currentSide = 'de';
-      mainElement.classList.add( 'de' );
-      mainElement.classList.remove( 'ar' );
-      mainElement.style.fontFamily = '';
-      speakButton.disabled = true;
-    }
-
-    successButton.disabled = true;
-    failButton.disabled = true;
+    configureUIAfterPick();
   };
 
   /**
@@ -641,35 +660,108 @@
   };
 
   /**
+   * Builds a hash-based index of local vocabulary for change detection
+   * @param {Array<Array>} currentBuckets - Current bucket structure
+   * @returns {object} Maps for lookup: { localVocabMap, localHashSet }
+   */
+  const buildLocalVocabIndex = ( currentBuckets ) => {
+    const localVocabMap = new Map();
+    const localHashSet = new Set();
+
+    currentBuckets.forEach( ( bucket, bucketIndex ) => {
+      bucket.forEach( ( word, arrayIndex ) => {
+        const wordHash = hashVocabularyWord( word );
+        localVocabMap.set( wordHash, { word,
+          bucketIndex,
+          arrayIndex } );
+        localHashSet.add( wordHash );
+      } );
+    } );
+
+    return { localVocabMap,
+      localHashSet };
+  };
+
+  /**
+   * Compares local vocabulary against Google Sheets data and applies changes
+   * @param {Array<Array>} currentBuckets - Current bucket structure
+   * @param {Set} localHashSet - Set of local vocabulary hashes
+   * @param {Map} localVocabMap - Map of hash to word location
+   * @param {Array} googleVocab - Vocabulary from Google Sheets
+   * @returns {object} Updated buckets and change statistics
+   */
+  const applyVocabularyDiff = ( currentBuckets, localHashSet, localVocabMap, googleVocab ) => {
+    const googleHashSet = new Set();
+    const newWords = [];
+
+    googleVocab.forEach( ( googleWord ) => {
+      const googleHash = hashVocabularyWord( googleWord );
+      googleHashSet.add( googleHash );
+
+      if ( !localHashSet.has( googleHash ) ) {
+        newWords.push( googleWord );
+      }
+    } );
+
+    // Find DELETED words
+    const deletionsToProcess = [];
+    localHashSet.forEach( ( localHash ) => {
+      if ( !googleHashSet.has( localHash ) ) {
+        const { bucketIndex, arrayIndex } = localVocabMap.get( localHash );
+        deletionsToProcess.push( { bucketIndex,
+          arrayIndex } );
+      }
+    } );
+
+    // Deep copy buckets and apply changes
+    const updatedBuckets = currentBuckets.map( ( bucket ) => {
+      return [ ...bucket ];
+    } );
+
+    newWords.forEach( ( word ) => {
+      updatedBuckets[ 0 ].push( { 'ar': word.ar,
+        'de': word.de,
+        'en': word.en,
+        'es': word.es } );
+    } );
+
+    /*
+     * Process deletions in reverse order to avoid index shifting.
+     * Sort by bucket first, then by array index (both descending).
+     */
+    deletionsToProcess.
+      sort( ( a, b ) => {
+        if ( a.bucketIndex !== b.bucketIndex ) {
+          return b.bucketIndex - a.bucketIndex;
+        }
+        return b.arrayIndex - a.arrayIndex;
+      } ).
+      forEach( ( { bucketIndex, arrayIndex } ) => {
+        updatedBuckets[ bucketIndex ].splice( arrayIndex, 1 );
+      } );
+
+    return {
+      'buckets': updatedBuckets,
+      'changes': {
+        'newWords': newWords.length,
+        'deletedWords': deletionsToProcess.length,
+        'unchangedWords': localHashSet.size - deletionsToProcess.length
+      }
+    };
+  };
+
+  /**
    * Checks for vocabulary updates by comparing local storage with Google Sheets data
-   * Uses hash-based change detection to preserve user progress on unchanged words
    * @param {Array<Array>} currentBuckets - Current bucket structure from localStorage
    * @returns {Promise<object>} Object containing updated buckets and change statistics
    */
   const checkForVocabularyUpdates = async ( currentBuckets = buckets ) => {
     try {
-      /*
-       * 1. Build lookup maps from local vocabulary
-       * Hash -> {word, bucketIndex, arrayIndex}
-       */
-      const localVocabMap = new Map();
-      const localHashSet = new Set();
-
-      currentBuckets.forEach( ( bucket, bucketIndex ) => {
-        bucket.forEach( ( word, arrayIndex ) => {
-          const wordHash = hashVocabularyWord( word );
-          localVocabMap.set( wordHash, { word,
-            bucketIndex,
-            arrayIndex } );
-          localHashSet.add( wordHash );
-        } );
-      } );
-
-      // 2. Fetch and process Google Sheets data
+      const { localVocabMap, localHashSet } = buildLocalVocabIndex( currentBuckets );
       const googleVocab = await fetchGoogleSheetsData();
 
       /*
-       * 3. CRITICAL: If fetch returned empty data, preserve existing buckets
+       * CRITICAL: If fetch returned empty data, preserve existing buckets
        * This handles offline scenarios and prevents progress loss
        */
       if ( googleVocab.length === 0 ) {
@@ -681,68 +773,7 @@
         };
       }
 
-      const googleHashSet = new Set();
-      const newWords = [];
-
-      googleVocab.forEach( ( googleWord ) => {
-        const googleHash = hashVocabularyWord( googleWord );
-        googleHashSet.add( googleHash );
-
-        if ( !localHashSet.has( googleHash ) ) {
-          // NEW word - will be added to bucket 0
-          newWords.push( googleWord );
-        }
-        // If hash exists, word is UNCHANGED - preserve with existing progress
-      } );
-
-      // 4. Find DELETED words and collect deletion info
-      const deletionsToProcess = [];
-      localHashSet.forEach( ( localHash ) => {
-        if ( !googleHashSet.has( localHash ) ) {
-          // DELETED word - mark for removal
-          const { bucketIndex, arrayIndex } = localVocabMap.get( localHash );
-          deletionsToProcess.push( { bucketIndex,
-            arrayIndex } );
-        }
-      } );
-
-      /*
-       * 5. Create new buckets structure with updates
-       * Deep copy
-       */
-      const updatedBuckets = currentBuckets.map( ( bucket ) => {
-        return [ ...bucket ];
-      } );
-
-      // 6. Add new words to bucket 0
-      newWords.forEach( ( word ) => {
-        updatedBuckets[ 0 ].push( { 'ar': word.ar,
-          'de': word.de,
-          'en': word.en,
-          'es': word.es } );
-      } );
-
-      // 7. Process deletions in reverse order to avoid index shifting issues
-      deletionsToProcess.
-        sort( ( a, b ) => {
-          // Sort by bucket first, then by array index (both descending)
-          if ( a.bucketIndex !== b.bucketIndex ) {
-            return b.bucketIndex - a.bucketIndex;
-          }
-          return b.arrayIndex - a.arrayIndex;
-        } ).
-        forEach( ( { bucketIndex, arrayIndex } ) => {
-          updatedBuckets[ bucketIndex ].splice( arrayIndex, 1 );
-        } );
-
-      return {
-        'buckets': updatedBuckets,
-        'changes': {
-          'newWords': newWords.length,
-          'deletedWords': deletionsToProcess.length,
-          'unchangedWords': localHashSet.size - deletionsToProcess.length
-        }
-      };
+      return applyVocabularyDiff( currentBuckets, localHashSet, localVocabMap, googleVocab );
     } catch ( err ) {
       console.error( 'Error checking for vocabulary updates:', err.message );
       return { 'buckets': currentBuckets,
@@ -813,20 +844,12 @@
   };
 
   /**
-   * Initializes the browser interface by setting up DOM elements and event listeners
+   * Sets up dynamic viewport height adjustment for PWA system UI.
+   * Adjusts on load, resize, and orientation change.
    */
-  const initBrowser = () => {
-    // Get DOM elements
-    mainElement = document.getElementById( 'main' );
-    speakButton = document.getElementById( 'speakButton' );
-    successButton = document.getElementById( 'successButton' );
-    failButton = document.getElementById( 'failButton' );
-    flipButton = document.getElementById( 'flipButton' );
-    letterOverlay = document.getElementById( 'letterOverlay' );
-    wordsElement = document.getElementById( 'words' );
-
+  const setupViewport = () => {
     /**
-     * Dynamic viewport height adjustment for PWA system UI
+     * Calculates and applies the adjusted viewport height minus padding.
      */
     const setViewportHeight = () => {
       const vh = window.innerHeight;
@@ -838,13 +861,18 @@
       document.body.style.maxHeight = `${adjustedHeight}px`;
     };
 
-    // Set viewport height on load and resize
     setViewportHeight();
     window.addEventListener( 'resize', setViewportHeight );
     window.addEventListener( 'orientationchange', setViewportHeight );
+  };
 
-
-    // On page load, read the buckets from local storage
+  /**
+   * Restores vocabulary buckets from localStorage into the module-level
+   * buckets variable, shuffles them, and recalls graduated words back
+   * into active rotation.
+   * @returns {boolean} Whether stored buckets were found in localStorage
+   */
+  const restoreBucketsFromStorage = () => {
     const storedBuckets = localStorage.getItem( 'murajiaty-buckets' );
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
@@ -860,14 +888,30 @@
         } );
       } );
 
-      // Shuffle each inner array (create copy to avoid modifying original)
       buckets = buckets.map( ( bucket ) => {
         return shuffleArray( [ ...bucket ] );
       } );
 
-      // Recycle oldest-graduated words from DONE back into active rotation
       recallWords( buckets );
     }
+    return storedBuckets !== null;
+  };
+
+  /**
+   * Initializes the browser interface by setting up DOM elements and event listeners
+   */
+  const initBrowser = () => {
+    mainElement = document.getElementById( 'main' );
+    speakButton = document.getElementById( 'speakButton' );
+    successButton = document.getElementById( 'successButton' );
+    failButton = document.getElementById( 'failButton' );
+    flipButton = document.getElementById( 'flipButton' );
+    letterOverlay = document.getElementById( 'letterOverlay' );
+    wordsElement = document.getElementById( 'words' );
+
+    setupViewport();
+
+    const hasStoredBuckets = restoreBucketsFromStorage();
 
     /*
      * Initialize event listeners
@@ -899,20 +943,20 @@
           }
 
           // Initialize UI for first-time users or after successful updates
-          if ( storedBuckets === null ) {
+          if ( !hasStoredBuckets ) {
             initializeUIIfDataExists();
           }
         } ).
         catch( ( err ) => {
           console.error( 'Vocabulary update failed:', err.message );
           // For initial load failures, still try to initialize UI with existing data
-          if ( storedBuckets === null ) {
+          if ( !hasStoredBuckets ) {
             initializeUIIfDataExists();
           }
         } );
 
       // Initialize UI for returning users (existing localStorage data)
-      if ( storedBuckets !== null ) {
+      if ( hasStoredBuckets ) {
         initializeUIIfDataExists();
       }
     }
