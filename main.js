@@ -221,10 +221,11 @@
   };
 
   /**
-   * Renders all elements needed for the input of Arabic text
-   * @param {object} vocabulary - the word or phrase to learn as an object with all translations
+   * Creates the DOM elements for the Arabic input interface
+   * @param {object} vocabulary - the word or phrase with all translations
+   * @returns {object} The created DOM elements { relativeDiv, overlay, input }
    */
-  const renderArabicInput = ( vocabulary ) => {
+  const createArabicInputDOM = ( vocabulary ) => {
     const labelLang = Math.floor( Math.random() * 3 );
     const label = document.createElement( 'div' );
     label.className = 'arabic-label';
@@ -235,11 +236,9 @@
     relativeDiv.className = 'arabic-input-relative';
     relativeDiv.style.fontFamily = pickRandomArabicFont();
 
-    // Overlay
     const overlay = document.createElement( 'div' );
     overlay.id = 'arabicInputOverlay';
 
-    // Input
     const input = document.createElement( 'input' );
     input.type = 'text';
     input.id = 'arabicInput';
@@ -249,13 +248,24 @@
     input.style.opacity = 0;
 
     const wrapper = document.createElement( 'div' );
-
     relativeDiv.appendChild( overlay );
     relativeDiv.appendChild( input );
     wrapper.appendChild( label );
     wrapper.appendChild( relativeDiv );
     mainElement.innerHTML = '';
     mainElement.appendChild( wrapper );
+
+    return { relativeDiv,
+      overlay,
+      input };
+  };
+
+  /**
+   * Renders all elements needed for the input of Arabic text
+   * @param {object} vocabulary - the word or phrase to learn as an object with all translations
+   */
+  const renderArabicInput = ( vocabulary ) => {
+    const { relativeDiv, overlay, input } = createArabicInputDOM( vocabulary );
 
     input.addEventListener( 'focus', () => {
       input.style.position = 'fixed';
@@ -274,7 +284,7 @@
     const solution = stripArabicDiacritics( vocabulary.ar );
 
     /**
-     * Updates the input overlay that shows the inputted text with color coding for right or wrong
+     * Updates the input overlay with color-coded comparison of user input vs solution
      */
     const updateOverlay = () => {
       const userInput = stripArabicDiacritics( input.value );
