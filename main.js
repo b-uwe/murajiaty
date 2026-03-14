@@ -225,12 +225,6 @@
       relativeDiv.scrollTo( -overlay.scrollWidth, 0 );
     };
 
-    // Remove previous inputs
-    const existing = document.getElementById( 'arabicInputWrapper' );
-    if ( existing ) {
-      existing.remove();
-    }
-
     const labelLang = Math.floor( Math.random() * 3 );
     const label = document.createElement( 'div' );
     label.className = 'arabic-label';
