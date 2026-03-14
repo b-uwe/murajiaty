@@ -87,8 +87,10 @@ describe( 'recallWords', () => {
 
     recallWords( buckets );
 
-    // All 3 should be pulled (we need 25, only 3 available)
-    // But they should be added oldest-first
+    /*
+     * All 3 should be pulled (we need 25, only 3 available)
+     * But they should be added oldest-first
+     */
     expect( buckets[ 0 ][ 0 ].de ).toBe( 'oldest' );
     expect( buckets[ 0 ][ 1 ].de ).toBe( 'middle' );
     expect( buckets[ 0 ][ 2 ].de ).toBe( 'newest' );

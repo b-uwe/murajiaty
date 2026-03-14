@@ -179,7 +179,8 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
         'ok': true,
         'text': () => {
           return Promise.resolve( '' );
-        } // Empty response
+        // Empty response
+        }
       } );
 
       const result = await checkForVocabularyUpdates( mockBuckets );

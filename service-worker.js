@@ -21,12 +21,10 @@ const urlsToCache = [
  * @returns {void}
  */
 const handleInstall = ( event ) => {
-  event.waitUntil(
-    caches.open( CACHE_NAME ).
-      then( ( cache ) => {
-        return cache.addAll( urlsToCache );
-      } )
-  );
+  event.waitUntil( caches.open( CACHE_NAME ).
+    then( ( cache ) => {
+      return cache.addAll( urlsToCache );
+    } ) );
 };
 
 /**
@@ -35,18 +33,16 @@ const handleInstall = ( event ) => {
  * @returns {void}
  */
 const handleFetch = ( event ) => {
-  event.respondWith(
-    caches.open( CACHE_NAME ).
-      then( ( cache ) => {
-        return cache.match( event.request );
-      } ).
-      then( ( response ) => {
-        if ( response ) {
-          return response;
-        }
-        return fetch( event.request );
-      } )
-  );
+  event.respondWith( caches.open( CACHE_NAME ).
+    then( ( cache ) => {
+      return cache.match( event.request );
+    } ).
+    then( ( response ) => {
+      if ( response ) {
+        return response;
+      }
+      return fetch( event.request );
+    } ) );
 };
 
 /**
@@ -55,22 +51,18 @@ const handleFetch = ( event ) => {
  * @returns {void}
  */
 const handleActivate = ( event ) => {
-  event.waitUntil(
-    caches.keys().then( ( cacheNames ) => {
-      return Promise.all(
-        cacheNames.
-          filter( ( cacheName ) => {
-            return cacheName.startsWith( 'murajiaty-' ) && cacheName !== CACHE_NAME;
-          } ).
-          map( ( cacheName ) => {
-            return caches.delete( cacheName );
-          } )
-      );
-    } ).
-      then( () => {
-        return clients.claim();
-      } )
-  );
+  event.waitUntil( caches.keys().then( ( cacheNames ) => {
+    return Promise.all( cacheNames.
+      filter( ( cacheName ) => {
+        return cacheName.startsWith( 'murajiaty-' ) && cacheName !== CACHE_NAME;
+      } ).
+      map( ( cacheName ) => {
+        return caches.delete( cacheName );
+      } ) );
+  } ).
+    then( () => {
+      return clients.claim();
+    } ) );
 };
 
 self.addEventListener( 'install', handleInstall );

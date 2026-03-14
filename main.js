@@ -29,10 +29,14 @@
    * @constant {string[]}
    */
   const COMMON_ARABIC_DIACRITICS = [
-    'َ', // Fatha
-    'ِ', // Kasra
-    'ُ', // Damma
-    'ْ' // Sukun
+    // Fatha
+    'َ',
+    // Kasra
+    'ِ',
+    // Damma
+    'ُ',
+    // Sukun
+    'ْ'
   ];
 
 
@@ -82,7 +86,8 @@
         if ( inQuotes && nextChar === '"' ) {
           // Escaped quote within quoted field
           currentField += '"';
-          i += 2; // Skip both quotes
+          // Skip both quotes
+          i += 2;
         } else {
           // Start or end of quoted field
           inQuotes = !inQuotes;
@@ -318,13 +323,14 @@
       }
     } else if ( currentBucket < buckets.length - 2 ) {
       // If no words in the current bucket, check the next higher bucket. But leave out the last one!
-      currentBucket++; // Move to the next bucket
+      currentBucket++;
 
       // On the last visible level, replace '👍' with '✨'
       if ( currentBucket === buckets.length - 2 ) {
         successButton.textContent = '✨';
       }
-      pickNextWord(); // Try again in the new bucket
+      // Try again in the new bucket
+      pickNextWord();
     } else {
       // Handle overflow
       mainElement.textContent = '😵';
@@ -359,14 +365,16 @@
     if ( currentWord ) {
       // Toggle between 'de' and 'ar' representation
       if ( currentSide === 'de' ) {
-        mainElement.textContent = currentWord.ar; // Show Arabic
+        // Show Arabic
+        mainElement.textContent = currentWord.ar;
         currentSide = 'ar';
         mainElement.classList.add( 'ar' );
         mainElement.classList.remove( 'de' );
         mainElement.style.fontFamily = pickRandomArabicFont();
         speakWord( currentWord.ar );
       } else {
-        mainElement.textContent = currentWord.de; // Show German
+        // Show German
+        mainElement.textContent = currentWord.de;
         currentSide = 'de';
         mainElement.classList.add( 'de' );
         mainElement.classList.remove( 'ar' );
@@ -398,7 +406,6 @@
         audioContext.decodeAudioData( arrayBuffer, ( buffer ) => {
           const source = audioContext.createBufferSource();
           source.buffer = buffer;
-          // source.playbackRate.value = 1; // Adjust playback rate if necessary
           source.connect( audioContext.destination );
           source.start( 0 );
         } );
@@ -413,7 +420,8 @@
    */
   const rememberedCorrectly = () => {
     const [ currentWord ] = buckets[ currentBucket ];
-    currentWord.touched = true; // Add the "touched" attribute
+    // Mark word as touched
+    currentWord.touched = true;
 
     // Determine the next bucket
     const nextBucket = currentBucket < buckets.length - 1 ? currentBucket + 1 : buckets.length - 1;
@@ -612,7 +620,8 @@
     for ( let i = 0; i < content.length; i++ ) {
       const char = content.charCodeAt( i );
       hash = ( ( hash << 5 ) - hash ) + char;
-      hash &= hash; // Convert to 32bit integer
+      // Convert to 32bit integer
+      hash &= hash;
     }
     return hash.toString( 16 );
   };
@@ -645,8 +654,11 @@
    */
   const checkForVocabularyUpdates = async ( currentBuckets = buckets ) => {
     try {
-      // 1. Build lookup maps from local vocabulary
-      const localVocabMap = new Map(); // hash -> {word, bucketIndex, arrayIndex}
+      /*
+       * 1. Build lookup maps from local vocabulary
+       * Hash -> {word, bucketIndex, arrayIndex}
+       */
+      const localVocabMap = new Map();
       const localHashSet = new Set();
 
       currentBuckets.forEach( ( bucket, bucketIndex ) => {
@@ -662,8 +674,10 @@
       // 2. Fetch and process Google Sheets data
       const googleVocab = await fetchGoogleSheetsData();
 
-      // 3. CRITICAL: If fetch returned empty data, preserve existing buckets
-      // This handles offline scenarios and prevents progress loss
+      /*
+       * 3. CRITICAL: If fetch returned empty data, preserve existing buckets
+       * This handles offline scenarios and prevents progress loss
+       */
       if ( googleVocab.length === 0 ) {
         return {
           'buckets': currentBuckets,
@@ -698,8 +712,10 @@
         }
       } );
 
-      // 5. Create new buckets structure with updates
-      // Deep copy
+      /*
+       * 5. Create new buckets structure with updates
+       * Deep copy
+       */
       const updatedBuckets = currentBuckets.map( ( bucket ) => {
         return [ ...bucket ];
       } );
@@ -748,7 +764,8 @@
    */
   const isPWA = () => {
     if ( typeof window === 'undefined' || !window.matchMedia ) {
-      return false; // Not in browser environment or matchMedia not available
+      // Not in browser environment or matchMedia not available
+      return false;
     }
     return window.matchMedia( '(display-mode: standalone)' ).matches ||
            window.navigator.standalone === true;
@@ -819,7 +836,8 @@
      */
     const setViewportHeight = () => {
       const vh = window.innerHeight;
-      const padding = 32; // 2rem in pixels (assuming 1rem = 16px)
+      // 2rem in pixels (assuming 1rem = 16px)
+      const padding = 32;
       const adjustedHeight = vh - padding;
       document.body.style.minHeight = `${adjustedHeight}px`;
       document.body.style.height = `${adjustedHeight}px`;
@@ -857,8 +875,10 @@
       recallWords( buckets );
     }
 
-    // Initialize event listeners
-    // Check that all required DOM elements are present before adding listeners
+    /*
+     * Initialize event listeners
+     * Check that all required DOM elements are present before adding listeners
+     */
     if ( mainElement && speakButton && successButton && failButton && flipButton && letterOverlay && wordsElement ) {
       speakButton.addEventListener( 'click', () => {
         speakWord( buckets[ currentBucket ][ 0 ].ar );
