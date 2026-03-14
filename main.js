@@ -344,6 +344,29 @@
   };
 
   /**
+   * Configures UI state after picking a word (language direction, button states)
+   */
+  const configureUIAfterPick = () => {
+    updateHeader();
+    if ( currentBucket === 3 || currentBucket === 5 ) {
+      currentSide = 'ar';
+      mainElement.classList.add( 'ar' );
+      mainElement.classList.remove( 'de' );
+      mainElement.style.fontFamily = pickRandomArabicFont();
+      speakButton.disabled = false;
+    } else {
+      currentSide = 'de';
+      mainElement.classList.add( 'de' );
+      mainElement.classList.remove( 'ar' );
+      mainElement.style.fontFamily = '';
+      speakButton.disabled = true;
+    }
+
+    successButton.disabled = true;
+    failButton.disabled = true;
+  };
+
+  /**
    * Picks the first word in the current bucket and shows it in #main.
    * If there is none, it goes one bucket higher and tries there.
    * Handles overflow in case there are no more buckets available.
@@ -391,23 +414,7 @@
       flipButton.disabled = true;
     }
 
-    updateHeader();
-    if ( currentBucket === 3 || currentBucket === 5 ) {
-      currentSide = 'ar';
-      mainElement.classList.add( 'ar' );
-      mainElement.classList.remove( 'de' );
-      mainElement.style.fontFamily = pickRandomArabicFont();
-      speakButton.disabled = false;
-    } else {
-      currentSide = 'de';
-      mainElement.classList.add( 'de' );
-      mainElement.classList.remove( 'ar' );
-      mainElement.style.fontFamily = '';
-      speakButton.disabled = true;
-    }
-
-    successButton.disabled = true;
-    failButton.disabled = true;
+    configureUIAfterPick();
   };
 
   /**
