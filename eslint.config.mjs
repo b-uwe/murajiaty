@@ -200,6 +200,7 @@ export default [ js.configs.recommended, {
   'rules': {
     ...sharedRules,
     'no-undefined': 'error',
+    'max-lines-per-function': [ 'error', { 'max': 50, 'skipBlankLines': true, 'skipComments': true } ],
     'jsdoc/require-jsdoc': [
       'error',
       {
