@@ -6,17 +6,23 @@ const { stripArabicDiacritics } = require( '../main.js' );
 
 describe( 'stripArabicDiacritics', () => {
   test( 'should remove basic Arabic diacritics (fatha, kasra, damma, sukun)', () => {
-    // Test individual diacritics
-    expect( stripArabicDiacritics( 'كَتَبَ' ) ).toBe( 'كتب' ); // fatha
-    expect( stripArabicDiacritics( 'بِسْمِ' ) ).toBe( 'بسم' ); // kasra + sukun
-    expect( stripArabicDiacritics( 'عُمُر' ) ).toBe( 'عمر' ); // damma
-    expect( stripArabicDiacritics( 'مَكْتَبَة' ) ).toBe( 'مكتبة' ); // mixed diacritics
+    // Fatha
+    expect( stripArabicDiacritics( 'كَتَبَ' ) ).toBe( 'كتب' );
+    // Kasra + sukun
+    expect( stripArabicDiacritics( 'بِسْمِ' ) ).toBe( 'بسم' );
+    // Damma
+    expect( stripArabicDiacritics( 'عُمُر' ) ).toBe( 'عمر' );
+    // Mixed diacritics
+    expect( stripArabicDiacritics( 'مَكْتَبَة' ) ).toBe( 'مكتبة' );
   } );
 
   test( 'should normalize alif forms (أ إ → ا)', () => {
-    expect( stripArabicDiacritics( 'أحمد' ) ).toBe( 'احمد' ); // alif with hamza above
-    expect( stripArabicDiacritics( 'إبراهيم' ) ).toBe( 'ابراهيم' ); // alif with hamza below
-    expect( stripArabicDiacritics( 'أإا' ) ).toBe( 'ااا' ); // mixed alif forms
+    // Alif with hamza above
+    expect( stripArabicDiacritics( 'أحمد' ) ).toBe( 'احمد' );
+    // Alif with hamza below
+    expect( stripArabicDiacritics( 'إبراهيم' ) ).toBe( 'ابراهيم' );
+    // Mixed alif forms
+    expect( stripArabicDiacritics( 'أإا' ) ).toBe( 'ااا' );
   } );
 
   test( 'should handle complex text with both diacritics and alif normalization', () => {
@@ -39,8 +45,10 @@ describe( 'stripArabicDiacritics', () => {
   } );
 
   test( 'should handle shadda and other extended diacritics (Unicode range \\u064B-\\u0652\\u0670)', () => {
-    expect( stripArabicDiacritics( 'مُحَمَّد' ) ).toBe( 'محمد' ); // with shadda
-    expect( stripArabicDiacritics( 'اللَّهُ' ) ).toBe( 'الله' ); // shadda + damma
+    // With shadda
+    expect( stripArabicDiacritics( 'مُحَمَّد' ) ).toBe( 'محمد' );
+    // Shadda + damma
+    expect( stripArabicDiacritics( 'اللَّهُ' ) ).toBe( 'الله' );
   } );
 
   test( 'should preserve spaces and punctuation', () => {

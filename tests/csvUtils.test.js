@@ -43,9 +43,11 @@ describe( 'CSV Utilities', () => {
     } );
 
     test( 'should handle empty fields gracefully', () => {
-      const csvLine = 'ar,ar,,en,es,hash'; // Empty DE field (3rd column)
+      // Empty DE field (3rd column)
+      const csvLine = 'ar,ar,,en,es,hash';
       const result = parseCSVLineToWord( csvLine );
-      expect( result ).toBeNull(); // Should return null if any required field is empty
+      // Should return null if any required field is empty
+      expect( result ).toBeNull();
     } );
 
     test( 'should ignore extra columns beyond the required ones', () => {

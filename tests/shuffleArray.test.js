@@ -8,7 +8,8 @@ describe( 'shuffleArray', () => {
   test( 'should return the same array reference', () => {
     const arr = [ 1, 2, 3, 4, 5 ];
     const result = shuffleArray( arr );
-    expect( result ).toBe( arr ); // Same reference
+    // Same reference
+    expect( result ).toBe( arr );
   } );
 
   test( 'should preserve all original elements', () => {

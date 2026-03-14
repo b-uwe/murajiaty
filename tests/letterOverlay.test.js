@@ -4,7 +4,8 @@
 
 const { buildLetterOverlayHTML, ARABIC_FONTS } = require( '../main.js' );
 
-const DIACRITICS = [ '\u064E', '\u0650', '\u064F' ]; // Fatha, Kasra, Damma
+// Fatha, Kasra, Damma
+const DIACRITICS = [ '\u064E', '\u0650', '\u064F' ];
 
 describe( 'buildLetterOverlayHTML', () => {
   test( 'should return a string', () => {
