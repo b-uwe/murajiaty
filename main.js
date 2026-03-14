@@ -193,44 +193,38 @@
   };
 
   /**
+   * Speaks the given word using the Google Translate.
+   * @param {string} word - The word to be spoken.
+   */
+  const speakWord = ( word ) => {
+    const audioContext = new ( window.AudioContext || window.webkitAudioContext )();
+    const url = `https://bernitt.biz/murajiaty/proxy/proxy.php?text=${encodeURIComponent( word )}`;
+
+    fetch( url ).
+      then( ( response ) => {
+        if ( !response.ok ) {
+          throw new Error( 'Network response was not ok' );
+        }
+        return response.arrayBuffer();
+      } ).
+      then( ( arrayBuffer ) => {
+        audioContext.decodeAudioData( arrayBuffer, ( buffer ) => {
+          const source = audioContext.createBufferSource();
+          source.buffer = buffer;
+          source.connect( audioContext.destination );
+          source.start( 0 );
+        } );
+      } ).
+      catch( ( error ) => {
+        return console.error( 'Error fetching audio:', error );
+      } );
+  };
+
+  /**
    * Renders all elements needed for the input of Arabic text
    * @param {object} vocabulary - the word or phrase to learn as an object with all translations
    */
   const renderArabicInput = ( vocabulary ) => {
-    /**
-     * Updates the input overlay that shows the inputted text with color coding for right or wrong
-     */
-    const updateOverlay = () => {
-      const userInput = stripArabicDiacritics( input.value );
-      let shownText = '';
-
-      for ( let i = 0; i < userInput.length || i < solution.length; i++ ) {
-        const uc = userInput[ i ] || '';
-        const sc = solution[ i ] || '';
-        if ( uc === sc ) {
-          shownText += `<span class="input-correct">${uc}</span>`;
-        } else {
-          shownText += `<span class="input-wrong">${uc}</span>`;
-        }
-      }
-
-      if ( solution === stripArabicDiacritics( input.value ) ) {
-        shownText += '🎉';
-        speakWord( vocabulary.ar );
-      }
-
-      overlay.innerHTML = shownText;
-      overlay.style.color = 'inherit';
-
-      relativeDiv.scrollTo( -overlay.scrollWidth, 0 );
-    };
-
-    // Remove previous inputs
-    const existing = document.getElementById( 'arabicInputWrapper' );
-    if ( existing ) {
-      existing.remove();
-    }
-
     const labelLang = Math.floor( Math.random() * 3 );
     const label = document.createElement( 'div' );
     label.className = 'arabic-label';
@@ -279,6 +273,34 @@
 
     const solution = stripArabicDiacritics( vocabulary.ar );
 
+    /**
+     * Updates the input overlay that shows the inputted text with color coding for right or wrong
+     */
+    const updateOverlay = () => {
+      const userInput = stripArabicDiacritics( input.value );
+      let shownText = '';
+
+      for ( let i = 0; i < userInput.length || i < solution.length; i++ ) {
+        const uc = userInput[ i ] || '';
+        const sc = solution[ i ] || '';
+        if ( uc === sc ) {
+          shownText += `<span class="input-correct">${uc}</span>`;
+        } else {
+          shownText += `<span class="input-wrong">${uc}</span>`;
+        }
+      }
+
+      if ( solution === stripArabicDiacritics( input.value ) ) {
+        shownText += '🎉';
+        speakWord( vocabulary.ar );
+      }
+
+      overlay.innerHTML = shownText;
+      overlay.style.color = 'inherit';
+
+      relativeDiv.scrollTo( -overlay.scrollWidth, 0 );
+    };
+
     input.addEventListener( 'input', () => {
       updateOverlay();
     } );
@@ -287,6 +309,28 @@
 
     // Auto-focus the input field so user can start typing immediately
     input.focus();
+  };
+
+  /**
+   * Updates the header with the current bucket and word count
+   */
+  const updateHeader = () => {
+    wordsElement.textContent = `${buckets.filter( ( bucket, idx ) => {
+      return idx !== buckets.length - 1;
+    } ).map( ( bucket, idx ) => {
+      return ( ( idx === currentBucket ) ? `<${`${bucket.filter( ( el ) => {
+        return !el.touched;
+      } ).length}/${bucket.length}`}>` : `${bucket.filter( ( el ) => {
+        return !el.touched;
+      } ).length}/${bucket.length}` );
+    } ).join( ' ' )} (${buckets[ buckets.length - 1 ].length})`;
+  };
+
+  /**
+   * Updates the local storage with the current buckets
+   */
+  const updateStorage = () => {
+    localStorage.setItem( 'murajiaty-buckets', JSON.stringify( buckets ) );
   };
 
   /**
@@ -385,34 +429,6 @@
     speakButton.disabled = false;
     successButton.disabled = false;
     failButton.disabled = false;
-  };
-
-  /**
-   * Speaks the given word using the Google Translate.
-   * @param {string} word - The word to be spoken.
-   */
-  const speakWord = ( word ) => {
-    const audioContext = new ( window.AudioContext || window.webkitAudioContext )();
-    const url = `https://bernitt.biz/murajiaty/proxy/proxy.php?text=${encodeURIComponent( word )}`;
-
-    fetch( url ).
-      then( ( response ) => {
-        if ( !response.ok ) {
-          throw new Error( 'Network response was not ok' );
-        }
-        return response.arrayBuffer();
-      } ).
-      then( ( arrayBuffer ) => {
-        audioContext.decodeAudioData( arrayBuffer, ( buffer ) => {
-          const source = audioContext.createBufferSource();
-          source.buffer = buffer;
-          source.connect( audioContext.destination );
-          source.start( 0 );
-        } );
-      } ).
-      catch( ( error ) => {
-        return console.error( 'Error fetching audio:', error );
-      } );
   };
 
   /**
@@ -571,28 +587,6 @@
       delete word.doneAt;
       targetBuckets[ 0 ].push( word );
     } );
-  };
-
-  /**
-   * Updates the header with the current bucket and word count
-   */
-  const updateHeader = () => {
-    wordsElement.textContent = `${buckets.filter( ( bucket, idx ) => {
-      return idx !== buckets.length - 1;
-    } ).map( ( bucket, idx ) => {
-      return ( ( idx === currentBucket ) ? `<${`${bucket.filter( ( el ) => {
-        return !el.touched;
-      } ).length}/${bucket.length}`}>` : `${bucket.filter( ( el ) => {
-        return !el.touched;
-      } ).length}/${bucket.length}` );
-    } ).join( ' ' )} (${buckets[ buckets.length - 1 ].length})`;
-  };
-
-  /**
-   * Updates the local storage with the current buckets
-   */
-  const updateStorage = () => {
-    localStorage.setItem( 'murajiaty-buckets', JSON.stringify( buckets ) );
   };
 
   /**
