@@ -169,20 +169,11 @@ const sharedRules = {
   'symbol-description': 'error',
   'yield-star-spacing': 'error',
 
-  // --- JSDoc ---
-  'jsdoc/check-alignment': 'error',
-  'jsdoc/check-param-names': 'error',
-  'jsdoc/check-tag-names': 'error',
-  'jsdoc/check-types': 'error',
-  'jsdoc/no-undefined-types': 'error',
-  'jsdoc/require-description': 'error',
-  'jsdoc/require-param': 'error',
-  'jsdoc/require-param-description': 'error',
-  'jsdoc/require-returns': 'error',
-  'jsdoc/require-returns-description': 'error'
+  // --- JSDoc (extends flat/recommended-error, only non-recommended rules here) ---
+  'jsdoc/require-description': 'error'
 };
 
-export default [ js.configs.recommended, {
+export default [ js.configs.recommended, jsdocPlugin.configs['flat/recommended-error'], {
   'files': [ '**/*.js' ],
   'ignores': [ 'tests/**/*.js' ],
   'languageOptions': {
@@ -213,10 +204,6 @@ export default [ js.configs.recommended, {
         }
       }
     ]
-  },
-
-  'plugins': {
-    'jsdoc': jsdocPlugin,
   }
 }, {
   'files': [ 'tests/**/*.js' ],
@@ -245,9 +232,5 @@ export default [ js.configs.recommended, {
         }
       }
     ]
-  },
-
-  'plugins': {
-    'jsdoc': jsdocPlugin,
   }
 } ];
