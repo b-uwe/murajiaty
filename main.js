@@ -839,20 +839,12 @@
   };
 
   /**
-   * Initializes the browser interface by setting up DOM elements and event listeners
+   * Sets up dynamic viewport height adjustment for PWA system UI.
+   * Adjusts on load, resize, and orientation change.
    */
-  const initBrowser = () => {
-    // Get DOM elements
-    mainElement = document.getElementById( 'main' );
-    speakButton = document.getElementById( 'speakButton' );
-    successButton = document.getElementById( 'successButton' );
-    failButton = document.getElementById( 'failButton' );
-    flipButton = document.getElementById( 'flipButton' );
-    letterOverlay = document.getElementById( 'letterOverlay' );
-    wordsElement = document.getElementById( 'words' );
-
+  const setupViewport = () => {
     /**
-     * Dynamic viewport height adjustment for PWA system UI
+     * Calculates and applies the adjusted viewport height minus padding.
      */
     const setViewportHeight = () => {
       const vh = window.innerHeight;
@@ -864,13 +856,17 @@
       document.body.style.maxHeight = `${adjustedHeight}px`;
     };
 
-    // Set viewport height on load and resize
     setViewportHeight();
     window.addEventListener( 'resize', setViewportHeight );
     window.addEventListener( 'orientationchange', setViewportHeight );
+  };
 
-
-    // On page load, read the buckets from local storage
+  /**
+   * Loads vocabulary buckets from localStorage, shuffles them, and recalls
+   * graduated words back into active rotation.
+   * @returns {boolean} Whether stored buckets were found in localStorage
+   */
+  const loadBucketsFromStorage = () => {
     const storedBuckets = localStorage.getItem( 'murajiaty-buckets' );
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
@@ -886,14 +882,30 @@
         } );
       } );
 
-      // Shuffle each inner array (create copy to avoid modifying original)
       buckets = buckets.map( ( bucket ) => {
         return shuffleArray( [ ...bucket ] );
       } );
 
-      // Recycle oldest-graduated words from DONE back into active rotation
       recallWords( buckets );
     }
+    return storedBuckets !== null;
+  };
+
+  /**
+   * Initializes the browser interface by setting up DOM elements and event listeners
+   */
+  const initBrowser = () => {
+    mainElement = document.getElementById( 'main' );
+    speakButton = document.getElementById( 'speakButton' );
+    successButton = document.getElementById( 'successButton' );
+    failButton = document.getElementById( 'failButton' );
+    flipButton = document.getElementById( 'flipButton' );
+    letterOverlay = document.getElementById( 'letterOverlay' );
+    wordsElement = document.getElementById( 'words' );
+
+    setupViewport();
+
+    const hasStoredBuckets = loadBucketsFromStorage();
 
     /*
      * Initialize event listeners
@@ -913,7 +925,6 @@
 
       addLetterClickListener();
 
-      // Load vocabulary (handles both initial load and updates)
       checkForVocabularyUpdates( buckets ).
         then( ( updateResult ) => {
           if ( updateResult.changes.newWords > 0 || updateResult.changes.deletedWords > 0 ) {
@@ -924,21 +935,18 @@
             updateHeader();
           }
 
-          // Initialize UI for first-time users or after successful updates
-          if ( storedBuckets === null ) {
+          if ( !hasStoredBuckets ) {
             initializeUIIfDataExists();
           }
         } ).
         catch( ( err ) => {
           console.error( 'Vocabulary update failed:', err.message );
-          // For initial load failures, still try to initialize UI with existing data
-          if ( storedBuckets === null ) {
+          if ( !hasStoredBuckets ) {
             initializeUIIfDataExists();
           }
         } );
 
-      // Initialize UI for returning users (existing localStorage data)
-      if ( storedBuckets !== null ) {
+      if ( hasStoredBuckets ) {
         initializeUIIfDataExists();
       }
     }
