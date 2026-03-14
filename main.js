@@ -221,11 +221,12 @@
   };
 
   /**
-   * Creates the DOM elements for the Arabic input interface
+   * Sets up the Arabic input interface by creating DOM elements and
+   * rendering them into mainElement.
    * @param {object} vocabulary - the word or phrase with all translations
-   * @returns {object} The created DOM elements { relativeDiv, overlay, input }
+   * @returns {object} Key DOM elements for event wiring: { relativeDiv, overlay, input }
    */
-  const createArabicInputDOM = ( vocabulary ) => {
+  const setupArabicInputDOM = ( vocabulary ) => {
     const labelLang = Math.floor( Math.random() * 3 );
     const label = document.createElement( 'div' );
     label.className = 'arabic-label';
@@ -248,6 +249,7 @@
     input.style.opacity = 0;
 
     const wrapper = document.createElement( 'div' );
+
     relativeDiv.appendChild( overlay );
     relativeDiv.appendChild( input );
     wrapper.appendChild( label );
@@ -265,7 +267,7 @@
    * @param {object} vocabulary - the word or phrase to learn as an object with all translations
    */
   const renderArabicInput = ( vocabulary ) => {
-    const { relativeDiv, overlay, input } = createArabicInputDOM( vocabulary );
+    const { relativeDiv, overlay, input } = setupArabicInputDOM( vocabulary );
 
     input.addEventListener( 'focus', () => {
       input.style.position = 'fixed';
@@ -723,7 +725,10 @@
         'es': word.es } );
     } );
 
-    // Process deletions in reverse order to avoid index shifting
+    /*
+     * Process deletions in reverse order to avoid index shifting.
+     * Sort by bucket first, then by array index (both descending).
+     */
     deletionsToProcess.
       sort( ( a, b ) => {
         if ( a.bucketIndex !== b.bucketIndex ) {
@@ -862,11 +867,12 @@
   };
 
   /**
-   * Loads vocabulary buckets from localStorage, shuffles them, and recalls
-   * graduated words back into active rotation.
+   * Restores vocabulary buckets from localStorage into the module-level
+   * buckets variable, shuffles them, and recalls graduated words back
+   * into active rotation.
    * @returns {boolean} Whether stored buckets were found in localStorage
    */
-  const loadBucketsFromStorage = () => {
+  const restoreBucketsFromStorage = () => {
     const storedBuckets = localStorage.getItem( 'murajiaty-buckets' );
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
@@ -905,7 +911,7 @@
 
     setupViewport();
 
-    const hasStoredBuckets = loadBucketsFromStorage();
+    const hasStoredBuckets = restoreBucketsFromStorage();
 
     /*
      * Initialize event listeners
@@ -925,6 +931,7 @@
 
       addLetterClickListener();
 
+      // Load vocabulary (handles both initial load and updates)
       checkForVocabularyUpdates( buckets ).
         then( ( updateResult ) => {
           if ( updateResult.changes.newWords > 0 || updateResult.changes.deletedWords > 0 ) {
@@ -935,17 +942,20 @@
             updateHeader();
           }
 
+          // Initialize UI for first-time users or after successful updates
           if ( !hasStoredBuckets ) {
             initializeUIIfDataExists();
           }
         } ).
         catch( ( err ) => {
           console.error( 'Vocabulary update failed:', err.message );
+          // For initial load failures, still try to initialize UI with existing data
           if ( !hasStoredBuckets ) {
             initializeUIIfDataExists();
           }
         } );
 
+      // Initialize UI for returning users (existing localStorage data)
       if ( hasStoredBuckets ) {
         initializeUIIfDataExists();
       }
