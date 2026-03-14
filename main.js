@@ -658,35 +658,105 @@
   };
 
   /**
+   * Builds a hash-based index of local vocabulary for change detection
+   * @param {Array<Array>} currentBuckets - Current bucket structure
+   * @returns {object} Maps for lookup: { localVocabMap, localHashSet }
+   */
+  const buildLocalVocabIndex = ( currentBuckets ) => {
+    const localVocabMap = new Map();
+    const localHashSet = new Set();
+
+    currentBuckets.forEach( ( bucket, bucketIndex ) => {
+      bucket.forEach( ( word, arrayIndex ) => {
+        const wordHash = hashVocabularyWord( word );
+        localVocabMap.set( wordHash, { word,
+          bucketIndex,
+          arrayIndex } );
+        localHashSet.add( wordHash );
+      } );
+    } );
+
+    return { localVocabMap,
+      localHashSet };
+  };
+
+  /**
+   * Compares local vocabulary against Google Sheets data and applies changes
+   * @param {Array<Array>} currentBuckets - Current bucket structure
+   * @param {Set} localHashSet - Set of local vocabulary hashes
+   * @param {Map} localVocabMap - Map of hash to word location
+   * @param {Array} googleVocab - Vocabulary from Google Sheets
+   * @returns {object} Updated buckets and change statistics
+   */
+  const applyVocabularyDiff = ( currentBuckets, localHashSet, localVocabMap, googleVocab ) => {
+    const googleHashSet = new Set();
+    const newWords = [];
+
+    googleVocab.forEach( ( googleWord ) => {
+      const googleHash = hashVocabularyWord( googleWord );
+      googleHashSet.add( googleHash );
+
+      if ( !localHashSet.has( googleHash ) ) {
+        newWords.push( googleWord );
+      }
+    } );
+
+    // Find DELETED words
+    const deletionsToProcess = [];
+    localHashSet.forEach( ( localHash ) => {
+      if ( !googleHashSet.has( localHash ) ) {
+        const { bucketIndex, arrayIndex } = localVocabMap.get( localHash );
+        deletionsToProcess.push( { bucketIndex,
+          arrayIndex } );
+      }
+    } );
+
+    // Deep copy buckets and apply changes
+    const updatedBuckets = currentBuckets.map( ( bucket ) => {
+      return [ ...bucket ];
+    } );
+
+    newWords.forEach( ( word ) => {
+      updatedBuckets[ 0 ].push( { 'ar': word.ar,
+        'de': word.de,
+        'en': word.en,
+        'es': word.es } );
+    } );
+
+    // Process deletions in reverse order to avoid index shifting
+    deletionsToProcess.
+      sort( ( a, b ) => {
+        if ( a.bucketIndex !== b.bucketIndex ) {
+          return b.bucketIndex - a.bucketIndex;
+        }
+        return b.arrayIndex - a.arrayIndex;
+      } ).
+      forEach( ( { bucketIndex, arrayIndex } ) => {
+        updatedBuckets[ bucketIndex ].splice( arrayIndex, 1 );
+      } );
+
+    return {
+      'buckets': updatedBuckets,
+      'changes': {
+        'newWords': newWords.length,
+        'deletedWords': deletionsToProcess.length,
+        'unchangedWords': localHashSet.size - deletionsToProcess.length
+      }
+    };
+  };
+
+  /**
    * Checks for vocabulary updates by comparing local storage with Google Sheets data
-   * Uses hash-based change detection to preserve user progress on unchanged words
    * @param {Array<Array>} currentBuckets - Current bucket structure from localStorage
    * @returns {Promise<object>} Object containing updated buckets and change statistics
    */
   const checkForVocabularyUpdates = async ( currentBuckets = buckets ) => {
     try {
-      /*
-       * 1. Build lookup maps from local vocabulary
-       * Hash -> {word, bucketIndex, arrayIndex}
-       */
-      const localVocabMap = new Map();
-      const localHashSet = new Set();
-
-      currentBuckets.forEach( ( bucket, bucketIndex ) => {
-        bucket.forEach( ( word, arrayIndex ) => {
-          const wordHash = hashVocabularyWord( word );
-          localVocabMap.set( wordHash, { word,
-            bucketIndex,
-            arrayIndex } );
-          localHashSet.add( wordHash );
-        } );
-      } );
-
-      // 2. Fetch and process Google Sheets data
+      const { localVocabMap, localHashSet } = buildLocalVocabIndex( currentBuckets );
       const googleVocab = await fetchGoogleSheetsData();
 
       /*
-       * 3. CRITICAL: If fetch returned empty data, preserve existing buckets
+       * CRITICAL: If fetch returned empty data, preserve existing buckets
        * This handles offline scenarios and prevents progress loss
        */
       if ( googleVocab.length === 0 ) {
@@ -698,68 +768,7 @@
         };
       }
 
-      const googleHashSet = new Set();
-      const newWords = [];
-
-      googleVocab.forEach( ( googleWord ) => {
-        const googleHash = hashVocabularyWord( googleWord );
-        googleHashSet.add( googleHash );
-
-        if ( !localHashSet.has( googleHash ) ) {
-          // NEW word - will be added to bucket 0
-          newWords.push( googleWord );
-        }
-        // If hash exists, word is UNCHANGED - preserve with existing progress
-      } );
-
-      // 4. Find DELETED words and collect deletion info
-      const deletionsToProcess = [];
-      localHashSet.forEach( ( localHash ) => {
-        if ( !googleHashSet.has( localHash ) ) {
-          // DELETED word - mark for removal
-          const { bucketIndex, arrayIndex } = localVocabMap.get( localHash );
-          deletionsToProcess.push( { bucketIndex,
-            arrayIndex } );
-        }
-      } );
-
-      /*
-       * 5. Create new buckets structure with updates
-       * Deep copy
-       */
-      const updatedBuckets = currentBuckets.map( ( bucket ) => {
-        return [ ...bucket ];
-      } );
-
-      // 6. Add new words to bucket 0
-      newWords.forEach( ( word ) => {
-        updatedBuckets[ 0 ].push( { 'ar': word.ar,
-          'de': word.de,
-          'en': word.en,
-          'es': word.es } );
-      } );
-
-      // 7. Process deletions in reverse order to avoid index shifting issues
-      deletionsToProcess.
-        sort( ( a, b ) => {
-          // Sort by bucket first, then by array index (both descending)
-          if ( a.bucketIndex !== b.bucketIndex ) {
-            return b.bucketIndex - a.bucketIndex;
-          }
-          return b.arrayIndex - a.arrayIndex;
-        } ).
-        forEach( ( { bucketIndex, arrayIndex } ) => {
-          updatedBuckets[ bucketIndex ].splice( arrayIndex, 1 );
-        } );
-
-      return {
-        'buckets': updatedBuckets,
-        'changes': {
-          'newWords': newWords.length,
-          'deletedWords': deletionsToProcess.length,
-          'unchangedWords': localHashSet.size - deletionsToProcess.length
-        }
-      };
+      return applyVocabularyDiff( currentBuckets, localHashSet, localVocabMap, googleVocab );
     } catch ( err ) {
       console.error( 'Error checking for vocabulary updates:', err.message );
       return { 'buckets': currentBuckets,
