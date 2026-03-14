@@ -2,7 +2,9 @@
  * @file Service worker for PWA offline functionality
  */
 
+/** @constant {string} Current cache version identifier */
 const CACHE_NAME = 'murajiaty-v3';
+/** @constant {string[]} URLs to pre-cache during service worker installation */
 const urlsToCache = [
   './',
   './index.html',

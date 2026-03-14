@@ -3,19 +3,27 @@
    * @file Main JavaScript file for Murajiaty application
    */
 
-  // DOM elements
+  /** @type {HTMLElement} Main content area for displaying words */
   let mainElement;
+  /** @type {HTMLButtonElement} Button to trigger text-to-speech */
   let speakButton;
+  /** @type {HTMLButtonElement} Button for marking a word as correctly remembered */
   let successButton;
+  /** @type {HTMLButtonElement} Button for marking a word as incorrectly remembered */
   let failButton;
+  /** @type {HTMLButtonElement} Button for flipping between Arabic and translation */
   let flipButton;
+  /** @type {HTMLElement} Overlay for showing Arabic letter diacritics */
   let letterOverlay;
+  /** @type {HTMLElement} Header element showing bucket word counts */
   let wordsElement;
 
+  /** @type {number} Index of the currently active spaced-repetition bucket */
   let currentBucket = 0;
+  /** @type {string} Current display language side: 'de' or 'ar' */
   let currentSide = 'de';
 
-  // Other global variables
+  /** @type {Array<Array<object>>} Spaced-repetition buckets holding vocabulary words */
   let buckets = [ [], [], [], [], [], [], [] ];
 
   /**
@@ -150,7 +158,7 @@
   /**
    * Parses CSV content and returns an array of vocabulary words
    * @param {string} csvContent - The raw CSV content to parse
-   * @returns {Array} Array of parsed vocabulary word objects
+   * @returns {Array<object>} Array of parsed vocabulary word objects
    */
   const parseGoogleSheetsCSV = ( csvContent ) => {
     const words = [];
@@ -263,7 +271,8 @@
   };
 
   /**
-   * Renders all elements needed for the input of Arabic text
+   * Wires event listeners and input behavior for the Arabic text input interface.
+   * Delegates DOM creation to setupArabicInputDOM.
    * @param {object} vocabulary - the word or phrase to learn as an object with all translations
    */
   const renderArabicInput = ( vocabulary ) => {
@@ -622,8 +631,8 @@
   };
 
   /**
-   * Simple MD5-like hash function for vocabulary words
-   * Creates a hash from the concatenated ar|de|en|es content
+   * DJB2-variant hash for vocabulary word identity comparison.
+   * Creates a 32-bit hash from the concatenated ar|de|en|es content.
    * @param {object} word - The vocabulary word with ar, de, en, es properties
    * @returns {string} Hash string representation of the word
    */
@@ -641,7 +650,7 @@
 
   /**
    * Fetches vocabulary data from Google Sheets
-   * @returns {Promise<Array>} Array of vocabulary word objects
+   * @returns {Promise<Array<object>>} Array of vocabulary word objects
    */
   const fetchGoogleSheetsData = async () => {
     try {
