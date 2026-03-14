@@ -14,7 +14,7 @@ describe( 'buildLetterOverlayHTML', () => {
 
   test( 'should contain the isolated letter once per font in the top row', () => {
     const result = buildLetterOverlayHTML( 'ب', DIACRITICS, ARABIC_FONTS );
-    const topRowMatch = result.match( /class="letter-top-row"/ );
+    const topRowMatch = result.match( /class="letter-top-row"/u );
     expect( topRowMatch ).not.toBeNull();
 
     // Each font gets a span with the isolated letter
@@ -29,14 +29,14 @@ describe( 'buildLetterOverlayHTML', () => {
 
   test( 'should include spacers between letters in the top row', () => {
     const result = buildLetterOverlayHTML( 'ف', DIACRITICS, ARABIC_FONTS );
-    const spacerCount = ( result.match( /class="letter-spacer"/g ) || [] ).length;
+    const spacerCount = ( result.match( /class="letter-spacer"/gu ) || [] ).length;
     // 5 fonts = 4 spacers between them
     expect( spacerCount ).toBe( ARABIC_FONTS.length - 1 );
   } );
 
   test( 'should have one diacritics row per font', () => {
     const result = buildLetterOverlayHTML( 'ن', DIACRITICS, ARABIC_FONTS );
-    const rowCount = ( result.match( /class="letter-diacritics-row"/g ) || [] ).length;
+    const rowCount = ( result.match( /class="letter-diacritics-row"/gu ) || [] ).length;
     expect( rowCount ).toBe( ARABIC_FONTS.length );
   } );
 
@@ -46,7 +46,7 @@ describe( 'buildLetterOverlayHTML', () => {
     // Each row should contain the letter combined with each diacritic
     for ( const d of DIACRITICS ) {
       const combined = letter + d;
-      const occurrences = ( result.match( new RegExp( combined, 'g' ) ) || [] ).length;
+      const occurrences = ( result.match( new RegExp( combined, 'gu' ) ) || [] ).length;
       // Once per font row
       expect( occurrences ).toBe( ARABIC_FONTS.length );
     }
@@ -71,9 +71,9 @@ describe( 'buildLetterOverlayHTML', () => {
 
   test( 'should work with a single font', () => {
     const result = buildLetterOverlayHTML( 'ك', DIACRITICS, [ 'Cairo' ] );
-    const spacerCount = ( result.match( /class="letter-spacer"/g ) || [] ).length;
+    const spacerCount = ( result.match( /class="letter-spacer"/gu ) || [] ).length;
     expect( spacerCount ).toBe( 0 );
-    const rowCount = ( result.match( /class="letter-diacritics-row"/g ) || [] ).length;
+    const rowCount = ( result.match( /class="letter-diacritics-row"/gu ) || [] ).length;
     expect( rowCount ).toBe( 1 );
   } );
 } );

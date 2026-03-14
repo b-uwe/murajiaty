@@ -222,10 +222,8 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
         'text': () => {
-          return Promise.resolve(
           // Google Sheets now only contains first two words, 'بيت' is deleted
-            'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2'
-          );
+          return Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2' );
         }
       } );
 
