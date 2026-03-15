@@ -2,7 +2,7 @@
  * @file Integration tests for vocabulary update system
  */
 
-const { fetchGoogleSheetsData, checkForVocabularyUpdates } = require( '../main.js' );
+const { fetchGoogleSheetsData, checkForVocabularyUpdates } = require( '../vocabulary-sync.js' );
 
 describe( 'Vocabulary Update System - Integration Tests', () => {
   describe( 'fetchGoogleSheetsData', () => {

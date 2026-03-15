@@ -2,7 +2,7 @@
  * @file Unit tests for vocabulary update utility functions
  */
 
-const { hashVocabularyWord } = require( '../main.js' );
+const { hashVocabularyWord } = require( '../vocabulary-sync.js' );
 
 describe( 'Vocabulary Update System - Unit Tests', () => {
   describe( 'hashVocabularyWord', () => {

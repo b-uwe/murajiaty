@@ -2,7 +2,7 @@
  * @file Tests for CSV utility functions
  */
 
-const { parseCSVLineToWord } = require( '../main.js' );
+const { parseCSVLineToWord } = require( '../vocabulary-sync.js' );
 
 describe( 'CSV Utilities', () => {
   describe( 'parseCSVLineToWord', () => {
