@@ -2,7 +2,7 @@
  * @file Tests for letter overlay HTML generation showing all Arabic fonts
  */
 
-const { buildLetterOverlayHTML, ARABIC_FONTS } = require( '../main.js' );
+const { buildLetterOverlayHTML, ARABIC_FONTS } = require( '../app-utils.js' );
 
 // Fatha, Kasra, Damma
 const DIACRITICS = [ '\u064E', '\u0650', '\u064F' ];

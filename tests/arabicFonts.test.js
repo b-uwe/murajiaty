@@ -2,7 +2,7 @@
  * @file Tests for Arabic font cycling feature
  */
 
-const { ARABIC_FONTS, pickRandomArabicFont } = require( '../main.js' );
+const { ARABIC_FONTS, pickRandomArabicFont } = require( '../app-utils.js' );
 
 describe( 'ARABIC_FONTS', () => {
   test( 'should contain exactly 5 entries (4 fonts + default)', () => {

@@ -2,7 +2,7 @@
  * @file Tests for smart vocabulary recycling from the DONE bucket
  */
 
-const { recallWords } = require( '../main.js' );
+const { recallWords } = require( '../app-utils.js' );
 
 /**
  * Creates a test vocabulary word with sensible defaults.
