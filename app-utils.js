@@ -256,7 +256,6 @@
       speakWord,
       buildLetterOverlayHTML,
       recallWords,
-      isPWA,
       showStorageError,
       ensurePersistentStorage,
       setupViewport
@@ -275,7 +274,6 @@
       speakWord,
       buildLetterOverlayHTML,
       recallWords,
-      isPWA,
       showStorageError,
       ensurePersistentStorage,
       setupViewport
