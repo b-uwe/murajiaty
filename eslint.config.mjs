@@ -124,7 +124,7 @@ const sharedRules = {
   'lines-between-class-members': 'error',
   'max-depth': [ 'error', 5 ],
   'max-len': [ 'error', 160 ],
-  'max-lines': [ 'error', { 'max': 500, 'skipBlankLines': true, 'skipComments': true } ],
+  'max-lines': [ 'error', 500 ],
   'max-nested-callbacks': 'error',
   'max-params': [ 'error', 5 ],
   'max-statements': [ 'error', 25, { 'ignoreTopLevelFunctions': true } ],

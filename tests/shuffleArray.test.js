@@ -2,7 +2,7 @@
  * @file Tests for shuffleArray utility function
  */
 
-const { shuffleArray } = require( '../main.js' );
+const { shuffleArray } = require( '../app-utils.js' );
 
 describe( 'shuffleArray', () => {
   test( 'should return the same array reference', () => {
