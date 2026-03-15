@@ -463,9 +463,9 @@
         letterOverlay.style.display = 'block';
 
         const fatha = clickedLetter + COMMON_ARABIC_DIACRITICS[ 0 ];
-        const damma = clickedLetter + COMMON_ARABIC_DIACRITICS[ 1 ];
-        const kasra = clickedLetter + COMMON_ARABIC_DIACRITICS[ 2 ];
-        speakWord( `${clickedLetter}, . ${fatha}, ${damma}, ${kasra}` );
+        const kasra = clickedLetter + COMMON_ARABIC_DIACRITICS[ 1 ];
+        const damma = clickedLetter + COMMON_ARABIC_DIACRITICS[ 2 ];
+        speakWord( `${clickedLetter}, . ${fatha}, ${kasra}, ${damma}` );
       }
     } );
   };
@@ -736,5 +736,5 @@
       pickRandomArabicFont,
       buildLetterOverlayHTML
     };
-  };
+  }
 } )();
