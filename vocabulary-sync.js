@@ -273,16 +273,9 @@
     }
   };
 
-  /** @type {object} Public API for browser consumption */
-  const publicApi = {
-    checkForVocabularyUpdates,
-    parseGoogleSheetsCSV,
-    fetchGoogleSheetsData
-  };
-
   // Browser: expose on window namespace
   if ( typeof window !== 'undefined' ) {
-    window.VocabularySync = publicApi;
+    window.VocabularySync = { checkForVocabularyUpdates };
   }
 
   // Node.js: expose for testing
