@@ -8,6 +8,7 @@ const CACHE_NAME = 'murajiaty-v4';
 const urlsToCache = [
   './',
   './index.html',
+  './app-utils.js',
   './vocabulary-sync.js',
   './main.js',
   './styles.css',
