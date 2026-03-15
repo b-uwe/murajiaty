@@ -26,6 +26,7 @@
   /** @type {Array<Array<object>>} Spaced-repetition buckets holding vocabulary words */
   let buckets = [ [], [], [], [], [], [], [] ];
 
+  // Node.js (Jest): use require; browser: use window namespace set by app-utils.js
   const {
     flags, COMMON_ARABIC_DIACRITICS, ARABIC_FONTS,
     pickRandomArabicFont, shuffleArray, stripArabicDiacritics,
