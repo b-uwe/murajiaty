@@ -244,25 +244,25 @@
    */
   const flipWord = () => {
     const [ currentWord ] = buckets[ currentBucket ];
-
-    if ( currentWord ) {
-      // Toggle between 'de' and 'ar' representation
-      if ( currentSide === 'de' ) {
-        // Show Arabic
-        mainElement.textContent = currentWord.ar;
-        currentSide = 'ar';
-        mainElement.classList.add( 'ar' );
-        mainElement.classList.remove( 'de' );
-        mainElement.style.fontFamily = pickRandomArabicFont();
-        speakWord( currentWord.ar );
-      } else {
-        // Show German
-        mainElement.textContent = currentWord.de;
-        currentSide = 'de';
-        mainElement.classList.add( 'de' );
-        mainElement.classList.remove( 'ar' );
-        mainElement.style.fontFamily = '';
-      }
+    if ( !currentWord ) {
+      return;
+    }
+    // Toggle between 'de' and 'ar' representation
+    if ( currentSide === 'de' ) {
+      // Show Arabic
+      mainElement.textContent = currentWord.ar;
+      currentSide = 'ar';
+      mainElement.classList.add( 'ar' );
+      mainElement.classList.remove( 'de' );
+      mainElement.style.fontFamily = pickRandomArabicFont();
+      speakWord( currentWord.ar );
+    } else {
+      // Show German
+      mainElement.textContent = currentWord.de;
+      currentSide = 'de';
+      mainElement.classList.add( 'de' );
+      mainElement.classList.remove( 'ar' );
+      mainElement.style.fontFamily = '';
     }
 
     speakButton.disabled = false;
@@ -279,16 +279,17 @@
     if ( !currentWord ) {
       return;
     }
-    // Mark word as touched
-    currentWord.touched = true;
 
     // Determine the next bucket
     const nextBucket = currentBucket < buckets.length - 1 ? currentBucket + 1 : buckets.length - 1;
 
     if ( nextBucket === buckets.length - 1 ) {
       // Graduating to review queue: show popup for quality selection
-      buckets[ currentBucket ].shift();
-      createReviewPopup( successButton, ( increment ) => {
+      createReviewPopup( ( increment ) => {
+        // Mark word as touched
+        currentWord.touched = true;
+        // Remove the word from the start of the current bucket
+        buckets[ currentBucket ].shift();
         insertIntoReviewQueue( currentWord, buckets, increment );
         pickNextWord();
         updateHeader();
@@ -297,6 +298,8 @@
       return;
     }
 
+    // Mark word as touched
+    currentWord.touched = true;
     // Add the word to the end of the next bucket
     buckets[ nextBucket ].push( currentWord );
     // Remove the word from the start of the current bucket
@@ -317,13 +320,10 @@
       return;
     }
     const trgtBucket = currentBucket > 0 ? currentBucket - 1 : 0;
-
     // Add the word to the end of the target (previous) bucket
     buckets[ trgtBucket ].push( currentWord );
-
     // Remove the word from the start of the current bucket
     buckets[ currentBucket ].shift();
-
     // Call the necessary functions
     pickNextWord();
     updateHeader();

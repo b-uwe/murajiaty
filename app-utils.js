@@ -327,25 +327,20 @@
   };
 
   /**
-   * Creates a review quality popup with 3 options (bald/gut/sitzt) and appends
-   * it to the given container. Calls onSelect with the chosen increment (0/1/2).
-   * @param {HTMLElement} container - Parent element to append the popup to
+   * Shows a full-screen overlay with 3 review quality options (bald/gut/sitzt).
+   * Clicking outside the popup dismisses it without side effects.
    * @param {Function} onSelect - Callback receiving the chosen increment value
    */
-  const createReviewPopup = ( container, onSelect ) => {
+  const createReviewPopup = ( onSelect ) => {
+    const overlay = document.createElement( 'div' );
+    overlay.className = 'review-overlay';
+
     const popup = document.createElement( 'div' );
     popup.className = 'review-popup';
 
-    /**
-     * Closes the popup when clicking outside of it
-     * @param {Event} event - The click event
-     */
-    const closeOnOutsideClick = ( event ) => {
-      if ( !popup.contains( event.target ) ) {
-        popup.remove();
-        document.removeEventListener( 'click', closeOnOutsideClick );
-      }
-    };
+    overlay.addEventListener( 'click', () => {
+      overlay.remove();
+    } );
 
     const options = [
       {
@@ -367,18 +362,14 @@
       btn.textContent = label;
       btn.addEventListener( 'click', ( event ) => {
         event.stopPropagation();
-        popup.remove();
-        document.removeEventListener( 'click', closeOnOutsideClick );
+        overlay.remove();
         onSelect( increment );
       } );
       popup.appendChild( btn );
     } );
 
-    container.appendChild( popup );
-
-    setTimeout( () => {
-      document.addEventListener( 'click', closeOnOutsideClick );
-    }, 0 );
+    overlay.appendChild( popup );
+    document.body.appendChild( overlay );
   };
 
   // Browser: expose on window namespace
