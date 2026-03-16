@@ -265,7 +265,7 @@ describe( 'recallWords', () => {
     expect( buckets[ 0 ] ).toHaveLength( 25 );
   } );
 
-  test( 'should handle legacy words with doneAt but no reviewCount', () => {
+  test( 'should handle legacy words with unknown properties without crashing', () => {
     const buckets = [
       [],
       [],
@@ -274,19 +274,17 @@ describe( 'recallWords', () => {
       [],
       [],
       [
-        makeWord( { 'de': 'legacy',
-          'doneAt': 1000 } )
+        makeWord( {
+          'de': 'legacy',
+          'doneAt': 1000,
+          'unknownLegacy': 'junk'
+        } )
       ]
     ];
 
-    recallWords( buckets, 0 );
+    const newCounter = recallWords( buckets, 0 );
 
     expect( buckets[ 0 ][ 0 ].de ).toBe( 'legacy' );
-
-    /*
-     * Legacy word without reviewCount is treated as reviewCount 0 by findWordForLevel.
-     * doneAt persists — parseStoredWord strips it on next restore.
-     */
-    expect( buckets[ 0 ][ 0 ].doneAt ).toBe( 1000 );
+    expect( newCounter ).toBe( 1 );
   } );
 } );

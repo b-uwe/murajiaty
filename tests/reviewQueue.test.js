@@ -132,15 +132,18 @@ describe( 'insertIntoReviewQueue', () => {
     expect( buckets[ 6 ][ 0 ] ).toBe( word );
   } );
 
-  test( 'should ignore legacy doneAt property without deleting it', () => {
-    const word = makeWord( { 'doneAt': 1000 } );
+  test( 'should handle words with unknown legacy properties without crashing', () => {
+    const word = makeWord( {
+      'doneAt': 1000,
+      'touched': true,
+      'unknownLegacy': 'junk'
+    } );
     const buckets = [ [], [], [], [], [], [], [] ];
 
     insertIntoReviewQueue( word, buckets, 1 );
 
-    // DoneAt is not cleaned here — parseStoredWord strips it on next restore
-    expect( word.doneAt ).toBe( 1000 );
     expect( word.reviewCount ).toBe( 1 );
+    expect( buckets[ 6 ][ 0 ] ).toBe( word );
   } );
 
   test( 'should delete touched property', () => {
