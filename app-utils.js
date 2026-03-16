@@ -304,6 +304,85 @@
     window.addEventListener( 'orientationchange', setViewportHeight );
   };
 
+  /**
+   * Parses a stored vocabulary word, keeping only known properties
+   * and discarding legacy fields like doneAt.
+   * @param {object} raw - The raw word object from localStorage
+   * @param {string} raw.de - German translation
+   * @param {string} raw.ar - Arabic word
+   * @param {string} raw.en - English translation
+   * @param {string} raw.es - Spanish translation
+   * @param {number} [raw.reviewCount] - Number of completed review cycles
+   * @returns {object} A clean word object with de, ar, en, es, and optional reviewCount
+   */
+  const parseStoredWord = ( { de, ar, en, es, reviewCount } ) => {
+    const word = {
+      de,
+      ar,
+      en,
+      es
+    };
+    if ( typeof reviewCount === 'number' ) {
+      word.reviewCount = reviewCount;
+    }
+    return word;
+  };
+
+  /**
+   * Creates a review quality popup with 3 options (bald/gut/sitzt) and appends
+   * it to the given container. Calls onSelect with the chosen increment (0/1/2).
+   * @param {HTMLElement} container - Parent element to append the popup to
+   * @param {Function} onSelect - Callback receiving the chosen increment value
+   */
+  const createReviewPopup = ( container, onSelect ) => {
+    const popup = document.createElement( 'div' );
+    popup.className = 'review-popup';
+
+    const options = [
+      {
+        'label': '🔁',
+        'increment': 0
+      },
+      {
+        'label': '👍',
+        'increment': 1
+      },
+      {
+        'label': '✨',
+        'increment': 2
+      }
+    ];
+
+    options.forEach( ( { label, increment } ) => {
+      const btn = document.createElement( 'button' );
+      btn.textContent = label;
+      btn.addEventListener( 'click', ( event ) => {
+        event.stopPropagation();
+        popup.remove();
+        onSelect( increment );
+      } );
+      popup.appendChild( btn );
+    } );
+
+    container.style.position = 'relative';
+    container.appendChild( popup );
+
+    /**
+     * Closes the popup when clicking outside of it
+     * @param {Event} event - The click event
+     */
+    const closeOnOutsideClick = ( event ) => {
+      if ( !popup.contains( event.target ) ) {
+        popup.remove();
+        document.removeEventListener( 'click', closeOnOutsideClick );
+      }
+    };
+
+    setTimeout( () => {
+      document.addEventListener( 'click', closeOnOutsideClick );
+    }, 0 );
+  };
+
   // Browser: expose on window namespace
   if ( typeof window !== 'undefined' ) {
     window.AppUtils = {
@@ -318,6 +397,8 @@
       calculateTargetLevel,
       insertIntoReviewQueue,
       recallWords,
+      parseStoredWord,
+      createReviewPopup,
       showStorageError,
       ensurePersistentStorage,
       setupViewport
@@ -338,6 +419,8 @@
       calculateTargetLevel,
       insertIntoReviewQueue,
       recallWords,
+      parseStoredWord,
+      createReviewPopup,
       showStorageError,
       ensurePersistentStorage,
       setupViewport

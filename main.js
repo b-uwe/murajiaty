@@ -27,10 +27,14 @@
   let buckets = [ [], [], [], [], [], [], [] ];
 
   // Node.js (Jest): use require; browser: use window namespace set by app-utils.js
+  /** @type {number} Global review counter for binary frequency distribution */
+  let reviewCounter = 0;
+
   const {
     flags, COMMON_ARABIC_DIACRITICS, ARABIC_FONTS,
     pickRandomArabicFont, shuffleArray, stripArabicDiacritics,
-    speakWord, buildLetterOverlayHTML, recallWords,
+    speakWord, buildLetterOverlayHTML, insertIntoReviewQueue, recallWords,
+    parseStoredWord, createReviewPopup,
     ensurePersistentStorage, showStorageError, setupViewport
   } = typeof window === 'undefined' ? require( './app-utils.js' ) : window.AppUtils;
 
@@ -154,10 +158,11 @@
   };
 
   /**
-   * Updates the local storage with the current buckets
+   * Updates the local storage with the current buckets and review counter
    */
   const updateStorage = () => {
     localStorage.setItem( 'murajiaty-buckets', JSON.stringify( buckets ) );
+    localStorage.setItem( 'murajiaty-review-counter', String( reviewCounter ) );
   };
 
   /**
@@ -266,28 +271,30 @@
   };
 
   /**
-   * When the user signals a correctly remembered word, put the card one bucket further out
+   * When the user signals a correctly remembered word, put the card one bucket further out.
+   * At the last bucket, shows a review quality popup instead of directly graduating.
    */
   const rememberedCorrectly = () => {
     const [ currentWord ] = buckets[ currentBucket ];
-    // Mark word as touched
     currentWord.touched = true;
 
-    // Determine the next bucket
     const nextBucket = currentBucket < buckets.length - 1 ? currentBucket + 1 : buckets.length - 1;
 
-    // Record when the word graduated to the DONE bucket for oldest-first recycling
     if ( nextBucket === buckets.length - 1 ) {
-      currentWord.doneAt = Date.now();
+      // Graduating to review queue: show popup for quality selection
+      buckets[ currentBucket ].shift();
+      createReviewPopup( successButton.parentElement, ( increment ) => {
+        insertIntoReviewQueue( currentWord, buckets, increment );
+        pickNextWord();
+        updateHeader();
+        updateStorage();
+      } );
+      return;
     }
 
-    // Add the word to the end of the next bucket
     buckets[ nextBucket ].push( currentWord );
-
-    // Remove the word from the start of the current bucket
     buckets[ currentBucket ].shift();
 
-    // Call the necessary functions
     pickNextWord();
     updateHeader();
     updateStorage();
@@ -372,31 +379,25 @@
 
   /**
    * Restores vocabulary buckets from localStorage into the module-level
-   * buckets variable, shuffles them, and recalls graduated words back
-   * into active rotation.
+   * buckets variable, shuffles them, loads the review counter, and
+   * recalls graduated words back into active rotation.
    * @returns {boolean} Whether stored buckets were found in localStorage
    */
   const restoreBucketsFromStorage = () => {
     const storedBuckets = localStorage.getItem( 'murajiaty-buckets' );
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
-        return bucket.map( ( { de, ar, en, es, doneAt } ) => {
-          const word = { de,
-            ar,
-            en,
-            es };
-          if ( doneAt ) {
-            word.doneAt = doneAt;
-          }
-          return word;
-        } );
+        return bucket.map( parseStoredWord );
       } );
 
       buckets = buckets.map( ( bucket ) => {
         return shuffleArray( [ ...bucket ] );
       } );
 
-      recallWords( buckets );
+      const storedCounter = localStorage.getItem( 'murajiaty-review-counter' );
+      reviewCounter = storedCounter ? Number( storedCounter ) : 0;
+      reviewCounter = recallWords( buckets, reviewCounter );
+      localStorage.setItem( 'murajiaty-review-counter', String( reviewCounter ) );
     }
     return storedBuckets !== null;
   };
