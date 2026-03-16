@@ -1,11 +1,13 @@
 /**
- * @file Tests for review queue functions: binary frequency level calculation
- * and review queue insertion with variable spacing.
+ * @file Tests for review queue functions: binary frequency level calculation,
+ * review queue insertion, level-based word finding, and stored word parsing.
  */
 
 const {
   calculateTargetLevel,
-  insertIntoReviewQueue
+  insertIntoReviewQueue,
+  findWordForLevel,
+  parseStoredWord
 } = require( '../app-utils.js' );
 
 describe( 'calculateTargetLevel', () => {
@@ -130,13 +132,15 @@ describe( 'insertIntoReviewQueue', () => {
     expect( buckets[ 6 ][ 0 ] ).toBe( word );
   } );
 
-  test( 'should delete legacy doneAt property', () => {
+  test( 'should ignore legacy doneAt property without deleting it', () => {
     const word = makeWord( { 'doneAt': 1000 } );
     const buckets = [ [], [], [], [], [], [], [] ];
 
     insertIntoReviewQueue( word, buckets, 1 );
 
-    expect( word ).not.toHaveProperty( 'doneAt' );
+    // DoneAt is not cleaned here — parseStoredWord strips it on next restore
+    expect( word.doneAt ).toBe( 1000 );
+    expect( word.reviewCount ).toBe( 1 );
   } );
 
   test( 'should delete touched property', () => {
@@ -155,5 +159,175 @@ describe( 'insertIntoReviewQueue', () => {
     insertIntoReviewQueue( word, buckets, 0 );
 
     expect( word.reviewCount ).toBe( 0 );
+  } );
+} );
+
+describe( 'findWordForLevel', () => {
+  /**
+   * Creates a minimal word object for testing.
+   * @param {object} overrides - Optional field overrides
+   * @returns {object} A vocabulary word object
+   */
+  const makeWord = ( overrides = {} ) => {
+    return {
+      'ar': 'كتاب',
+      'de': 'Buch',
+      'en': 'book',
+      'es': 'libro',
+      ...overrides
+    };
+  };
+
+  test( 'should find exact match for target level', () => {
+    const bucket = [
+      makeWord( { 'de': 'level0',
+        'reviewCount': 0 } ),
+      makeWord( { 'de': 'level2',
+        'reviewCount': 2 } ),
+      makeWord( { 'de': 'level1',
+        'reviewCount': 1 } )
+    ];
+
+    const result = findWordForLevel( bucket, 2 );
+
+    expect( result.de ).toBe( 'level2' );
+  } );
+
+  test( 'should fall back to lower level when target not found', () => {
+    const bucket = [
+      makeWord( { 'de': 'level0',
+        'reviewCount': 0 } ),
+      makeWord( { 'de': 'level1',
+        'reviewCount': 1 } )
+    ];
+
+    // Target level 3 not found, falls back to 1
+    const result = findWordForLevel( bucket, 3 );
+
+    expect( result.de ).toBe( 'level1' );
+  } );
+
+  test( 'should pick lowest reviewCount when all words are above target', () => {
+    const bucket = [
+      makeWord( { 'de': 'high',
+        'reviewCount': 5 } ),
+      makeWord( { 'de': 'higher',
+        'reviewCount': 8 } ),
+      makeWord( { 'de': 'mid',
+        'reviewCount': 3 } )
+    ];
+
+    // Target level 0, no words at 0..0, fallback picks lowest (3)
+    const result = findWordForLevel( bucket, 0 );
+
+    expect( result.de ).toBe( 'mid' );
+  } );
+
+  test( 'should treat missing reviewCount as level 0', () => {
+    const bucket = [
+      makeWord( { 'de': 'noCount' } ),
+      makeWord( { 'de': 'hasCount',
+        'reviewCount': 1 } )
+    ];
+
+    const result = findWordForLevel( bucket, 0 );
+
+    expect( result.de ).toBe( 'noCount' );
+  } );
+
+  test( 'should return undefined for empty bucket', () => {
+    const result = findWordForLevel( [], 0 );
+
+    expect( result ).toBeUndefined();
+  } );
+} );
+
+describe( 'parseStoredWord', () => {
+  test( 'should keep de, ar, en, es properties', () => {
+    const result = parseStoredWord( {
+      'de': 'Buch',
+      'ar': 'كتاب',
+      'en': 'book',
+      'es': 'libro'
+    } );
+
+    expect( result ).toEqual( {
+      'de': 'Buch',
+      'ar': 'كتاب',
+      'en': 'book',
+      'es': 'libro'
+    } );
+  } );
+
+  test( 'should preserve reviewCount when present', () => {
+    const result = parseStoredWord( {
+      'de': 'Buch',
+      'ar': 'كتاب',
+      'en': 'book',
+      'es': 'libro',
+      'reviewCount': 3
+    } );
+
+    expect( result.reviewCount ).toBe( 3 );
+  } );
+
+  test( 'should preserve reviewCount of 0', () => {
+    const result = parseStoredWord( {
+      'de': 'Buch',
+      'ar': 'كتاب',
+      'en': 'book',
+      'es': 'libro',
+      'reviewCount': 0
+    } );
+
+    expect( result.reviewCount ).toBe( 0 );
+  } );
+
+  test( 'should not include reviewCount when undefined', () => {
+    const result = parseStoredWord( {
+      'de': 'Buch',
+      'ar': 'كتاب',
+      'en': 'book',
+      'es': 'libro'
+    } );
+
+    expect( result ).not.toHaveProperty( 'reviewCount' );
+  } );
+
+  test( 'should strip legacy doneAt property', () => {
+    const result = parseStoredWord( {
+      'de': 'Buch',
+      'ar': 'كتاب',
+      'en': 'book',
+      'es': 'libro',
+      'doneAt': 1000
+    } );
+
+    expect( result ).not.toHaveProperty( 'doneAt' );
+  } );
+
+  test( 'should strip touched property', () => {
+    const result = parseStoredWord( {
+      'de': 'Buch',
+      'ar': 'كتاب',
+      'en': 'book',
+      'es': 'libro',
+      'touched': true
+    } );
+
+    expect( result ).not.toHaveProperty( 'touched' );
+  } );
+
+  test( 'should strip any unknown properties', () => {
+    const result = parseStoredWord( {
+      'de': 'Buch',
+      'ar': 'كتاب',
+      'en': 'book',
+      'es': 'libro',
+      'unknownField': 'junk',
+      'anotherJunk': 42
+    } );
+
+    expect( Object.keys( result ) ).toEqual( [ 'de', 'ar', 'en', 'es' ] );
   } );
 } );

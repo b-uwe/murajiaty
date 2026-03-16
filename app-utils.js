@@ -132,9 +132,6 @@
    * @returns {number} The target review level (0, 1, 2, ...)
    */
   const calculateTargetLevel = ( counter ) => {
-    if ( counter === 0 ) {
-      return 0;
-    }
     let level = 0;
     let value = counter;
     while ( value > 0 && value % 2 === 0 ) {
@@ -146,14 +143,13 @@
 
   /**
    * Inserts a graduated word into the review queue (last bucket) with
-   * updated reviewCount. Cleans up legacy and transient properties.
+   * updated reviewCount. Cleans up transient properties.
    * @param {object} word - The vocabulary word to insert
    * @param {Array<Array>} targetBuckets - The bucket structure
    * @param {number} increment - How much to add to reviewCount (0=bald, 1=gut, 2=sitzt)
    */
   const insertIntoReviewQueue = ( word, targetBuckets, increment ) => {
     word.reviewCount = ( word.reviewCount || 0 ) + increment;
-    delete word.doneAt;
     delete word.touched;
     targetBuckets[ targetBuckets.length - 1 ].push( word );
   };
@@ -166,6 +162,9 @@
    * @returns {object|undefined} The matched word, or undefined if bucket is empty
    */
   const findWordForLevel = ( bucket, targetLevel ) => {
+    if ( bucket.length === 0 ) {
+      return bucket[ 0 ];
+    }
     for ( let level = targetLevel; level >= 0; level-- ) {
       const found = bucket.find( ( w ) => {
         return ( w.reviewCount || 0 ) === level;
@@ -175,9 +174,9 @@
       }
     }
     // Fallback: pick the word with the lowest reviewCount
-    return [ ...bucket ].sort( ( a, b ) => {
-      return ( a.reviewCount || 0 ) - ( b.reviewCount || 0 );
-    } )[ 0 ];
+    return bucket.reduce( ( min, w ) => {
+      return ( w.reviewCount || 0 ) < ( min.reviewCount || 0 ) ? w : min;
+    } );
   };
 
   /**
@@ -216,7 +215,6 @@
       }
       const idx = lastBucket.indexOf( word );
       lastBucket.splice( idx, 1 );
-      delete word.doneAt;
       targetBuckets[ 0 ].push( word );
     }
 
@@ -338,6 +336,17 @@
     const popup = document.createElement( 'div' );
     popup.className = 'review-popup';
 
+    /**
+     * Closes the popup when clicking outside of it
+     * @param {Event} event - The click event
+     */
+    const closeOnOutsideClick = ( event ) => {
+      if ( !popup.contains( event.target ) ) {
+        popup.remove();
+        document.removeEventListener( 'click', closeOnOutsideClick );
+      }
+    };
+
     const options = [
       {
         'label': '🔁',
@@ -359,24 +368,13 @@
       btn.addEventListener( 'click', ( event ) => {
         event.stopPropagation();
         popup.remove();
+        document.removeEventListener( 'click', closeOnOutsideClick );
         onSelect( increment );
       } );
       popup.appendChild( btn );
     } );
 
-    container.style.position = 'relative';
     container.appendChild( popup );
-
-    /**
-     * Closes the popup when clicking outside of it
-     * @param {Event} event - The click event
-     */
-    const closeOnOutsideClick = ( event ) => {
-      if ( !popup.contains( event.target ) ) {
-        popup.remove();
-        document.removeEventListener( 'click', closeOnOutsideClick );
-      }
-    };
 
     setTimeout( () => {
       document.addEventListener( 'click', closeOnOutsideClick );
@@ -396,6 +394,7 @@
       buildLetterOverlayHTML,
       calculateTargetLevel,
       insertIntoReviewQueue,
+      findWordForLevel,
       recallWords,
       parseStoredWord,
       createReviewPopup,
@@ -418,6 +417,7 @@
       buildLetterOverlayHTML,
       calculateTargetLevel,
       insertIntoReviewQueue,
+      findWordForLevel,
       recallWords,
       parseStoredWord,
       createReviewPopup,

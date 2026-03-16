@@ -276,8 +276,10 @@
    */
   const rememberedCorrectly = () => {
     const [ currentWord ] = buckets[ currentBucket ];
+    // Mark word as touched
     currentWord.touched = true;
 
+    // Determine the next bucket
     const nextBucket = currentBucket < buckets.length - 1 ? currentBucket + 1 : buckets.length - 1;
 
     if ( nextBucket === buckets.length - 1 ) {
@@ -292,9 +294,12 @@
       return;
     }
 
+    // Add the word to the end of the next bucket
     buckets[ nextBucket ].push( currentWord );
+    // Remove the word from the start of the current bucket
     buckets[ currentBucket ].shift();
 
+    // Call the necessary functions
     pickNextWord();
     updateHeader();
     updateStorage();

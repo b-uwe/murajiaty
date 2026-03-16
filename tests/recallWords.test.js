@@ -283,7 +283,10 @@ describe( 'recallWords', () => {
 
     expect( buckets[ 0 ][ 0 ].de ).toBe( 'legacy' );
 
-    // Legacy word without reviewCount is treated as reviewCount 0
-    expect( buckets[ 0 ][ 0 ] ).not.toHaveProperty( 'doneAt' );
+    /*
+     * Legacy word without reviewCount is treated as reviewCount 0 by findWordForLevel.
+     * doneAt persists — parseStoredWord strips it on next restore.
+     */
+    expect( buckets[ 0 ][ 0 ].doneAt ).toBe( 1000 );
   } );
 } );

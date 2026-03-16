@@ -25,6 +25,7 @@
 }
 
 body {
+  position: relative;
   background: #1a1a1a;
   color: #e0e0e0;
   min-height: calc( 100dvh - 2rem );
