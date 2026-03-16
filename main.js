@@ -300,7 +300,7 @@
     const [ currentWord ] = buckets[ currentBucket ];
     const trgtBucket = currentBucket > 0 ? currentBucket - 1 : 0;
 
-    // Add the word to the end of the next bucket
+    // Add the word to the end of the target (previous) bucket
     buckets[ trgtBucket ].push( currentWord );
 
     // Remove the word from the start of the current bucket
