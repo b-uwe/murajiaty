@@ -27,116 +27,16 @@
   let buckets = [ [], [], [], [], [], [], [] ];
 
   // Node.js (Jest): use require; browser: use window namespace set by app-utils.js
+  /** @type {number} Global review counter for binary frequency distribution */
+  let reviewCounter = 0;
+
   const {
     flags, COMMON_ARABIC_DIACRITICS, ARABIC_FONTS,
     pickRandomArabicFont, shuffleArray, stripArabicDiacritics,
-    speakWord, buildLetterOverlayHTML, recallWords,
+    speakWord, buildLetterOverlayHTML, insertIntoReviewQueue, recallWords,
+    parseStoredWord, createReviewPopup,
     ensurePersistentStorage, showStorageError, setupViewport
   } = typeof window === 'undefined' ? require( './app-utils.js' ) : window.AppUtils;
-
-  /**
-   * Sets up the Arabic input interface by creating DOM elements and
-   * rendering them into mainElement.
-   * @param {object} vocabulary - the word or phrase with all translations
-   * @returns {object} Key DOM elements for event wiring: { relativeDiv, overlay, input }
-   */
-  const setupArabicInputDOM = ( vocabulary ) => {
-    const labelLang = Math.floor( Math.random() * 3 );
-    const label = document.createElement( 'div' );
-    label.className = 'arabic-label';
-    label.innerHTML = `${flags[ labelLang ]}<br/>${vocabulary[ [ 'es', 'de', 'en' ][ labelLang ] ]}`;
-
-    // Relative container for overlay + input
-    const relativeDiv = document.createElement( 'div' );
-    relativeDiv.className = 'arabic-input-relative';
-    relativeDiv.style.fontFamily = pickRandomArabicFont();
-
-    const overlay = document.createElement( 'div' );
-    overlay.id = 'arabicInputOverlay';
-
-    const input = document.createElement( 'input' );
-    input.type = 'text';
-    input.id = 'arabicInput';
-    input.lang = 'ar';
-    input.autocomplete = 'off';
-    input.spellcheck = false;
-    input.style.opacity = 0;
-
-    const wrapper = document.createElement( 'div' );
-
-    relativeDiv.appendChild( overlay );
-    relativeDiv.appendChild( input );
-    wrapper.appendChild( label );
-    wrapper.appendChild( relativeDiv );
-    mainElement.innerHTML = '';
-    mainElement.appendChild( wrapper );
-
-    return { relativeDiv,
-      overlay,
-      input };
-  };
-
-  /**
-   * Wires event listeners and input behavior for the Arabic text input interface.
-   * Delegates DOM creation to setupArabicInputDOM.
-   * @param {object} vocabulary - the word or phrase to learn as an object with all translations
-   */
-  const renderArabicInput = ( vocabulary ) => {
-    const { relativeDiv, overlay, input } = setupArabicInputDOM( vocabulary );
-
-    input.addEventListener( 'focus', () => {
-      input.style.position = 'fixed';
-      input.style.opacity = 0;
-      input.style.height = 0;
-      input.style.width = 0;
-      input.style.top = '100%';
-      setTimeout( () => {
-        input.scrollIntoView();
-
-        successButton.disabled = false;
-        failButton.disabled = false;
-      }, 100 );
-    } );
-
-    const solution = stripArabicDiacritics( vocabulary.ar );
-
-    /**
-     * Updates the input overlay with color-coded comparison of user input vs solution
-     */
-    const updateOverlay = () => {
-      const userInput = stripArabicDiacritics( input.value );
-      let shownText = '';
-
-      for ( let i = 0; i < userInput.length || i < solution.length; i++ ) {
-        const uc = userInput[ i ] || '';
-        const sc = solution[ i ] || '';
-        if ( uc === sc ) {
-          shownText += `<span class="input-correct">${uc}</span>`;
-        } else {
-          shownText += `<span class="input-wrong">${uc}</span>`;
-        }
-      }
-
-      if ( solution === stripArabicDiacritics( input.value ) ) {
-        shownText += '🎉';
-        speakWord( vocabulary.ar );
-      }
-
-      overlay.innerHTML = shownText;
-      overlay.style.color = 'inherit';
-
-      relativeDiv.scrollTo( -overlay.scrollWidth, 0 );
-    };
-
-    input.addEventListener( 'input', () => {
-      updateOverlay();
-    } );
-
-    updateOverlay();
-
-    // Auto-focus the input field so user can start typing immediately
-    input.focus();
-  };
 
   /**
    * Updates the header with the current bucket and word count
@@ -154,10 +54,11 @@
   };
 
   /**
-   * Updates the local storage with the current buckets
+   * Updates the local storage with the current buckets and review counter
    */
   const updateStorage = () => {
     localStorage.setItem( 'murajiaty-buckets', JSON.stringify( buckets ) );
+    localStorage.setItem( 'murajiaty-review-counter', String( reviewCounter ) );
   };
 
   /**
@@ -209,7 +110,11 @@
           mainElement.textContent = word.ar;
           break;
         case 4:
-          renderArabicInput( word );
+          window.ArabicInput.render( word, {
+            mainElement,
+            successButton,
+            failButton
+          } );
           break;
         default:
           mainElement.textContent = stripArabicDiacritics( word.ar );
@@ -239,25 +144,25 @@
    */
   const flipWord = () => {
     const [ currentWord ] = buckets[ currentBucket ];
-
-    if ( currentWord ) {
-      // Toggle between 'de' and 'ar' representation
-      if ( currentSide === 'de' ) {
-        // Show Arabic
-        mainElement.textContent = currentWord.ar;
-        currentSide = 'ar';
-        mainElement.classList.add( 'ar' );
-        mainElement.classList.remove( 'de' );
-        mainElement.style.fontFamily = pickRandomArabicFont();
-        speakWord( currentWord.ar );
-      } else {
-        // Show German
-        mainElement.textContent = currentWord.de;
-        currentSide = 'de';
-        mainElement.classList.add( 'de' );
-        mainElement.classList.remove( 'ar' );
-        mainElement.style.fontFamily = '';
-      }
+    if ( !currentWord ) {
+      return;
+    }
+    // Toggle between 'de' and 'ar' representation
+    if ( currentSide === 'de' ) {
+      // Show Arabic
+      mainElement.textContent = currentWord.ar;
+      currentSide = 'ar';
+      mainElement.classList.add( 'ar' );
+      mainElement.classList.remove( 'de' );
+      mainElement.style.fontFamily = pickRandomArabicFont();
+      speakWord( currentWord.ar );
+    } else {
+      // Show German
+      mainElement.textContent = currentWord.de;
+      currentSide = 'de';
+      mainElement.classList.add( 'de' );
+      mainElement.classList.remove( 'ar' );
+      mainElement.style.fontFamily = '';
     }
 
     speakButton.disabled = false;
@@ -266,24 +171,37 @@
   };
 
   /**
-   * When the user signals a correctly remembered word, put the card one bucket further out
+   * When the user signals a correctly remembered word, put the card one bucket further out.
+   * At the last bucket, shows a review quality popup instead of directly graduating.
    */
   const rememberedCorrectly = () => {
     const [ currentWord ] = buckets[ currentBucket ];
-    // Mark word as touched
-    currentWord.touched = true;
+    if ( !currentWord ) {
+      return;
+    }
 
     // Determine the next bucket
     const nextBucket = currentBucket < buckets.length - 1 ? currentBucket + 1 : buckets.length - 1;
 
-    // Record when the word graduated to the DONE bucket for oldest-first recycling
     if ( nextBucket === buckets.length - 1 ) {
-      currentWord.doneAt = Date.now();
+      // Graduating to review queue: show popup for quality selection
+      createReviewPopup( ( increment ) => {
+        // Mark word as touched
+        currentWord.touched = true;
+        // Remove the word from the start of the current bucket
+        buckets[ currentBucket ].shift();
+        insertIntoReviewQueue( currentWord, buckets, increment );
+        pickNextWord();
+        updateHeader();
+        updateStorage();
+      } );
+      return;
     }
 
+    // Mark word as touched
+    currentWord.touched = true;
     // Add the word to the end of the next bucket
     buckets[ nextBucket ].push( currentWord );
-
     // Remove the word from the start of the current bucket
     buckets[ currentBucket ].shift();
 
@@ -298,9 +216,12 @@
    */
   const rememberedIncorrectly = () => {
     const [ currentWord ] = buckets[ currentBucket ];
+    if ( !currentWord ) {
+      return;
+    }
     const trgtBucket = currentBucket > 0 ? currentBucket - 1 : 0;
 
-    // Add the word to the end of the next bucket
+    // Add the word to the end of the target (previous) bucket
     buckets[ trgtBucket ].push( currentWord );
 
     // Remove the word from the start of the current bucket
@@ -372,31 +293,21 @@
 
   /**
    * Restores vocabulary buckets from localStorage into the module-level
-   * buckets variable, shuffles them, and recalls graduated words back
-   * into active rotation.
+   * buckets variable, shuffles them, loads the review counter, and
+   * recalls graduated words back into active rotation.
    * @returns {boolean} Whether stored buckets were found in localStorage
    */
   const restoreBucketsFromStorage = () => {
     const storedBuckets = localStorage.getItem( 'murajiaty-buckets' );
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
-        return bucket.map( ( { de, ar, en, es, doneAt } ) => {
-          const word = { de,
-            ar,
-            en,
-            es };
-          if ( doneAt ) {
-            word.doneAt = doneAt;
-          }
-          return word;
-        } );
+        return shuffleArray( bucket.map( parseStoredWord ) );
       } );
 
-      buckets = buckets.map( ( bucket ) => {
-        return shuffleArray( [ ...bucket ] );
-      } );
-
-      recallWords( buckets );
+      const storedCounter = localStorage.getItem( 'murajiaty-review-counter' );
+      reviewCounter = storedCounter ? Number( storedCounter ) : 0;
+      reviewCounter = recallWords( buckets, reviewCounter );
+      localStorage.setItem( 'murajiaty-review-counter', String( reviewCounter ) );
     }
     return storedBuckets !== null;
   };

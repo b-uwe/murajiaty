@@ -125,16 +125,72 @@
   };
 
   /**
-   * Recalls words from the DONE bucket into the first bucket to maintain
-   * 25 actively-cycling words. Picks the oldest-graduated words first
-   * (by doneAt timestamp) and strips doneAt before recycling.
-   * @param {Array<Array>} targetBuckets - The bucket structure to operate on
-   * @returns {void}
+   * Calculates the target review level from a counter value using
+   * binary frequency distribution (trailing zeros in binary representation).
+   * Level 0 appears 50% of the time, level 1 at 25%, level 2 at 12.5%, etc.
+   * @param {number} counter - The global review counter value
+   * @returns {number} The target review level (0, 1, 2, ...)
    */
-  const recallWords = ( targetBuckets ) => {
+  const calculateTargetLevel = ( counter ) => {
+    let level = 0;
+    let value = counter;
+    while ( value > 0 && value % 2 === 0 ) {
+      level++;
+      value = Math.floor( value / 2 );
+    }
+    return level;
+  };
+
+  /**
+   * Inserts a graduated word into the review queue (last bucket) with
+   * updated reviewCount. Cleans up transient properties.
+   * @param {object} word - The vocabulary word to insert
+   * @param {Array<Array>} targetBuckets - The bucket structure
+   * @param {number} increment - How much to add to reviewCount (0=bald, 1=gut, 2=sitzt)
+   */
+  const insertIntoReviewQueue = ( word, targetBuckets, increment ) => {
+    word.reviewCount = ( word.reviewCount || 0 ) + increment;
+    delete word.touched;
+    targetBuckets[ targetBuckets.length - 1 ].push( word );
+  };
+
+  /**
+   * Finds a word in the bucket matching the target reviewCount level.
+   * Falls back to lower levels, then to the lowest available reviewCount.
+   * @param {Array<object>} bucket - The DONE bucket to search
+   * @param {number} targetLevel - The desired reviewCount level
+   * @returns {object|undefined} The matched word, or undefined if bucket is empty
+   */
+  const findWordForLevel = ( bucket, targetLevel ) => {
+    if ( bucket.length === 0 ) {
+      return bucket[ 0 ];
+    }
+    for ( let level = targetLevel; level >= 0; level-- ) {
+      const found = bucket.find( ( w ) => {
+        return ( w.reviewCount || 0 ) === level;
+      } );
+      if ( found ) {
+        return found;
+      }
+    }
+    // Fallback: pick the word with the lowest reviewCount
+    return bucket.reduce( ( min, w ) => {
+      return ( w.reviewCount || 0 ) < ( min.reviewCount || 0 ) ? w : min;
+    } );
+  };
+
+  /**
+   * Recalls words from the DONE bucket into the first bucket to maintain
+   * 25 actively-cycling words. Uses binary frequency distribution to select
+   * words by reviewCount level: level 0 at 50%, level 1 at 25%, etc.
+   * @param {Array<Array>} targetBuckets - The bucket structure to operate on
+   * @param {number} reviewCounter - The current global review counter
+   * @returns {number} The updated review counter after pulling words
+   */
+  const recallWords = ( targetBuckets, reviewCounter ) => {
     const lastBucket = targetBuckets[ targetBuckets.length - 1 ];
     if ( lastBucket.length === 0 ) {
-      return;
+      return reviewCounter;
     }
 
     // 25 = target number of words actively cycling through non-DONE buckets
@@ -146,21 +202,23 @@
 
     const wordsNeeded = 25 - activeWordCount;
     if ( wordsNeeded <= 0 ) {
-      return;
+      return reviewCounter;
     }
 
-    const sorted = [ ...lastBucket ].sort( ( a, b ) => {
-      return a.doneAt - b.doneAt;
-    } );
-
-    const toRecycle = sorted.slice( 0, wordsNeeded );
-
-    toRecycle.forEach( ( word ) => {
+    let counter = reviewCounter;
+    for ( let i = 0; i < wordsNeeded && lastBucket.length > 0; i++ ) {
+      counter++;
+      const targetLevel = calculateTargetLevel( counter );
+      const word = findWordForLevel( lastBucket, targetLevel );
+      if ( !word ) {
+        break;
+      }
       const idx = lastBucket.indexOf( word );
       lastBucket.splice( idx, 1 );
-      delete word.doneAt;
       targetBuckets[ 0 ].push( word );
-    } );
+    }
+
+    return counter;
   };
 
   /**
@@ -244,6 +302,76 @@
     window.addEventListener( 'orientationchange', setViewportHeight );
   };
 
+  /**
+   * Parses a stored vocabulary word, keeping only known properties
+   * and discarding legacy fields like doneAt.
+   * @param {object} raw - The raw word object from localStorage
+   * @param {string} raw.de - German translation
+   * @param {string} raw.ar - Arabic word
+   * @param {string} raw.en - English translation
+   * @param {string} raw.es - Spanish translation
+   * @param {number} [raw.reviewCount] - Number of completed review cycles
+   * @returns {object} A clean word object with de, ar, en, es, and optional reviewCount
+   */
+  const parseStoredWord = ( { de, ar, en, es, reviewCount } ) => {
+    const word = {
+      de,
+      ar,
+      en,
+      es
+    };
+    if ( typeof reviewCount === 'number' ) {
+      word.reviewCount = reviewCount;
+    }
+    return word;
+  };
+
+  /**
+   * Shows a full-screen overlay with 3 review quality options (bald/gut/sitzt).
+   * Clicking outside the popup dismisses it without side effects.
+   * @param {Function} onSelect - Callback receiving the chosen increment value
+   */
+  const createReviewPopup = ( onSelect ) => {
+    const overlay = document.createElement( 'div' );
+    overlay.className = 'review-overlay';
+
+    const popup = document.createElement( 'div' );
+    popup.className = 'review-popup';
+
+    overlay.addEventListener( 'click', () => {
+      overlay.remove();
+    } );
+
+    const options = [
+      {
+        'label': '🔁',
+        'increment': 0
+      },
+      {
+        'label': '👍',
+        'increment': 1
+      },
+      {
+        'label': '✨',
+        'increment': 2
+      }
+    ];
+
+    options.forEach( ( { label, increment } ) => {
+      const btn = document.createElement( 'button' );
+      btn.textContent = label;
+      btn.addEventListener( 'click', ( event ) => {
+        event.stopPropagation();
+        overlay.remove();
+        onSelect( increment );
+      } );
+      popup.appendChild( btn );
+    } );
+
+    overlay.appendChild( popup );
+    document.body.appendChild( overlay );
+  };
+
   // Browser: expose on window namespace
   if ( typeof window !== 'undefined' ) {
     window.AppUtils = {
@@ -255,7 +383,12 @@
       stripArabicDiacritics,
       speakWord,
       buildLetterOverlayHTML,
+      calculateTargetLevel,
+      insertIntoReviewQueue,
+      findWordForLevel,
       recallWords,
+      parseStoredWord,
+      createReviewPopup,
       showStorageError,
       ensurePersistentStorage,
       setupViewport
@@ -273,7 +406,12 @@
       stripArabicDiacritics,
       speakWord,
       buildLetterOverlayHTML,
+      calculateTargetLevel,
+      insertIntoReviewQueue,
+      findWordForLevel,
       recallWords,
+      parseStoredWord,
+      createReviewPopup,
       showStorageError,
       ensurePersistentStorage,
       setupViewport
