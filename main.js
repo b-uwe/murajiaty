@@ -276,6 +276,9 @@
    */
   const rememberedCorrectly = () => {
     const [ currentWord ] = buckets[ currentBucket ];
+    if ( !currentWord ) {
+      return;
+    }
     // Mark word as touched
     currentWord.touched = true;
 
@@ -285,7 +288,7 @@
     if ( nextBucket === buckets.length - 1 ) {
       // Graduating to review queue: show popup for quality selection
       buckets[ currentBucket ].shift();
-      createReviewPopup( successButton.parentElement, ( increment ) => {
+      createReviewPopup( successButton, ( increment ) => {
         insertIntoReviewQueue( currentWord, buckets, increment );
         pickNextWord();
         updateHeader();
@@ -310,6 +313,9 @@
    */
   const rememberedIncorrectly = () => {
     const [ currentWord ] = buckets[ currentBucket ];
+    if ( !currentWord ) {
+      return;
+    }
     const trgtBucket = currentBucket > 0 ? currentBucket - 1 : 0;
 
     // Add the word to the end of the target (previous) bucket
@@ -392,11 +398,7 @@
     const storedBuckets = localStorage.getItem( 'murajiaty-buckets' );
     if ( storedBuckets ) {
       buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
-        return bucket.map( parseStoredWord );
-      } );
-
-      buckets = buckets.map( ( bucket ) => {
-        return shuffleArray( [ ...bucket ] );
+        return shuffleArray( bucket.map( parseStoredWord ) );
       } );
 
       const storedCounter = localStorage.getItem( 'murajiaty-review-counter' );
