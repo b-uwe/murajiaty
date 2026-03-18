@@ -155,37 +155,73 @@
   };
 
   /**
-   * Finds a word in the bucket matching the target reviewCount level.
-   * Falls back to lower levels, then to the lowest available reviewCount.
+   * Finds a word in the bucket matching the target reviewCount level,
+   * subject to a minimum population threshold per level.
+   *
+   * Strategy: only pull from a level that has at least 5 words. This
+   * prevents the same few words from being hammered when the review
+   * queue is still sparsely populated. When the target level is too
+   * thin, fall back directly to level 0 (skipping all intermediate
+   * levels) to avoid cascading pulls. If level 0 is also below the
+   * threshold, return null to signal "skip this pull".
    * @param {Array<object>} bucket - The DONE bucket to search
    * @param {number} targetLevel - The desired reviewCount level
-   * @returns {object|null} The matched word, or null if bucket is empty
+   * @returns {object|null} The matched word, or null if no level meets the threshold
    */
   const findWordForLevel = ( bucket, targetLevel ) => {
     if ( bucket.length === 0 ) {
       return null;
     }
-    for ( let level = targetLevel; level >= 0; level-- ) {
-      const found = bucket.find( ( w ) => {
+
+    /**
+     * Collects all words at the given reviewCount level.
+     * @param {number} level - The reviewCount value to match
+     * @returns {Array<object>} Words whose reviewCount equals level
+     */
+    const wordsAtLevel = ( level ) => {
+      return bucket.filter( ( w ) => {
         return ( w.reviewCount || 0 ) === level;
       } );
-      if ( found ) {
-        return found;
+    };
+
+    /*
+     * Minimum number of words a level must have before we pull from it.
+     * Prevents hammering the same few words in a sparsely populated queue.
+     */
+    const minPopulation = 5;
+
+    // Try the target level first
+    const atTarget = wordsAtLevel( targetLevel );
+    if ( atTarget.length >= minPopulation ) {
+      return atTarget[ 0 ];
+    }
+
+    /*
+     * Direct fallback to level 0 — skip intermediate levels entirely
+     * to avoid the cascade that causes constant repetition of words
+     * at every level between target and 0.
+     */
+    if ( targetLevel > 0 ) {
+      const atZero = wordsAtLevel( 0 );
+      if ( atZero.length >= minPopulation ) {
+        return atZero[ 0 ];
       }
     }
-    // Fallback: pick the word with the lowest reviewCount
-    return bucket.reduce( ( min, w ) => {
-      return ( w.reviewCount || 0 ) < ( min.reviewCount || 0 ) ? w : min;
-    } );
+
+    // No level meets the minimum population — skip this pull
+    return null;
   };
 
   /**
    * Recalls words from the DONE bucket into the first bucket to maintain
    * 25 actively-cycling words. Uses binary frequency distribution to select
    * words by reviewCount level: level 0 at 50%, level 1 at 25%, etc.
+   * When no level meets the minimum population threshold, the pull slot
+   * is skipped — the counter advances but no word moves. This prevents
+   * hammering the same few words when the review queue is sparsely populated.
    * @param {Array<Array>} targetBuckets - The bucket structure to operate on
    * @param {number} reviewCounter - The current global review counter
-   * @returns {number} The updated review counter after pulling words
+   * @returns {number} The updated review counter after pull attempts
    */
   const recallWords = ( targetBuckets, reviewCounter ) => {
     const lastBucket = targetBuckets[ targetBuckets.length - 1 ];
@@ -210,12 +246,16 @@
       counter++;
       const targetLevel = calculateTargetLevel( counter );
       const word = findWordForLevel( lastBucket, targetLevel );
-      if ( !word ) {
-        break;
+      /*
+       * When findWordForLevel returns null, no level met the minimum
+       * population threshold. Skip this slot — the counter still advances
+       * to maintain the binary frequency distribution across future calls.
+       */
+      if ( word ) {
+        const idx = lastBucket.indexOf( word );
+        lastBucket.splice( idx, 1 );
+        targetBuckets[ 0 ].push( word );
       }
-      const idx = lastBucket.indexOf( word );
-      lastBucket.splice( idx, 1 );
-      targetBuckets[ 0 ].push( word );
     }
 
     return counter;

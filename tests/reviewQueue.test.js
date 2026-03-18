@@ -181,65 +181,114 @@ describe( 'findWordForLevel', () => {
     };
   };
 
-  test( 'should find exact match for target level', () => {
+  /**
+   * Creates N words at a given reviewCount level.
+   * @param {number} count - Number of words to create
+   * @param {number} reviewCount - The reviewCount to assign
+   * @returns {Array<object>} Array of word objects
+   */
+  const makeWordsAtLevel = ( count, reviewCount ) => {
+    return Array.from( { 'length': count }, ( _, i ) => {
+      return makeWord( { 'de': `lvl${reviewCount}_${i}`,
+        reviewCount } );
+    } );
+  };
+
+  test( 'should pull from target level when it has >= 5 words', () => {
     const bucket = [
-      makeWord( { 'de': 'level0',
-        'reviewCount': 0 } ),
-      makeWord( { 'de': 'level2',
-        'reviewCount': 2 } ),
-      makeWord( { 'de': 'level1',
-        'reviewCount': 1 } )
+      ...makeWordsAtLevel( 5, 2 ),
+      ...makeWordsAtLevel( 5, 0 )
     ];
 
     const result = findWordForLevel( bucket, 2 );
 
-    expect( result.de ).toBe( 'level2' );
+    expect( result.reviewCount ).toBe( 2 );
   } );
 
-  test( 'should fall back to lower level when target not found', () => {
+  test( 'should fall back directly to level 0 when target level has < 5 words', () => {
     const bucket = [
-      makeWord( { 'de': 'level0',
-        'reviewCount': 0 } ),
-      makeWord( { 'de': 'level1',
-        'reviewCount': 1 } )
+      ...makeWordsAtLevel( 3, 2 ),
+      ...makeWordsAtLevel( 6, 0 )
     ];
 
-    // Target level 3 not found, falls back to 1
+    // Target level 2 has only 3 words (< 5), level 0 has 6 (>= 5)
+    const result = findWordForLevel( bucket, 2 );
+
+    expect( result.reviewCount ).toBe( 0 );
+  } );
+
+  test( 'should skip intermediate levels entirely when falling back', () => {
+    const bucket = [
+      ...makeWordsAtLevel( 2, 3 ),
+      ...makeWordsAtLevel( 8, 1 ),
+      ...makeWordsAtLevel( 6, 0 )
+    ];
+
+    /*
+     * Target level 3 has 2 words (< 5), level 1 has 8 (>= 5) but
+     * is skipped — falls directly to level 0 which also has >= 5.
+     */
     const result = findWordForLevel( bucket, 3 );
 
-    expect( result.de ).toBe( 'level1' );
+    expect( result.reviewCount ).toBe( 0 );
   } );
 
-  test( 'should pick lowest reviewCount when all words are above target', () => {
+  test( 'should return null when target and level 0 both have < 5 words', () => {
     const bucket = [
-      makeWord( { 'de': 'high',
-        'reviewCount': 5 } ),
-      makeWord( { 'de': 'higher',
-        'reviewCount': 8 } ),
-      makeWord( { 'de': 'mid',
-        'reviewCount': 3 } )
+      ...makeWordsAtLevel( 2, 2 ),
+      ...makeWordsAtLevel( 3, 0 )
     ];
 
-    // Target level 0, no words at 0..0, fallback picks lowest (3)
+    // Target level 2 has 2 (< 5), level 0 has 3 (< 5) — skip
+    const result = findWordForLevel( bucket, 2 );
+
+    expect( result ).toBeNull();
+  } );
+
+  test( 'should return null when target is level 0 and it has < 5 words', () => {
+    const bucket = makeWordsAtLevel( 4, 0 );
+
+    // Target IS level 0, only 4 words (< 5) — skip
     const result = findWordForLevel( bucket, 0 );
 
-    expect( result.de ).toBe( 'mid' );
+    expect( result ).toBeNull();
+  } );
+
+  test( 'should pull from level 0 when target is level 0 and it has >= 5 words', () => {
+    const bucket = makeWordsAtLevel( 5, 0 );
+
+    const result = findWordForLevel( bucket, 0 );
+
+    expect( result.reviewCount ).toBe( 0 );
   } );
 
   test( 'should treat missing reviewCount as level 0', () => {
     const bucket = [
-      makeWord( { 'de': 'noCount' } ),
-      makeWord( { 'de': 'hasCount',
-        'reviewCount': 1 } )
+      ...Array.from( { 'length': 5 }, ( _, i ) => {
+        return makeWord( { 'de': `noCount_${i}` } );
+      } ),
+      ...makeWordsAtLevel( 5, 1 )
     ];
 
     const result = findWordForLevel( bucket, 0 );
 
-    expect( result.de ).toBe( 'noCount' );
+    expect( result.de ).toBe( 'noCount_0' );
   } );
 
   test( 'should return null for empty bucket', () => {
     const result = findWordForLevel( [], 0 );
+
+    expect( result ).toBeNull();
+  } );
+
+  test( 'should return null when many words exist but none at target or level 0', () => {
+    const bucket = [
+      ...makeWordsAtLevel( 10, 3 ),
+      ...makeWordsAtLevel( 10, 5 )
+    ];
+
+    // Target level 1 has 0 words, level 0 has 0 words — skip
+    const result = findWordForLevel( bucket, 1 );
 
     expect( result ).toBeNull();
   } );
