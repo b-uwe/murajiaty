@@ -238,10 +238,10 @@ describe( 'findWordForLevel', () => {
     expect( result.de ).toBe( 'noCount' );
   } );
 
-  test( 'should return undefined for empty bucket', () => {
+  test( 'should return null for empty bucket', () => {
     const result = findWordForLevel( [], 0 );
 
-    expect( result ).toBeUndefined();
+    expect( result ).toBeNull();
   } );
 } );
 

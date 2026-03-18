@@ -159,11 +159,11 @@
    * Falls back to lower levels, then to the lowest available reviewCount.
    * @param {Array<object>} bucket - The DONE bucket to search
    * @param {number} targetLevel - The desired reviewCount level
-   * @returns {object|undefined} The matched word, or undefined if bucket is empty
+   * @returns {object|null} The matched word, or null if bucket is empty
    */
   const findWordForLevel = ( bucket, targetLevel ) => {
     if ( bucket.length === 0 ) {
-      return bucket[ 0 ];
+      return null;
     }
     for ( let level = targetLevel; level >= 0; level-- ) {
       const found = bucket.find( ( w ) => {
