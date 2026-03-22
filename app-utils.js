@@ -368,10 +368,12 @@
 
   /**
    * Shows a full-screen overlay with 3 review quality options (bald/gut/sitzt).
+   * Displays the word's current review count above the buttons.
    * Clicking outside the popup dismisses it without side effects.
    * @param {Function} onSelect - Callback receiving the chosen increment value
+   * @param {number} reviewCount - The word's current reviewCount
    */
-  const createReviewPopup = ( onSelect ) => {
+  const createReviewPopup = ( onSelect, reviewCount ) => {
     const overlay = document.createElement( 'div' );
     overlay.className = 'review-overlay';
 
@@ -381,6 +383,14 @@
     overlay.addEventListener( 'click', () => {
       overlay.remove();
     } );
+
+    const counter = document.createElement( 'div' );
+    counter.className = 'review-popup-counter';
+    counter.textContent = `× ${reviewCount}`;
+    popup.appendChild( counter );
+
+    const buttonRow = document.createElement( 'div' );
+    buttonRow.className = 'review-popup-buttons';
 
     const options = [
       {
@@ -405,9 +415,10 @@
         overlay.remove();
         onSelect( increment );
       } );
-      popup.appendChild( btn );
+      buttonRow.appendChild( btn );
     } );
 
+    popup.appendChild( buttonRow );
     overlay.appendChild( popup );
     document.body.appendChild( overlay );
   };

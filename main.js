@@ -194,7 +194,7 @@
         pickNextWord();
         updateHeader();
         updateStorage();
-      } );
+      }, currentWord.reviewCount || 0 );
       return;
     }
 
