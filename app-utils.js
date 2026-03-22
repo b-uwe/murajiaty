@@ -158,7 +158,7 @@
    * Finds a word in the bucket matching the target reviewCount level,
    * subject to a minimum population threshold per level.
    *
-   * Strategy: only pull from a level that has at least 5 words. This
+   * Strategy: only pull from a level that has at least 10 words. This
    * prevents the same few words from being hammered when the review
    * queue is still sparsely populated. When the target level is too
    * thin, fall back directly to level 0 (skipping all intermediate
@@ -188,7 +188,7 @@
      * Minimum number of words a level must have before we pull from it.
      * Prevents hammering the same few words in a sparsely populated queue.
      */
-    const minPopulation = 5;
+    const minPopulation = 10;
 
     // Try the target level first
     const atTarget = wordsAtLevel( targetLevel );
