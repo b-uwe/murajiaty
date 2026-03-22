@@ -281,6 +281,38 @@ describe( 'findWordForLevel', () => {
     expect( result ).toBeNull();
   } );
 
+  test( 'should return the first word at the target level (FIFO order)', () => {
+    const bucket = [
+      ...makeWordsAtLevel( 5, 0 ),
+      ...makeWordsAtLevel( 5, 1 )
+    ];
+
+    /*
+     * Level 0 has 5 words (de: lvl0_0 … lvl0_4). The function must
+     * return the first one in array order to preserve FIFO: older
+     * words (closer to the front) are recalled before newer ones.
+     */
+    const result = findWordForLevel( bucket, 0 );
+
+    expect( result.de ).toBe( 'lvl0_0' );
+  } );
+
+  test( 'should return the first level-0 word when falling back (FIFO order)', () => {
+    const bucket = [
+      ...makeWordsAtLevel( 2, 2 ),
+      ...makeWordsAtLevel( 6, 0 )
+    ];
+
+    /*
+     * Target level 2 is underpopulated (2 < 5), falls back to
+     * level 0 which has 6 words. Must return the first level-0
+     * word in array order (lvl0_0) to maintain FIFO recall.
+     */
+    const result = findWordForLevel( bucket, 2 );
+
+    expect( result.de ).toBe( 'lvl0_0' );
+  } );
+
   test( 'should return null when many words exist but none at target or level 0', () => {
     const bucket = [
       ...makeWordsAtLevel( 10, 3 ),

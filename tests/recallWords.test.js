@@ -279,6 +279,33 @@ describe( 'recallWords', () => {
     expect( newCounter ).toBe( 7 );
   } );
 
+  test( 'should recall oldest words first when DONE bucket preserves insertion order', () => {
+    const oldWords = makeWordsAtLevel( 5, 0, 'old' );
+    const newWords = makeWordsAtLevel( 5, 0, 'new' );
+
+    const buckets = [
+      Array.from( { 'length': 24 }, ( _, i ) => {
+        return makeWord( { 'de': `active${i}` } );
+      } ),
+      [],
+      [],
+      [],
+      [],
+      [],
+      [ ...oldWords, ...newWords ]
+    ];
+
+    /*
+     * Need 1 word. Counter 0→1 → target level 0. Level 0 has 10
+     * words (>= 5). The oldest word (old_rc0_0) sits at the front
+     * of the bucket — FIFO order ensures it is recalled first.
+     */
+    const newCounter = recallWords( buckets, 0 );
+
+    expect( buckets[ 0 ][ 24 ].de ).toBe( 'old_rc0_0' );
+    expect( newCounter ).toBe( 1 );
+  } );
+
   test( 'should handle legacy words with unknown properties without crashing', () => {
     const legacyWords = Array.from( { 'length': 5 }, ( _, i ) => {
       return makeWord( {
