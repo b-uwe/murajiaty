@@ -293,15 +293,19 @@
 
   /**
    * Restores vocabulary buckets from localStorage into the module-level
-   * buckets variable, shuffles them, loads the review counter, and
-   * recalls graduated words back into active rotation.
+   * buckets variable, shuffles active buckets, loads the review counter,
+   * and recalls graduated words back into active rotation.
+   * The DONE bucket (last) is NOT shuffled so that older graduates
+   * remain at the front and are recalled first (FIFO order).
    * @returns {boolean} Whether stored buckets were found in localStorage
    */
   const restoreBucketsFromStorage = () => {
     const storedBuckets = localStorage.getItem( 'murajiaty-buckets' );
     if ( storedBuckets ) {
-      buckets = JSON.parse( storedBuckets ).map( ( bucket ) => {
-        return shuffleArray( bucket.map( parseStoredWord ) );
+      const parsed = JSON.parse( storedBuckets );
+      buckets = parsed.map( ( bucket, idx ) => {
+        const words = bucket.map( parseStoredWord );
+        return idx < parsed.length - 1 ? shuffleArray( words ) : words;
       } );
 
       const storedCounter = localStorage.getItem( 'murajiaty-review-counter' );
