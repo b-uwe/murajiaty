@@ -47,13 +47,14 @@
   };
 
   /**
-   * Maps a bucket index (0-5) to the prompt-side language of the card.
-   * Buckets 0/1/2 -> DE/EN/ES; buckets 3/4/5 -> AR (bucket 4 via typing widget).
+   * Maps a bucket index to its prompt-side language. Contract: buckets 0/1/2
+   * use DE/EN/ES; every bucket >= 3 uses AR (including the bucket-4 typing
+   * widget and the bucket-5 graduated review).
    * @param {number} bucket - Zero-based bucket index.
    * @returns {string} One of 'de' | 'en' | 'es' | 'ar'.
    */
   const promptLangFor = ( bucket ) => {
-    return [ 'de', 'en', 'es' ][ bucket ] || 'ar';
+    return bucket < 3 ? [ 'de', 'en', 'es' ][ bucket ] : 'ar';
   };
 
   /**
