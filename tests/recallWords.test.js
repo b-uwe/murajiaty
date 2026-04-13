@@ -83,7 +83,7 @@ describe( 'recallWords', () => {
     expect( newCounter ).toBe( 5 );
   } );
 
-  test( 'should skip pull when no level meets the population threshold', () => {
+  test( 'should pull from level 0 even when population is below threshold', () => {
     const buckets = [
       Array.from( { 'length': 22 }, ( _, i ) => {
         return makeWord( { 'de': `active${i}` } );
@@ -96,12 +96,15 @@ describe( 'recallWords', () => {
       makeWordsAtLevel( 7, 0 )
     ];
 
-    // Only 7 words at level 0 (< 10 threshold), no other levels
+    /*
+     * Only 7 words at level 0 (< threshold). The threshold does not
+     * apply to level 0 — all 3 needed pulls succeed via the level-0
+     * fallback so the user always has something to review.
+     */
     const newCounter = recallWords( buckets, 0 );
 
-    // Counter advances 3 times (wordsNeeded=3) but no words pulled
-    expect( buckets[ 0 ] ).toHaveLength( 22 );
-    expect( buckets[ 6 ] ).toHaveLength( 7 );
+    expect( buckets[ 0 ] ).toHaveLength( 25 );
+    expect( buckets[ 6 ] ).toHaveLength( 4 );
     expect( newCounter ).toBe( 3 );
   } );
 
@@ -233,7 +236,7 @@ describe( 'recallWords', () => {
     expect( newCounter ).toBe( 8 );
   } );
 
-  test( 'should advance counter even when pulls are skipped', () => {
+  test( 'should advance counter when pulls are skipped because level 0 is empty', () => {
     const buckets = [
       Array.from( { 'length': 23 }, ( _, i ) => {
         return makeWord( { 'de': `active${i}` } );
@@ -243,10 +246,14 @@ describe( 'recallWords', () => {
       [],
       [],
       [],
-      makeWordsAtLevel( 5, 0 )
+      makeWordsAtLevel( 5, 2 )
     ];
 
-    // Need 2 words, but level 0 has only 5 (< 10). No pulls, counter still advances.
+    /*
+     * Need 2 words. Level 0 is empty and level 2 has only 5 words
+     * (below the threshold for non-zero levels). No pulls succeed;
+     * counter still advances for both slots.
+     */
     const newCounter = recallWords( buckets, 10 );
 
     expect( newCounter ).toBe( 12 );
@@ -254,7 +261,7 @@ describe( 'recallWords', () => {
     expect( buckets[ 6 ] ).toHaveLength( 5 );
   } );
 
-  test( 'should stop pulling when level drops below threshold mid-loop', () => {
+  test( 'should continue pulling from level 0 as it drops below the non-zero threshold', () => {
     const buckets = [
       Array.from( { 'length': 18 }, ( _, i ) => {
         return makeWord( { 'de': `active${i}` } );
@@ -268,15 +275,41 @@ describe( 'recallWords', () => {
     ];
 
     /*
-     * Need 7 words but level 0 starts with exactly 10. Counter 1 →
-     * target level 0: 10 >= 10 → pull (9 left). Now level 0 has 9 < 10,
-     * so all subsequent pull attempts return null. Only 1 word moved.
+     * Need 7 words; level 0 starts with 10. No threshold applies to
+     * level 0, so every pull succeeds until level 0 is drained to 3.
      */
     const newCounter = recallWords( buckets, 0 );
 
-    expect( buckets[ 0 ] ).toHaveLength( 19 );
-    expect( buckets[ 6 ] ).toHaveLength( 9 );
+    expect( buckets[ 0 ] ).toHaveLength( 25 );
+    expect( buckets[ 6 ] ).toHaveLength( 3 );
     expect( newCounter ).toBe( 7 );
+  } );
+
+  test( 'should still skip pulls from target level > 0 when below threshold', () => {
+    const buckets = [
+      Array.from( { 'length': 24 }, ( _, i ) => {
+        return makeWord( { 'de': `active${i}` } );
+      } ),
+      [],
+      [],
+      [],
+      [],
+      [],
+      makeWordsAtLevel( 5, 2 )
+    ];
+
+    /*
+     * Need 1 word. Starting counter 3 → next counter 4 → target level 2.
+     * Level 2 has only 5 words (< threshold) and level 0 is empty, so
+     * the pull is skipped even though 5 words exist in the DONE bucket.
+     * This proves the threshold still protects non-zero levels from
+     * being hammered.
+     */
+    const newCounter = recallWords( buckets, 3 );
+
+    expect( buckets[ 0 ] ).toHaveLength( 24 );
+    expect( buckets[ 6 ] ).toHaveLength( 5 );
+    expect( newCounter ).toBe( 4 );
   } );
 
   test( 'should recall oldest words first when DONE bucket preserves insertion order', () => {

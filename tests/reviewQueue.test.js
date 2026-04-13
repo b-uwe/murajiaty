@@ -233,25 +233,56 @@ describe( 'findWordForLevel', () => {
     expect( result.reviewCount ).toBe( 0 );
   } );
 
-  test( 'should return null when target and level 0 both have < 10 words', () => {
+  test( 'should fall back to level 0 even when it has < 10 words', () => {
     const bucket = [
       ...makeWordsAtLevel( 4, 2 ),
       ...makeWordsAtLevel( 7, 0 )
     ];
 
-    // Target level 2 has 4 (< 10), level 0 has 7 (< 10) — skip
+    /*
+     * Target level 2 has 4 (< 10), level 0 has 7 (< 10). The threshold
+     * does not apply to level 0 as a fallback — return the first level-0
+     * word (FIFO) so the user always has something to review.
+     */
     const result = findWordForLevel( bucket, 2 );
 
-    expect( result ).toBeNull();
+    expect( result.reviewCount ).toBe( 0 );
+    expect( result.de ).toBe( 'lvl0_0' );
   } );
 
-  test( 'should return null when target is level 0 and it has < 10 words', () => {
+  test( 'should pull from level 0 directly when it has < 10 words', () => {
     const bucket = makeWordsAtLevel( 9, 0 );
 
-    // Target IS level 0, only 9 words (< 10) — skip
+    /*
+     * Target IS level 0 with only 9 words. The threshold does not apply
+     * to level 0 — pull the oldest word.
+     */
     const result = findWordForLevel( bucket, 0 );
 
-    expect( result ).toBeNull();
+    expect( result.de ).toBe( 'lvl0_0' );
+  } );
+
+  test( 'should pull from level 0 directly when it has a single word', () => {
+    const bucket = makeWordsAtLevel( 1, 0 );
+
+    const result = findWordForLevel( bucket, 0 );
+
+    expect( result.de ).toBe( 'lvl0_0' );
+  } );
+
+  test( 'should still skip target level with < 10 words when level 0 has any word', () => {
+    const bucket = [
+      ...makeWordsAtLevel( 5, 2 ),
+      ...makeWordsAtLevel( 1, 0 )
+    ];
+
+    /*
+     * Target level 2 has 5 (< 10) — threshold protects it from hammering.
+     * Level 0 has just 1 word but no threshold applies: return it.
+     */
+    const result = findWordForLevel( bucket, 2 );
+
+    expect( result.reviewCount ).toBe( 0 );
   } );
 
   test( 'should pull from level 0 when target is level 0 and it has >= 10 words', () => {

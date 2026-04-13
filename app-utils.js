@@ -155,18 +155,21 @@
   };
 
   /**
-   * Finds a word in the bucket matching the target reviewCount level,
-   * subject to a minimum population threshold per level.
+   * Finds a word in the bucket matching the target reviewCount level.
    *
-   * Strategy: only pull from a level that has at least 10 words. This
-   * prevents the same few words from being hammered when the review
-   * queue is still sparsely populated. When the target level is too
-   * thin, fall back directly to level 0 (skipping all intermediate
-   * levels) to avoid cascading pulls. If level 0 is also below the
-   * threshold, return null to signal "skip this pull".
+   * Strategy:
+   * - Levels > 0 are gated by a minimum population threshold to prevent
+   *   hammering the same few words at a thinly populated higher level.
+   * - Level 0 is never gated: it is the entry level for recycling, has
+   *   no lower level to fall back to, and newly-graduated words are
+   *   what the binary-frequency design wants cycled back fastest.
+   *
+   * When the target level is > 0 and underpopulated, fall through
+   * directly to level 0 (skipping intermediate levels). If level 0 is
+   * also empty, return null to signal "skip this pull".
    * @param {Array<object>} bucket - The DONE bucket to search
    * @param {number} targetLevel - The desired reviewCount level
-   * @returns {object|null} The matched word, or null if no level meets the threshold
+   * @returns {object|null} The matched word, or null if none is available
    */
   const findWordForLevel = ( bucket, targetLevel ) => {
     if ( bucket.length === 0 ) {
@@ -185,31 +188,25 @@
     };
 
     /*
-     * Minimum number of words a level must have before we pull from it.
-     * Prevents hammering the same few words in a sparsely populated queue.
+     * Minimum words a level > 0 must have before we pull from it.
+     * Prevents hammering thin high-level populations.
      */
     const minPopulation = 10;
 
-    // Try the target level first
-    const atTarget = wordsAtLevel( targetLevel );
-    if ( atTarget.length >= minPopulation ) {
-      return atTarget[ 0 ];
-    }
-
-    /*
-     * Direct fallback to level 0 — skip intermediate levels entirely
-     * to avoid the cascade that causes constant repetition of words
-     * at every level between target and 0.
-     */
     if ( targetLevel > 0 ) {
-      const atZero = wordsAtLevel( 0 );
-      if ( atZero.length >= minPopulation ) {
-        return atZero[ 0 ];
+      const atTarget = wordsAtLevel( targetLevel );
+      if ( atTarget.length >= minPopulation ) {
+        return atTarget[ 0 ];
       }
     }
 
-    // No level meets the minimum population — skip this pull
-    return null;
+    /*
+     * Level-0 pull — used both as the direct path when targetLevel === 0
+     * and as the fallback when the non-zero target is underpopulated.
+     * No threshold: return the oldest level-0 word if any exist.
+     */
+    const atZero = wordsAtLevel( 0 );
+    return atZero[ 0 ] || null;
   };
 
   /**
