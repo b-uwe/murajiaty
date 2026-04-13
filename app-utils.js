@@ -80,6 +80,20 @@
   };
 
   /**
+   * Display text for a side of a vocabulary word; bucket 5 strips AR diacritics.
+   * @param {object} word - Vocabulary word with { de, en, es, ar }.
+   * @param {string} side - Language code ('de' | 'en' | 'es' | 'ar').
+   * @param {number} bucket - Current bucket index.
+   * @returns {string} Text to render.
+   */
+  const textForSide = ( word, side, bucket ) => {
+    if ( side === 'ar' && bucket === 5 ) {
+      return stripArabicDiacritics( word.ar );
+    }
+    return word[ side ];
+  };
+
+  /**
    * Speaks the given word using the Google Translate.
    * @param {string} word - The word to be spoken.
    */
@@ -439,6 +453,7 @@
       pickRandomArabicFont,
       promptLangFor,
       cycleOrderFor,
+      textForSide,
       shuffleArray,
       stripArabicDiacritics,
       speakWord,
@@ -464,6 +479,7 @@
       pickRandomArabicFont,
       promptLangFor,
       cycleOrderFor,
+      textForSide,
       shuffleArray,
       stripArabicDiacritics,
       speakWord,

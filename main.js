@@ -32,7 +32,7 @@
 
   const {
     flags, COMMON_ARABIC_DIACRITICS, ARABIC_FONTS,
-    pickRandomArabicFont, promptLangFor, cycleOrderFor,
+    pickRandomArabicFont, promptLangFor, cycleOrderFor, textForSide,
     shuffleArray, stripArabicDiacritics,
     speakWord, buildLetterOverlayHTML, insertIntoReviewQueue, recallWords,
     parseStoredWord, createReviewPopup,
@@ -153,21 +153,6 @@
   };
 
   /**
-   * Returns the display text for the given side of the current word.
-   * Bucket 5 strips Arabic diacritics to match its graduated-review style
-   * (see pickNextWord's default case).
-   * @param {object} word - The current vocabulary word.
-   * @param {string} side - One of 'de' | 'en' | 'es' | 'ar'.
-   * @returns {string} Text to render in #main.
-   */
-  const textForSide = ( word, side ) => {
-    if ( side === 'ar' && currentBucket === 5 ) {
-      return stripArabicDiacritics( word.ar );
-    }
-    return word[ side ];
-  };
-
-  /**
    * Advances the flip cycle to the next language for the current card.
    * The cycle visits all four languages in a fixed order determined by the
    * bucket's prompt language (see cycleOrderFor): first press goes prompt -> AR
@@ -182,7 +167,7 @@
     const cycle = cycleOrderFor( promptLangFor( currentBucket ) );
     const nextSide = cycle[ ( cycle.indexOf( currentSide ) + 1 ) % cycle.length ];
 
-    mainElement.textContent = textForSide( currentWord, nextSide );
+    mainElement.textContent = textForSide( currentWord, nextSide, currentBucket );
     currentSide = nextSide;
     applySideStyling( nextSide );
     if ( nextSide === 'ar' ) {

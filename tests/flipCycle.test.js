@@ -2,7 +2,7 @@
  * @file Tests for 4-language flip cycle helpers (cycleOrderFor, promptLangFor).
  */
 
-const { cycleOrderFor, promptLangFor } = require( '../app-utils.js' );
+const { cycleOrderFor, promptLangFor, textForSide } = require( '../app-utils.js' );
 
 describe( 'promptLangFor', () => {
   test( 'bucket 0 is German prompt', () => {
@@ -78,5 +78,44 @@ describe( 'cycleOrderFor', () => {
     const b = cycleOrderFor( 'de' );
     a[ 0 ] = 'mutated';
     expect( b[ 0 ] ).toBe( 'de' );
+  } );
+} );
+
+describe( 'textForSide', () => {
+  const word = {
+    'de': 'der Baum',
+    'en': 'tree',
+    'es': 'árbol',
+    'ar': 'شَجَرَة'
+  };
+
+  test( 'returns the DE translation for the de side', () => {
+    expect( textForSide( word, 'de', 0 ) ).toBe( 'der Baum' );
+  } );
+
+  test( 'returns the EN translation for the en side', () => {
+    expect( textForSide( word, 'en', 1 ) ).toBe( 'tree' );
+  } );
+
+  test( 'returns the ES translation for the es side', () => {
+    expect( textForSide( word, 'es', 2 ) ).toBe( 'árbol' );
+  } );
+
+  test( 'returns full Arabic with diacritics for bucket 3', () => {
+    expect( textForSide( word, 'ar', 3 ) ).toBe( 'شَجَرَة' );
+  } );
+
+  test( 'returns full Arabic with diacritics for bucket 4', () => {
+    expect( textForSide( word, 'ar', 4 ) ).toBe( 'شَجَرَة' );
+  } );
+
+  test( 'strips Arabic diacritics only for bucket 5 AR step', () => {
+    expect( textForSide( word, 'ar', 5 ) ).toBe( 'شجرة' );
+  } );
+
+  test( 'non-AR sides on bucket 5 are unaffected by the stripping rule', () => {
+    expect( textForSide( word, 'de', 5 ) ).toBe( 'der Baum' );
+    expect( textForSide( word, 'en', 5 ) ).toBe( 'tree' );
+    expect( textForSide( word, 'es', 5 ) ).toBe( 'árbol' );
   } );
 } );
