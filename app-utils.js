@@ -9,33 +9,15 @@
    */
   const flags = [ '🇪🇸', '🇩🇪', '🇺🇸' ];
 
-  /**
-   * Common Arabic diacritical marks (basic vowels and sukun)
-   * @constant {string[]}
-   */
-  const COMMON_ARABIC_DIACRITICS = [
-    // Fatha
-    'َ',
-    // Kasra
-    'ِ',
-    // Damma
-    'ُ',
-    // Sukun
-    'ْ'
-  ];
+  /** @constant {string[]} Basic Arabic marks in order: Fatha, Kasra, Damma, Sukun. */
+  const COMMON_ARABIC_DIACRITICS = [ 'َ', 'ِ', 'ُ', 'ْ' ];
 
   /**
-   * Arabic font families for recognition practice: empty string represents the system default
-   * (Noto Naskh Arabic on Android), the rest are self-hosted woff2 fonts declared in styles.css.
-   * @constant {string[]}
+   * @constant {string[]} Arabic font families for recognition practice. Empty
+   * string = system default (Noto Naskh Arabic on Android); the rest are
+   * self-hosted woff2 fonts declared in styles.css.
    */
-  const ARABIC_FONTS = [
-    '',
-    'Fustat',
-    'Reem Kufi',
-    'Cairo',
-    'Changa'
-  ];
+  const ARABIC_FONTS = [ '', 'Fustat', 'Reem Kufi', 'Cairo', 'Changa' ];
 
   /**
    * Picks a random Arabic font family from ARABIC_FONTS.
