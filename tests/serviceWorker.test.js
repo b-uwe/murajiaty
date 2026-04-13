@@ -52,7 +52,7 @@ describe( 'service worker fetch handler', () => {
     await respondWithPromise;
 
     // Verify caches.open was called with the specific murajiaty cache name
-    expect( mockCacheOpen ).toHaveBeenCalledWith( 'murajiaty-v6' );
+    expect( mockCacheOpen ).toHaveBeenCalledWith( 'murajiaty-v7' );
     // Verify we used the specific cache's match, not the global caches.match
     expect( mockCacheMatch ).toHaveBeenCalledWith( mockRequest );
     expect( global.caches.match ).not.toHaveBeenCalled();
@@ -161,7 +161,7 @@ describe( 'service worker cache cleanup', () => {
 
     global.caches = {
       'keys': jest.fn().mockResolvedValue( [
-        'murajiaty-v6',
+        'murajiaty-v7',
         'murajiaty-old-cache',
         'murajiaty-v0'
       ] ),
@@ -203,7 +203,7 @@ describe( 'service worker cache cleanup', () => {
 
     expect( deletedCaches ).toContain( 'murajiaty-old-cache' );
     expect( deletedCaches ).toContain( 'murajiaty-v0' );
-    expect( deletedCaches ).not.toContain( 'murajiaty-v6' );
+    expect( deletedCaches ).not.toContain( 'murajiaty-v7' );
   } );
 
   test( 'should NOT delete caches from other PWAs on same origin', async () => {
@@ -212,7 +212,7 @@ describe( 'service worker cache cleanup', () => {
 
     global.caches = {
       'keys': jest.fn().mockResolvedValue( [
-        'murajiaty-v6',
+        'murajiaty-v7',
         'musajjil-v1',
         'other-pwa-cache',
         'workbox-cache'
@@ -255,7 +255,7 @@ describe( 'service worker cache cleanup', () => {
     expect( deletedCaches ).not.toContain( 'musajjil-v1' );
     expect( deletedCaches ).not.toContain( 'other-pwa-cache' );
     expect( deletedCaches ).not.toContain( 'workbox-cache' );
-    expect( deletedCaches ).not.toContain( 'murajiaty-v6' );
+    expect( deletedCaches ).not.toContain( 'murajiaty-v7' );
   } );
 
   test( 'should delete only murajiaty-prefixed caches that are not current', async () => {
@@ -264,7 +264,7 @@ describe( 'service worker cache cleanup', () => {
 
     global.caches = {
       'keys': jest.fn().mockResolvedValue( [
-        'murajiaty-v6',
+        'murajiaty-v7',
         'murajiaty-v1',
         'musajjil-cache',
         'another-app'
@@ -312,7 +312,7 @@ describe( 'service worker cache cleanup', () => {
     const mockClients = { 'claim': jest.fn().mockResolvedValue( undefined ) };
 
     global.caches = {
-      'keys': jest.fn().mockResolvedValue( [ 'murajiaty-v6' ] ),
+      'keys': jest.fn().mockResolvedValue( [ 'murajiaty-v7' ] ),
       'delete': jest.fn().mockResolvedValue( true ),
       'open': jest.fn().mockResolvedValue( { 'addAll': jest.fn().mockResolvedValue( undefined ) } ),
       'match': jest.fn().mockResolvedValue( undefined )

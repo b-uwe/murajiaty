@@ -9,33 +9,15 @@
    */
   const flags = [ '🇪🇸', '🇩🇪', '🇺🇸' ];
 
-  /**
-   * Common Arabic diacritical marks (basic vowels and sukun)
-   * @constant {string[]}
-   */
-  const COMMON_ARABIC_DIACRITICS = [
-    // Fatha
-    'َ',
-    // Kasra
-    'ِ',
-    // Damma
-    'ُ',
-    // Sukun
-    'ْ'
-  ];
+  /** @constant {string[]} Basic Arabic marks in order: Fatha, Kasra, Damma, Sukun. */
+  const COMMON_ARABIC_DIACRITICS = [ 'َ', 'ِ', 'ُ', 'ْ' ];
 
   /**
-   * Arabic font families for recognition practice: empty string represents the system default
-   * (Noto Naskh Arabic on Android), the rest are self-hosted woff2 fonts declared in styles.css.
-   * @constant {string[]}
+   * @constant {string[]} Arabic font families for recognition practice. Empty
+   * string = system default (Noto Naskh Arabic on Android); the rest are
+   * self-hosted woff2 fonts declared in styles.css.
    */
-  const ARABIC_FONTS = [
-    '',
-    'Fustat',
-    'Reem Kufi',
-    'Cairo',
-    'Changa'
-  ];
+  const ARABIC_FONTS = [ '', 'Fustat', 'Reem Kufi', 'Cairo', 'Changa' ];
 
   /**
    * Picks a random Arabic font family from ARABIC_FONTS.
@@ -44,6 +26,34 @@
    */
   const pickRandomArabicFont = () => {
     return ARABIC_FONTS[ Math.floor( Math.random() * ARABIC_FONTS.length ) ];
+  };
+
+  /**
+   * Maps a bucket index to its prompt-side language. Contract: buckets 0/1/2
+   * use DE/EN/ES; every bucket >= 3 uses AR (including the bucket-4 typing
+   * widget and the bucket-5 graduated review).
+   * @param {number} bucket - Zero-based bucket index.
+   * @returns {string} One of 'de' | 'en' | 'es' | 'ar'.
+   */
+  const promptLangFor = ( bucket ) => {
+    return bucket < 3 ? [ 'de', 'en', 'es' ][ bucket ] : 'ar';
+  };
+
+  /**
+   * 4-language flip cycle order for the given prompt language. Starts at the
+   * prompt itself, then AR (for DE/EN/ES prompts) or DE (for AR prompts), then
+   * the two remaining languages. Fresh array on each call.
+   * @param {string} promptLang - One of 'de' | 'en' | 'es' | 'ar'.
+   * @returns {string[]} Ordered language codes covering all four languages.
+   */
+  const cycleOrderFor = ( promptLang ) => {
+    if ( promptLang === 'ar' ) {
+      return [ 'ar', 'de', 'en', 'es' ];
+    }
+    const rest = [ 'de', 'en', 'es' ].filter( ( lang ) => {
+      return lang !== promptLang;
+    } );
+    return [ promptLang, 'ar', ...rest ];
   };
 
   /**
@@ -67,6 +77,20 @@
   const stripArabicDiacritics = ( str ) => {
     // Covers Arabic vowels and sukun, shadda, etc.
     return str.replace( /[\u064B-\u0652\u0670]/gu, '' ).replace( /[أإ]/gu, 'ا' );
+  };
+
+  /**
+   * Display text for a side of a vocabulary word; bucket 5 strips AR diacritics.
+   * @param {object} word - Vocabulary word with { de, en, es, ar }.
+   * @param {string} side - Language code ('de' | 'en' | 'es' | 'ar').
+   * @param {number} bucket - Current bucket index.
+   * @returns {string} Text to render.
+   */
+  const textForSide = ( word, side, bucket ) => {
+    if ( side === 'ar' && bucket === 5 ) {
+      return stripArabicDiacritics( word.ar );
+    }
+    return word[ side ];
   };
 
   /**
@@ -427,6 +451,9 @@
       COMMON_ARABIC_DIACRITICS,
       ARABIC_FONTS,
       pickRandomArabicFont,
+      promptLangFor,
+      cycleOrderFor,
+      textForSide,
       shuffleArray,
       stripArabicDiacritics,
       speakWord,
@@ -450,6 +477,9 @@
       COMMON_ARABIC_DIACRITICS,
       ARABIC_FONTS,
       pickRandomArabicFont,
+      promptLangFor,
+      cycleOrderFor,
+      textForSide,
       shuffleArray,
       stripArabicDiacritics,
       speakWord,

@@ -20,7 +20,7 @@
 
   /** @type {number} Index of the currently active spaced-repetition bucket */
   let currentBucket = 0;
-  /** @type {string} Current display language side: 'de' or 'ar' */
+  /** @type {string} Current display language side: one of 'de' | 'en' | 'es' | 'ar' */
   let currentSide = 'de';
 
   /** @type {Array<Array<object>>} Spaced-repetition buckets holding vocabulary words */
@@ -32,7 +32,8 @@
 
   const {
     flags, COMMON_ARABIC_DIACRITICS, ARABIC_FONTS,
-    pickRandomArabicFont, shuffleArray, stripArabicDiacritics,
+    pickRandomArabicFont, promptLangFor, cycleOrderFor, textForSide,
+    shuffleArray, stripArabicDiacritics,
     speakWord, buildLetterOverlayHTML, insertIntoReviewQueue, recallWords,
     parseStoredWord, createReviewPopup,
     ensurePersistentStorage, showStorageError, setupViewport
@@ -62,23 +63,35 @@
   };
 
   /**
-   * Configures UI state after picking a word (language direction, button states)
+   * Applies Arabic vs Latin-script styling to the main display element.
+   * Toggles the '.ar'/'.de' classes and sets the font family accordingly.
+   * @param {string} side - Either 'ar' or anything else (DE is the default Latin styling).
    */
-  const configureUIAfterPick = () => {
-    updateHeader();
-    if ( currentBucket === 3 || currentBucket === 5 ) {
-      currentSide = 'ar';
+  const applySideStyling = ( side ) => {
+    if ( side === 'ar' ) {
       mainElement.classList.add( 'ar' );
       mainElement.classList.remove( 'de' );
       mainElement.style.fontFamily = pickRandomArabicFont();
-      speakButton.disabled = false;
     } else {
-      currentSide = 'de';
       mainElement.classList.add( 'de' );
       mainElement.classList.remove( 'ar' );
       mainElement.style.fontFamily = '';
-      speakButton.disabled = true;
     }
+  };
+
+  /**
+   * Configures UI state after picking a word (language direction, button states).
+   * currentSide reflects the prompt language of the bucket (de/en/es/ar). The
+   * DOM styling is still keyed off whether Arabic is *visible* on screen, which
+   * is only true for buckets 3 and 5 — bucket 4 shows the typing widget and
+   * therefore stays Latin-styled at the container level.
+   */
+  const configureUIAfterPick = () => {
+    updateHeader();
+    currentSide = promptLangFor( currentBucket );
+    const isArabicVisible = currentBucket === 3 || currentBucket === 5;
+    applySideStyling( isArabicVisible ? 'ar' : 'de' );
+    speakButton.disabled = !isArabicVisible;
 
     successButton.disabled = true;
     failButton.disabled = true;
@@ -140,31 +153,33 @@
   };
 
   /**
-   * Flips the displayed word between its Arabic and German representations.
+   * Advances the flip cycle to the next language for the current card.
+   * The cycle visits all four languages in a fixed order determined by the
+   * bucket's prompt language (see cycleOrderFor): first press goes prompt -> AR
+   * (or AR -> DE for Arabic-prompt buckets), preserving existing muscle memory.
+   * Speaks the Arabic rendition only when cycling to the AR step.
    */
   const flipWord = () => {
     const [ currentWord ] = buckets[ currentBucket ];
     if ( !currentWord ) {
       return;
     }
-    // Toggle between 'de' and 'ar' representation
-    if ( currentSide === 'de' ) {
-      // Show Arabic
-      mainElement.textContent = currentWord.ar;
-      currentSide = 'ar';
-      mainElement.classList.add( 'ar' );
-      mainElement.classList.remove( 'de' );
-      mainElement.style.fontFamily = pickRandomArabicFont();
+    const cycle = cycleOrderFor( promptLangFor( currentBucket ) );
+    const nextSide = cycle[ ( cycle.indexOf( currentSide ) + 1 ) % cycle.length ];
+
+    mainElement.textContent = textForSide( currentWord, nextSide, currentBucket );
+    currentSide = nextSide;
+    applySideStyling( nextSide );
+    if ( nextSide === 'ar' ) {
       speakWord( currentWord.ar );
-    } else {
-      // Show German
-      mainElement.textContent = currentWord.de;
-      currentSide = 'de';
-      mainElement.classList.add( 'de' );
-      mainElement.classList.remove( 'ar' );
-      mainElement.style.fontFamily = '';
     }
 
+    /*
+     * Speak button stays enabled on every cycle step regardless of which side
+     * is visible: it always voices the Arabic form (see initBrowser's click
+     * handler), so even on the DE/EN/ES steps it is a useful "let me hear
+     * the Arabic again" shortcut after the user has seen it at least once.
+     */
     speakButton.disabled = false;
     successButton.disabled = false;
     failButton.disabled = false;
@@ -241,7 +256,7 @@
     document.getElementById( 'main' ).addEventListener( 'click', ( event ) => {
       const div = event.target;
 
-      if ( currentSide === 'de' ) {
+      if ( currentSide !== 'ar' ) {
         return;
       }
 
