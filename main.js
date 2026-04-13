@@ -174,6 +174,12 @@
       speakWord( currentWord.ar );
     }
 
+    /*
+     * Speak button stays enabled on every cycle step regardless of which side
+     * is visible: it always voices the Arabic form (see initBrowser's click
+     * handler), so even on the DE/EN/ES steps it is a useful "let me hear
+     * the Arabic again" shortcut after the user has seen it at least once.
+     */
     speakButton.disabled = false;
     successButton.disabled = false;
     failButton.disabled = false;
