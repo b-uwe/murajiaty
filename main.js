@@ -62,23 +62,31 @@
   };
 
   /**
+   * Applies Arabic vs Latin-script styling to the main display element.
+   * Toggles the '.ar'/'.de' classes and sets the font family accordingly.
+   * @param {string} side - Either 'ar' or anything else (DE is the default Latin styling).
+   */
+  const applySideStyling = ( side ) => {
+    if ( side === 'ar' ) {
+      mainElement.classList.add( 'ar' );
+      mainElement.classList.remove( 'de' );
+      mainElement.style.fontFamily = pickRandomArabicFont();
+    } else {
+      mainElement.classList.add( 'de' );
+      mainElement.classList.remove( 'ar' );
+      mainElement.style.fontFamily = '';
+    }
+  };
+
+  /**
    * Configures UI state after picking a word (language direction, button states)
    */
   const configureUIAfterPick = () => {
     updateHeader();
-    if ( currentBucket === 3 || currentBucket === 5 ) {
-      currentSide = 'ar';
-      mainElement.classList.add( 'ar' );
-      mainElement.classList.remove( 'de' );
-      mainElement.style.fontFamily = pickRandomArabicFont();
-      speakButton.disabled = false;
-    } else {
-      currentSide = 'de';
-      mainElement.classList.add( 'de' );
-      mainElement.classList.remove( 'ar' );
-      mainElement.style.fontFamily = '';
-      speakButton.disabled = true;
-    }
+    const isArabicPrompt = currentBucket === 3 || currentBucket === 5;
+    currentSide = isArabicPrompt ? 'ar' : 'de';
+    applySideStyling( currentSide );
+    speakButton.disabled = !isArabicPrompt;
 
     successButton.disabled = true;
     failButton.disabled = true;
@@ -149,20 +157,14 @@
     }
     // Toggle between 'de' and 'ar' representation
     if ( currentSide === 'de' ) {
-      // Show Arabic
       mainElement.textContent = currentWord.ar;
       currentSide = 'ar';
-      mainElement.classList.add( 'ar' );
-      mainElement.classList.remove( 'de' );
-      mainElement.style.fontFamily = pickRandomArabicFont();
+      applySideStyling( 'ar' );
       speakWord( currentWord.ar );
     } else {
-      // Show German
       mainElement.textContent = currentWord.de;
       currentSide = 'de';
-      mainElement.classList.add( 'de' );
-      mainElement.classList.remove( 'ar' );
-      mainElement.style.fontFamily = '';
+      applySideStyling( 'de' );
     }
 
     speakButton.disabled = false;
