@@ -47,6 +47,33 @@
   };
 
   /**
+   * Maps a bucket index (0-5) to the prompt-side language of the card.
+   * Buckets 0/1/2 -> DE/EN/ES; buckets 3/4/5 -> AR (bucket 4 via typing widget).
+   * @param {number} bucket - Zero-based bucket index.
+   * @returns {string} One of 'de' | 'en' | 'es' | 'ar'.
+   */
+  const promptLangFor = ( bucket ) => {
+    return [ 'de', 'en', 'es' ][ bucket ] || 'ar';
+  };
+
+  /**
+   * 4-language flip cycle order for the given prompt language. Starts at the
+   * prompt itself, then AR (for DE/EN/ES prompts) or DE (for AR prompts), then
+   * the two remaining languages. Fresh array on each call.
+   * @param {string} promptLang - One of 'de' | 'en' | 'es' | 'ar'.
+   * @returns {string[]} Ordered language codes covering all four languages.
+   */
+  const cycleOrderFor = ( promptLang ) => {
+    if ( promptLang === 'ar' ) {
+      return [ 'ar', 'de', 'en', 'es' ];
+    }
+    const rest = [ 'de', 'en', 'es' ].filter( ( lang ) => {
+      return lang !== promptLang;
+    } );
+    return [ promptLang, 'ar', ...rest ];
+  };
+
+  /**
    * Shuffles an array in place using Fisher-Yates algorithm
    * @param {Array} array - The array to shuffle
    * @returns {Array} The shuffled array (same reference)
@@ -427,6 +454,8 @@
       COMMON_ARABIC_DIACRITICS,
       ARABIC_FONTS,
       pickRandomArabicFont,
+      promptLangFor,
+      cycleOrderFor,
       shuffleArray,
       stripArabicDiacritics,
       speakWord,
@@ -450,6 +479,8 @@
       COMMON_ARABIC_DIACRITICS,
       ARABIC_FONTS,
       pickRandomArabicFont,
+      promptLangFor,
+      cycleOrderFor,
       shuffleArray,
       stripArabicDiacritics,
       speakWord,
