@@ -20,7 +20,7 @@
 
   /** @type {number} Index of the currently active spaced-repetition bucket */
   let currentBucket = 0;
-  /** @type {string} Current display language side: 'de' or 'ar' */
+  /** @type {string} Current display language side: one of 'de' | 'en' | 'es' | 'ar' */
   let currentSide = 'de';
 
   /** @type {Array<Array<object>>} Spaced-repetition buckets holding vocabulary words */
@@ -32,7 +32,8 @@
 
   const {
     flags, COMMON_ARABIC_DIACRITICS, ARABIC_FONTS,
-    pickRandomArabicFont, shuffleArray, stripArabicDiacritics,
+    pickRandomArabicFont, promptLangFor, cycleOrderFor,
+    shuffleArray, stripArabicDiacritics,
     speakWord, buildLetterOverlayHTML, insertIntoReviewQueue, recallWords,
     parseStoredWord, createReviewPopup,
     ensurePersistentStorage, showStorageError, setupViewport
@@ -79,14 +80,18 @@
   };
 
   /**
-   * Configures UI state after picking a word (language direction, button states)
+   * Configures UI state after picking a word (language direction, button states).
+   * currentSide reflects the prompt language of the bucket (de/en/es/ar). The
+   * DOM styling is still keyed off whether Arabic is *visible* on screen, which
+   * is only true for buckets 3 and 5 — bucket 4 shows the typing widget and
+   * therefore stays Latin-styled at the container level.
    */
   const configureUIAfterPick = () => {
     updateHeader();
-    const isArabicPrompt = currentBucket === 3 || currentBucket === 5;
-    currentSide = isArabicPrompt ? 'ar' : 'de';
-    applySideStyling( currentSide );
-    speakButton.disabled = !isArabicPrompt;
+    currentSide = promptLangFor( currentBucket );
+    const isArabicVisible = currentBucket === 3 || currentBucket === 5;
+    applySideStyling( isArabicVisible ? 'ar' : 'de' );
+    speakButton.disabled = !isArabicVisible;
 
     successButton.disabled = true;
     failButton.disabled = true;
@@ -148,23 +153,40 @@
   };
 
   /**
-   * Flips the displayed word between its Arabic and German representations.
+   * Returns the display text for the given side of the current word.
+   * Bucket 5 strips Arabic diacritics to match its graduated-review style
+   * (see pickNextWord's default case).
+   * @param {object} word - The current vocabulary word.
+   * @param {string} side - One of 'de' | 'en' | 'es' | 'ar'.
+   * @returns {string} Text to render in #main.
+   */
+  const textForSide = ( word, side ) => {
+    if ( side === 'ar' && currentBucket === 5 ) {
+      return stripArabicDiacritics( word.ar );
+    }
+    return word[ side ];
+  };
+
+  /**
+   * Advances the flip cycle to the next language for the current card.
+   * The cycle visits all four languages in a fixed order determined by the
+   * bucket's prompt language (see cycleOrderFor): first press goes prompt -> AR
+   * (or AR -> DE for Arabic-prompt buckets), preserving existing muscle memory.
+   * Speaks the Arabic rendition only when cycling to the AR step.
    */
   const flipWord = () => {
     const [ currentWord ] = buckets[ currentBucket ];
     if ( !currentWord ) {
       return;
     }
-    // Toggle between 'de' and 'ar' representation
-    if ( currentSide === 'de' ) {
-      mainElement.textContent = currentWord.ar;
-      currentSide = 'ar';
-      applySideStyling( 'ar' );
+    const cycle = cycleOrderFor( promptLangFor( currentBucket ) );
+    const nextSide = cycle[ ( cycle.indexOf( currentSide ) + 1 ) % cycle.length ];
+
+    mainElement.textContent = textForSide( currentWord, nextSide );
+    currentSide = nextSide;
+    applySideStyling( nextSide );
+    if ( nextSide === 'ar' ) {
       speakWord( currentWord.ar );
-    } else {
-      mainElement.textContent = currentWord.de;
-      currentSide = 'de';
-      applySideStyling( 'de' );
     }
 
     speakButton.disabled = false;
@@ -243,7 +265,7 @@
     document.getElementById( 'main' ).addEventListener( 'click', ( event ) => {
       const div = event.target;
 
-      if ( currentSide === 'de' ) {
+      if ( currentSide !== 'ar' ) {
         return;
       }
 
