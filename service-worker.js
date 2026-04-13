@@ -3,7 +3,7 @@
  */
 
 /** @constant {string} Current cache version identifier */
-const CACHE_NAME = 'murajiaty-v5';
+const CACHE_NAME = 'murajiaty-v6';
 /** @constant {string[]} URLs to pre-cache during service worker installation */
 const urlsToCache = [
   './',

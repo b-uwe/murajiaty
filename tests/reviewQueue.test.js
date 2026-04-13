@@ -181,67 +181,179 @@ describe( 'findWordForLevel', () => {
     };
   };
 
-  test( 'should find exact match for target level', () => {
+  /**
+   * Creates N words at a given reviewCount level.
+   * @param {number} count - Number of words to create
+   * @param {number} reviewCount - The reviewCount to assign
+   * @returns {Array<object>} Array of word objects
+   */
+  const makeWordsAtLevel = ( count, reviewCount ) => {
+    return Array.from( { 'length': count }, ( _, i ) => {
+      return makeWord( { 'de': `lvl${reviewCount}_${i}`,
+        reviewCount } );
+    } );
+  };
+
+  test( 'should pull from target level when it has >= 10 words', () => {
     const bucket = [
-      makeWord( { 'de': 'level0',
-        'reviewCount': 0 } ),
-      makeWord( { 'de': 'level2',
-        'reviewCount': 2 } ),
-      makeWord( { 'de': 'level1',
-        'reviewCount': 1 } )
+      ...makeWordsAtLevel( 10, 2 ),
+      ...makeWordsAtLevel( 10, 0 )
     ];
 
     const result = findWordForLevel( bucket, 2 );
 
-    expect( result.de ).toBe( 'level2' );
+    expect( result.reviewCount ).toBe( 2 );
   } );
 
-  test( 'should fall back to lower level when target not found', () => {
+  test( 'should fall back directly to level 0 when target level has < 10 words', () => {
     const bucket = [
-      makeWord( { 'de': 'level0',
-        'reviewCount': 0 } ),
-      makeWord( { 'de': 'level1',
-        'reviewCount': 1 } )
+      ...makeWordsAtLevel( 7, 2 ),
+      ...makeWordsAtLevel( 12, 0 )
     ];
 
-    // Target level 3 not found, falls back to 1
+    // Target level 2 has only 7 words (< 10), level 0 has 12 (>= 10)
+    const result = findWordForLevel( bucket, 2 );
+
+    expect( result.reviewCount ).toBe( 0 );
+  } );
+
+  test( 'should skip intermediate levels entirely when falling back', () => {
+    const bucket = [
+      ...makeWordsAtLevel( 4, 3 ),
+      ...makeWordsAtLevel( 15, 1 ),
+      ...makeWordsAtLevel( 12, 0 )
+    ];
+
+    /*
+     * Target level 3 has 4 words (< 10), level 1 has 15 (>= 10) but
+     * is skipped — falls directly to level 0 which also has >= 10.
+     */
     const result = findWordForLevel( bucket, 3 );
 
-    expect( result.de ).toBe( 'level1' );
+    expect( result.reviewCount ).toBe( 0 );
   } );
 
-  test( 'should pick lowest reviewCount when all words are above target', () => {
+  test( 'should fall back to level 0 even when it has < 10 words', () => {
     const bucket = [
-      makeWord( { 'de': 'high',
-        'reviewCount': 5 } ),
-      makeWord( { 'de': 'higher',
-        'reviewCount': 8 } ),
-      makeWord( { 'de': 'mid',
-        'reviewCount': 3 } )
+      ...makeWordsAtLevel( 4, 2 ),
+      ...makeWordsAtLevel( 7, 0 )
     ];
 
-    // Target level 0, no words at 0..0, fallback picks lowest (3)
+    /*
+     * Target level 2 has 4 (< 10), level 0 has 7 (< 10). The threshold
+     * does not apply to level 0 as a fallback — return the first level-0
+     * word (FIFO) so the user always has something to review.
+     */
+    const result = findWordForLevel( bucket, 2 );
+
+    expect( result.reviewCount ).toBe( 0 );
+    expect( result.de ).toBe( 'lvl0_0' );
+  } );
+
+  test( 'should pull from level 0 directly when it has < 10 words', () => {
+    const bucket = makeWordsAtLevel( 9, 0 );
+
+    /*
+     * Target IS level 0 with only 9 words. The threshold does not apply
+     * to level 0 — pull the oldest word.
+     */
     const result = findWordForLevel( bucket, 0 );
 
-    expect( result.de ).toBe( 'mid' );
+    expect( result.de ).toBe( 'lvl0_0' );
+  } );
+
+  test( 'should pull from level 0 directly when it has a single word', () => {
+    const bucket = makeWordsAtLevel( 1, 0 );
+
+    const result = findWordForLevel( bucket, 0 );
+
+    expect( result.de ).toBe( 'lvl0_0' );
+  } );
+
+  test( 'should still skip target level with < 10 words when level 0 has any word', () => {
+    const bucket = [
+      ...makeWordsAtLevel( 5, 2 ),
+      ...makeWordsAtLevel( 1, 0 )
+    ];
+
+    /*
+     * Target level 2 has 5 (< 10) — threshold protects it from hammering.
+     * Level 0 has just 1 word but no threshold applies: return it.
+     */
+    const result = findWordForLevel( bucket, 2 );
+
+    expect( result.reviewCount ).toBe( 0 );
+  } );
+
+  test( 'should pull from level 0 when target is level 0 and it has >= 10 words', () => {
+    const bucket = makeWordsAtLevel( 10, 0 );
+
+    const result = findWordForLevel( bucket, 0 );
+
+    expect( result.reviewCount ).toBe( 0 );
   } );
 
   test( 'should treat missing reviewCount as level 0', () => {
     const bucket = [
-      makeWord( { 'de': 'noCount' } ),
-      makeWord( { 'de': 'hasCount',
-        'reviewCount': 1 } )
+      ...Array.from( { 'length': 10 }, ( _, i ) => {
+        return makeWord( { 'de': `noCount_${i}` } );
+      } ),
+      ...makeWordsAtLevel( 10, 1 )
     ];
 
     const result = findWordForLevel( bucket, 0 );
 
-    expect( result.de ).toBe( 'noCount' );
+    expect( result.de ).toBe( 'noCount_0' );
   } );
 
-  test( 'should return undefined for empty bucket', () => {
+  test( 'should return null for empty bucket', () => {
     const result = findWordForLevel( [], 0 );
 
-    expect( result ).toBeUndefined();
+    expect( result ).toBeNull();
+  } );
+
+  test( 'should return the first word at the target level (FIFO order)', () => {
+    const bucket = [
+      ...makeWordsAtLevel( 10, 0 ),
+      ...makeWordsAtLevel( 10, 1 )
+    ];
+
+    /*
+     * Level 0 has 10 words (de: lvl0_0 … lvl0_9). The function must
+     * return the first one in array order to preserve FIFO: older
+     * words (closer to the front) are recalled before newer ones.
+     */
+    const result = findWordForLevel( bucket, 0 );
+
+    expect( result.de ).toBe( 'lvl0_0' );
+  } );
+
+  test( 'should return the first level-0 word when falling back (FIFO order)', () => {
+    const bucket = [
+      ...makeWordsAtLevel( 4, 2 ),
+      ...makeWordsAtLevel( 12, 0 )
+    ];
+
+    /*
+     * Target level 2 is underpopulated (4 < 10), falls back to
+     * level 0 which has 12 words. Must return the first level-0
+     * word in array order (lvl0_0) to maintain FIFO recall.
+     */
+    const result = findWordForLevel( bucket, 2 );
+
+    expect( result.de ).toBe( 'lvl0_0' );
+  } );
+
+  test( 'should return null when many words exist but none at target or level 0', () => {
+    const bucket = [
+      ...makeWordsAtLevel( 15, 3 ),
+      ...makeWordsAtLevel( 15, 5 )
+    ];
+
+    // Target level 1 has 0 words, level 0 has 0 words — skip
+    const result = findWordForLevel( bucket, 1 );
+
+    expect( result ).toBeNull();
   } );
 } );
 

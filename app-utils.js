@@ -156,36 +156,69 @@
 
   /**
    * Finds a word in the bucket matching the target reviewCount level.
-   * Falls back to lower levels, then to the lowest available reviewCount.
+   *
+   * Strategy:
+   * - Levels > 0 are gated by a minimum population threshold to prevent
+   *   hammering the same few words at a thinly populated higher level.
+   * - Level 0 is never gated: it is the entry level for recycling, has
+   *   no lower level to fall back to, and newly-graduated words are
+   *   what the binary-frequency design wants cycled back fastest.
+   *
+   * When the target level is > 0 and underpopulated, fall through
+   * directly to level 0 (skipping intermediate levels). If level 0 is
+   * also empty, return null to signal "skip this pull".
    * @param {Array<object>} bucket - The DONE bucket to search
    * @param {number} targetLevel - The desired reviewCount level
-   * @returns {object|undefined} The matched word, or undefined if bucket is empty
+   * @returns {object|null} The matched word, or null if none is available
    */
   const findWordForLevel = ( bucket, targetLevel ) => {
     if ( bucket.length === 0 ) {
-      return bucket[ 0 ];
+      return null;
     }
-    for ( let level = targetLevel; level >= 0; level-- ) {
-      const found = bucket.find( ( w ) => {
+
+    /**
+     * Collects all words at the given reviewCount level.
+     * @param {number} level - The reviewCount value to match
+     * @returns {Array<object>} Words whose reviewCount equals level
+     */
+    const wordsAtLevel = ( level ) => {
+      return bucket.filter( ( w ) => {
         return ( w.reviewCount || 0 ) === level;
       } );
-      if ( found ) {
-        return found;
+    };
+
+    /*
+     * Minimum words a level > 0 must have before we pull from it.
+     * Prevents hammering thin high-level populations.
+     */
+    const minPopulation = 10;
+
+    if ( targetLevel > 0 ) {
+      const atTarget = wordsAtLevel( targetLevel );
+      if ( atTarget.length >= minPopulation ) {
+        return atTarget[ 0 ];
       }
     }
-    // Fallback: pick the word with the lowest reviewCount
-    return bucket.reduce( ( min, w ) => {
-      return ( w.reviewCount || 0 ) < ( min.reviewCount || 0 ) ? w : min;
-    } );
+
+    /*
+     * Level-0 pull — used both as the direct path when targetLevel === 0
+     * and as the fallback when the non-zero target is underpopulated.
+     * No threshold: return the oldest level-0 word if any exist.
+     */
+    const atZero = wordsAtLevel( 0 );
+    return atZero[ 0 ] || null;
   };
 
   /**
    * Recalls words from the DONE bucket into the first bucket to maintain
    * 25 actively-cycling words. Uses binary frequency distribution to select
    * words by reviewCount level: level 0 at 50%, level 1 at 25%, etc.
+   * When no level meets the minimum population threshold, the pull slot
+   * is skipped — the counter advances but no word moves. This prevents
+   * hammering the same few words when the review queue is sparsely populated.
    * @param {Array<Array>} targetBuckets - The bucket structure to operate on
    * @param {number} reviewCounter - The current global review counter
-   * @returns {number} The updated review counter after pulling words
+   * @returns {number} The updated review counter after pull attempts
    */
   const recallWords = ( targetBuckets, reviewCounter ) => {
     const lastBucket = targetBuckets[ targetBuckets.length - 1 ];
@@ -210,12 +243,16 @@
       counter++;
       const targetLevel = calculateTargetLevel( counter );
       const word = findWordForLevel( lastBucket, targetLevel );
-      if ( !word ) {
-        break;
+      /*
+       * When findWordForLevel returns null, no level met the minimum
+       * population threshold. Skip this slot — the counter still advances
+       * to maintain the binary frequency distribution across future calls.
+       */
+      if ( word ) {
+        const idx = lastBucket.indexOf( word );
+        lastBucket.splice( idx, 1 );
+        targetBuckets[ 0 ].push( word );
       }
-      const idx = lastBucket.indexOf( word );
-      lastBucket.splice( idx, 1 );
-      targetBuckets[ 0 ].push( word );
     }
 
     return counter;
@@ -328,10 +365,12 @@
 
   /**
    * Shows a full-screen overlay with 3 review quality options (bald/gut/sitzt).
+   * Displays the word's current review count above the buttons.
    * Clicking outside the popup dismisses it without side effects.
    * @param {Function} onSelect - Callback receiving the chosen increment value
+   * @param {number} reviewCount - The word's current reviewCount
    */
-  const createReviewPopup = ( onSelect ) => {
+  const createReviewPopup = ( onSelect, reviewCount ) => {
     const overlay = document.createElement( 'div' );
     overlay.className = 'review-overlay';
 
@@ -341,6 +380,14 @@
     overlay.addEventListener( 'click', () => {
       overlay.remove();
     } );
+
+    const counter = document.createElement( 'div' );
+    counter.className = 'review-popup-counter';
+    counter.textContent = `× ${reviewCount}`;
+    popup.appendChild( counter );
+
+    const buttonRow = document.createElement( 'div' );
+    buttonRow.className = 'review-popup-buttons';
 
     const options = [
       {
@@ -365,9 +412,10 @@
         overlay.remove();
         onSelect( increment );
       } );
-      popup.appendChild( btn );
+      buttonRow.appendChild( btn );
     } );
 
+    popup.appendChild( buttonRow );
     overlay.appendChild( popup );
     document.body.appendChild( overlay );
   };
