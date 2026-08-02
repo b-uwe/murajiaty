@@ -129,16 +129,30 @@ describe( 'Vocabulary Update System - Unit Tests', () => {
 
   describe( 'parseCSVLineToWord error-row handling', () => {
     /**
-     * Test that a row with a #ERROR! Arabic field is rejected
+     * Test that the plain-text Arabic column is used when the formula column errored.
+     * Column 0 is a GOOGLETRANSLATE formula; column 1 is a stable plain-text copy.
      */
-    test( 'should reject a row whose Arabic field is a Sheets error', () => {
+    test( 'should fall back to the plain-text Arabic column when the formula column errored', () => {
+      expect( parseCSVLineToWord( '#ERROR!,كتاب,Buch,book,libro,md5' ) ).toEqual( {
+        'ar': 'كتاب',
+        'de': 'Buch',
+        'en': 'book',
+        'es': 'libro',
+        'bucketIndex': 0
+      } );
+    } );
+
+    /**
+     * Test that a row is only rejected when BOTH Arabic columns are Sheets errors
+     */
+    test( 'should reject a row when both Arabic columns are Sheets errors', () => {
       expect( parseCSVLineToWord( '#ERROR!,#ERROR!,Buch,book,libro,md5' ) ).toBeNull();
     } );
 
     /**
-     * Test that a Sheets error in any language field rejects the whole row
+     * Test that a Sheets error in any translation field rejects the whole row
      */
-    test( 'should reject a row where any language field is a Sheets error', () => {
+    test( 'should reject a row where any translation field is a Sheets error', () => {
       expect( parseCSVLineToWord( 'كتاب,كتاب,#N/A,book,libro,md5' ) ).toBeNull();
       expect( parseCSVLineToWord( 'كتاب,كتاب,Buch,#REF!,libro,md5' ) ).toBeNull();
       expect( parseCSVLineToWord( 'كتاب,كتاب,Buch,book,#VALUE!,md5' ) ).toBeNull();

@@ -99,12 +99,19 @@
     const parts = parseCSVLine( csvLine );
 
     // Extract columns: 0=AR, 1=AR(duplicate), 2=DE, 3=EN, 4=ES, 5=md5
-    const ar = ( parts[ 0 ] || '' ).trim();
+    /*
+     * Column 0 is a live GOOGLETRANSLATE formula that can transiently fail;
+     * column 1 is a stable plain-text copy of the same Arabic. Prefer the
+     * formula result, but fall back to the text column when it errored.
+     */
+    const arFormula = ( parts[ 0 ] || '' ).trim();
+    const arText = ( parts[ 1 ] || '' ).trim();
+    const ar = isSheetsErrorValue( arFormula ) ? arText : arFormula;
     const de = ( parts[ 2 ] || '' ).trim();
     const en = ( parts[ 3 ] || '' ).trim();
     const es = ( parts[ 4 ] || '' ).trim();
 
-    // Reject rows where a transient Google Sheets formula error leaked into any field
+    // Reject rows where a Google Sheets error survived the fallback in any field
     if ( [ ar, de, en, es ].some( isSheetsErrorValue ) ) {
       return null;
     }
