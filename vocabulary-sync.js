@@ -54,7 +54,7 @@
 
   /**
    * Parses a Google Sheets CSV line to extract word data
-   * Uses columns 1, 3, 4, 5 (AR, DE, EN, ES) from Google Sheets format
+   * Uses columns 0, 2, 3, 4 (AR, DE, EN, ES) from Google Sheets format
    * @param {string} csvLine - The CSV line to parse
    * @returns {object|null} Parsed word object or null if invalid
    */
