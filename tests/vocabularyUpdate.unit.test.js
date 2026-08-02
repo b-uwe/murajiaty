@@ -2,7 +2,7 @@
  * @file Unit tests for vocabulary update utility functions
  */
 
-const { hashVocabularyWord } = require( '../vocabulary-sync.js' );
+const { hashVocabularyWord, isSheetsErrorValue, parseCSVLineToWord } = require( '../vocabulary-sync.js' );
 
 describe( 'Vocabulary Update System - Unit Tests', () => {
   describe( 'hashVocabularyWord', () => {
@@ -92,6 +92,69 @@ describe( 'Vocabulary Update System - Unit Tests', () => {
       const hash = hashVocabularyWord( word );
       expect( typeof hash ).toBe( 'string' );
       expect( hash.length ).toBeGreaterThan( 0 );
+    } );
+  } );
+
+  describe( 'isSheetsErrorValue', () => {
+    /**
+     * Test that every known Google Sheets error sentinel is recognized
+     */
+    test( 'should recognize all Google Sheets error sentinels', () => {
+      const sentinels = [
+        '#ERROR!',
+        '#N/A',
+        '#REF!',
+        '#VALUE!',
+        '#NAME?',
+        '#DIV/0!',
+        '#NUM!',
+        '#NULL!',
+        '#GETTING_DATA'
+      ];
+      sentinels.forEach( ( sentinel ) => {
+        expect( isSheetsErrorValue( sentinel ) ).toBe( true );
+      } );
+    } );
+
+    /**
+     * Test that genuine vocabulary content is not treated as an error
+     */
+    test( 'should not flag genuine vocabulary content', () => {
+      expect( isSheetsErrorValue( 'كتاب' ) ).toBe( false );
+      expect( isSheetsErrorValue( 'Buch' ) ).toBe( false );
+      expect( isSheetsErrorValue( 'a#b' ) ).toBe( false );
+      expect( isSheetsErrorValue( '' ) ).toBe( false );
+    } );
+  } );
+
+  describe( 'parseCSVLineToWord error-row handling', () => {
+    /**
+     * Test that a row with a #ERROR! Arabic field is rejected
+     */
+    test( 'should reject a row whose Arabic field is a Sheets error', () => {
+      expect( parseCSVLineToWord( '#ERROR!,#ERROR!,Buch,book,libro,md5' ) ).toBeNull();
+    } );
+
+    /**
+     * Test that a Sheets error in any language field rejects the whole row
+     */
+    test( 'should reject a row where any language field is a Sheets error', () => {
+      expect( parseCSVLineToWord( 'كتاب,كتاب,#N/A,book,libro,md5' ) ).toBeNull();
+      expect( parseCSVLineToWord( 'كتاب,كتاب,Buch,#REF!,libro,md5' ) ).toBeNull();
+      expect( parseCSVLineToWord( 'كتاب,كتاب,Buch,book,#VALUE!,md5' ) ).toBeNull();
+    } );
+
+    /**
+     * Test that a fully valid row is still parsed into a word object
+     */
+    test( 'should accept a valid row', () => {
+      expect( parseCSVLineToWord( 'كتاب,كتاب,Buch,book,libro,md5' ) ).toEqual( {
+        'ar': 'كتاب',
+        'de': 'Buch',
+        'en': 'book',
+        'es': 'libro',
+        'bucketIndex': 0
+      } );
     } );
   } );
 } );

@@ -53,6 +53,33 @@
   };
 
   /**
+   * Google Sheets error sentinels. When a cell formula (e.g. GOOGLETRANSLATE)
+   * transiently fails, the CSV export contains one of these literal strings
+   * instead of real content, so any field matching them must be rejected.
+   * @type {Set<string>}
+   */
+  const SHEETS_ERROR_VALUES = new Set( [
+    '#ERROR!',
+    '#N/A',
+    '#REF!',
+    '#VALUE!',
+    '#NAME?',
+    '#DIV/0!',
+    '#NUM!',
+    '#NULL!',
+    '#GETTING_DATA'
+  ] );
+
+  /**
+   * Checks whether a CSV field holds a Google Sheets error sentinel
+   * @param {string} value - The trimmed field value to inspect
+   * @returns {boolean} True if the value is a Google Sheets error string
+   */
+  const isSheetsErrorValue = ( value ) => {
+    return SHEETS_ERROR_VALUES.has( value );
+  };
+
+  /**
    * Parses a Google Sheets CSV line to extract word data
    * Uses columns 0, 2, 3, 4 (AR, DE, EN, ES) from Google Sheets format
    * @param {string} csvLine - The CSV line to parse
@@ -76,6 +103,11 @@
     const de = ( parts[ 2 ] || '' ).trim();
     const en = ( parts[ 3 ] || '' ).trim();
     const es = ( parts[ 4 ] || '' ).trim();
+
+    // Reject rows where a transient Google Sheets formula error leaked into any field
+    if ( [ ar, de, en, es ].some( isSheetsErrorValue ) ) {
+      return null;
+    }
 
     // Validate that all required fields are present and non-empty
     if ( ar && de && en && es && parts.length >= 5 ) {
@@ -282,6 +314,7 @@
   if ( typeof module !== 'undefined' && module.exports ) {
     module.exports = {
       parseCSVLine,
+      isSheetsErrorValue,
       parseCSVLineToWord,
       parseGoogleSheetsCSV,
       hashVocabularyWord,
