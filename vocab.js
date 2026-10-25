@@ -14,6 +14,7 @@
   const diacriticsKey = 'murajiaty-vocab-diacritics';
   let words = [];
   let showDiacritics = false;
+  let commentsMap = {};
 
   /**
    * Returns the Arabic text to display, stripping diacritics unless the
@@ -45,6 +46,84 @@
   };
 
   /**
+   * Returns the comments stored for a word, matched by its runtime hash, or
+   * an empty array when the word has none.
+   * @param {object} map - The hash-keyed comment map from the server.
+   * @param {object} word - Vocabulary word with ar/de/en/es fields.
+   * @returns {Array<object>} The word's comments.
+   */
+  const lookupComments = ( map, word ) => {
+    const hash = window.VocabularySync.hashVocabularyWord( word );
+    return ( map[ hash ] && map[ hash ].comments ) || [];
+  };
+
+  /**
+   * Builds a list item for one comment, prefixed with its author's name.
+   * @param {object} comment - Comment with text and author fields.
+   * @returns {HTMLLIElement} The populated list item.
+   */
+  const renderComment = ( comment ) => {
+    const item = document.createElement( 'li' );
+    const author = document.createElement( 'strong' );
+    author.textContent = `${comment.author}: `;
+    item.append( author, document.createTextNode( comment.text ) );
+    return item;
+  };
+
+  /**
+   * Fetches the comment list from the server. A failure leaves the view as a
+   * plain read-only table, so comments are strictly additive.
+   * @returns {Promise<void>} Resolves once the comments are loaded.
+   */
+  const fetchComments = async () => {
+    try {
+      const response = await fetch( `./comments.php?action=list&t=${Date.now()}` );
+      if ( !response.ok ) {
+        return;
+      }
+      const data = await response.json();
+      commentsMap = data.comments || {};
+    } catch {
+      // Comments are optional; the table still works without them.
+    }
+  };
+
+  /**
+   * Opens the overlay and fills it with a word's comments.
+   * @param {object} word - Vocabulary word with ar/de/en/es fields.
+   */
+  const openCommentOverlay = ( word ) => {
+    const body = document.getElementById( 'overlay-body' );
+    const list = document.createElement( 'ul' );
+    list.className = 'comment-list';
+    lookupComments( commentsMap, word ).forEach( ( comment ) => {
+      list.append( renderComment( comment ) );
+    } );
+    body.replaceChildren( list );
+    document.getElementById( 'overlay' ).hidden = false;
+  };
+
+  /**
+   * Adds a clickable comment marker to a row when the word has comments. The
+   * marker opens the overlay with the word's comments.
+   * @param {HTMLTableRowElement} row - The row to augment.
+   * @param {object} word - Vocabulary word with ar/de/en/es fields.
+   */
+  const addCommentMarker = ( row, word ) => {
+    const count = lookupComments( commentsMap, word ).length;
+    if ( count === 0 ) {
+      return;
+    }
+    const marker = document.createElement( 'button' );
+    marker.className = 'comment-marker';
+    marker.textContent = `💬 ${count}`;
+    marker.addEventListener( 'click', () => {
+      openCommentOverlay( word );
+    } );
+    row.lastChild.append( ' ', marker );
+  };
+
+  /**
    * Builds one table row for a vocabulary word ( AR, DE, EN, ES ). The
    * Arabic cell speaks the word when tapped.
    * @param {object} word - Vocabulary word with ar/de/en/es fields.
@@ -64,6 +143,7 @@
       }
       row.append( cell );
     } );
+    addCommentMarker( row, word );
     return row;
   };
 
@@ -93,6 +173,7 @@
       return;
     }
 
+    await fetchComments();
     renderRows();
     status.textContent = `${words.length} مفردة`;
   };
@@ -104,6 +185,10 @@
    */
   const init = async () => {
     showDiacritics = readDiacriticsPref();
+    const overlay = document.getElementById( 'overlay' );
+    document.getElementById( 'overlay-close' ).addEventListener( 'click', () => {
+      overlay.hidden = true;
+    } );
     const toggle = document.getElementById( 'diacritics-toggle' );
     toggle.checked = showDiacritics;
     toggle.addEventListener( 'change', () => {
@@ -122,6 +207,8 @@
     module.exports = { displayArabic,
       speakArabic,
       buildRow,
+      lookupComments,
+      renderComment,
       readDiacriticsPref };
   }
 } )();
