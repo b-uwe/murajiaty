@@ -1,7 +1,7 @@
 ( () => {
   /**
    * @file Vocabulary synchronization module.
-   * Handles CSV parsing, Google Sheets fetching, and vocabulary diff logic.
+   * Handles CSV parsing, vocabulary-source fetching, and vocabulary diff logic.
    * Exposes window.VocabularySync for browser use and module.exports for tests.
    */
 
@@ -53,8 +53,8 @@
   };
 
   /**
-   * Parses a Google Sheets CSV line to extract word data
-   * Uses columns 1, 2, 3, 4 (AR, DE, EN, ES) from Google Sheets format
+   * Parses a vocabulary CSV line to extract word data
+   * Uses columns 1, 2, 3, 4 (AR, DE, EN, ES) from the source format
    * @param {string} csvLine - The CSV line to parse
    * @returns {object|null} Parsed word object or null if invalid
    */
@@ -98,7 +98,7 @@
    * @param {string} csvContent - The raw CSV content to parse
    * @returns {Array<object>} Array of parsed vocabulary word objects
    */
-  const parseGoogleSheetsCSV = ( csvContent ) => {
+  const parseVocabularyCSV = ( csvContent ) => {
     const words = [];
 
     if ( csvContent.length > 0 ) {
@@ -134,10 +134,10 @@
   };
 
   /**
-   * Fetches vocabulary data from Google Sheets
+   * Fetches vocabulary data from the vocabulary source
    * @returns {Promise<Array<object>>} Array of vocabulary word objects
    */
-  const fetchGoogleSheetsData = async () => {
+  const fetchVocabularyData = async () => {
     try {
       const response = await fetch( `https://docs.google.com/spreadsheets/d/1kPsGq3Zo9PPjtcst-T3pfiToeohq82K-yHuLywxtucU/export?format=csv&t=${Date.now()}` );
 
@@ -146,9 +146,9 @@
       }
 
       const content = await response.text();
-      return parseGoogleSheetsCSV( content );
+      return parseVocabularyCSV( content );
     } catch ( err ) {
-      console.error( 'Error fetching vocabulary from Google Sheets:', err.message );
+      console.error( 'Error fetching vocabulary from source:', err.message );
       return [];
     }
   };
@@ -177,30 +177,30 @@
   };
 
   /**
-   * Compares local vocabulary against Google Sheets data and applies changes
+   * Compares local vocabulary against the vocabulary source and applies changes
    * @param {Array<Array>} currentBuckets - Current bucket structure
    * @param {Set} localHashSet - Set of local vocabulary hashes
    * @param {Map} localVocabMap - Map of hash to word location
-   * @param {Array} googleVocab - Vocabulary from Google Sheets
+   * @param {Array} sourceVocab - Vocabulary from the source
    * @returns {object} Updated buckets and change statistics
    */
-  const applyVocabularyDiff = ( currentBuckets, localHashSet, localVocabMap, googleVocab ) => {
-    const googleHashSet = new Set();
+  const applyVocabularyDiff = ( currentBuckets, localHashSet, localVocabMap, sourceVocab ) => {
+    const sourceHashSet = new Set();
     const newWords = [];
 
-    googleVocab.forEach( ( googleWord ) => {
-      const googleHash = hashVocabularyWord( googleWord );
-      googleHashSet.add( googleHash );
+    sourceVocab.forEach( ( sourceWord ) => {
+      const sourceHash = hashVocabularyWord( sourceWord );
+      sourceHashSet.add( sourceHash );
 
-      if ( !localHashSet.has( googleHash ) ) {
-        newWords.push( googleWord );
+      if ( !localHashSet.has( sourceHash ) ) {
+        newWords.push( sourceWord );
       }
     } );
 
     // Find DELETED words
     const deletionsToProcess = [];
     localHashSet.forEach( ( localHash ) => {
-      if ( !googleHashSet.has( localHash ) ) {
+      if ( !sourceHashSet.has( localHash ) ) {
         const { bucketIndex, arrayIndex } = localVocabMap.get( localHash );
         deletionsToProcess.push( { bucketIndex,
           arrayIndex } );
@@ -245,20 +245,20 @@
   };
 
   /**
-   * Checks for vocabulary updates by comparing local storage with Google Sheets data
+   * Checks for vocabulary updates by comparing local storage with the vocabulary source
    * @param {Array<Array>} currentBuckets - Current bucket structure from localStorage
    * @returns {Promise<object>} Object containing updated buckets and change statistics
    */
   const checkForVocabularyUpdates = async ( currentBuckets ) => {
     try {
       const { localVocabMap, localHashSet } = buildLocalVocabIndex( currentBuckets );
-      const googleVocab = await fetchGoogleSheetsData();
+      const sourceVocab = await fetchVocabularyData();
 
       /*
        * CRITICAL: If fetch returned empty data, preserve existing buckets
        * This handles offline scenarios and prevents progress loss
        */
-      if ( googleVocab.length === 0 ) {
+      if ( sourceVocab.length === 0 ) {
         return {
           'buckets': currentBuckets,
           'changes': { 'newWords': 0,
@@ -267,7 +267,7 @@
         };
       }
 
-      return applyVocabularyDiff( currentBuckets, localHashSet, localVocabMap, googleVocab );
+      return applyVocabularyDiff( currentBuckets, localHashSet, localVocabMap, sourceVocab );
     } catch ( err ) {
       console.error( 'Error checking for vocabulary updates:', err.message );
       return { 'buckets': currentBuckets,
@@ -287,9 +287,9 @@
     module.exports = {
       parseCSVLine,
       parseCSVLineToWord,
-      parseGoogleSheetsCSV,
+      parseVocabularyCSV,
       hashVocabularyWord,
-      fetchGoogleSheetsData,
+      fetchVocabularyData,
       buildLocalVocabIndex,
       applyVocabularyDiff,
       checkForVocabularyUpdates

@@ -2,12 +2,12 @@
  * @file Integration tests for vocabulary update system
  */
 
-const { fetchGoogleSheetsData, checkForVocabularyUpdates } = require( '../vocabulary-sync.js' );
+const { fetchVocabularyData, checkForVocabularyUpdates } = require( '../vocabulary-sync.js' );
 
 describe( 'Vocabulary Update System - Integration Tests', () => {
-  describe( 'fetchGoogleSheetsData', () => {
+  describe( 'fetchVocabularyData', () => {
     /**
-     * Test that fetchGoogleSheetsData returns array of vocabulary words
+     * Test that fetchVocabularyData returns array of vocabulary words
      * @returns {Promise<void>}
      */
     test( 'should return array of vocabulary words', async () => {
@@ -19,7 +19,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
         }
       } );
 
-      const result = await fetchGoogleSheetsData();
+      const result = await fetchVocabularyData();
       expect( Array.isArray( result ) ).toBe( true );
       expect( result ).toHaveLength( 2 );
       expect( result[ 0 ] ).toEqual( {
@@ -38,7 +38,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     test( 'should handle fetch errors gracefully', async () => {
       global.fetch = jest.fn().mockRejectedValue( new Error( 'Network error' ) );
 
-      const result = await fetchGoogleSheetsData();
+      const result = await fetchVocabularyData();
       expect( result ).toEqual( [] );
     } );
 
@@ -52,7 +52,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
         'status': 404
       } );
 
-      const result = await fetchGoogleSheetsData();
+      const result = await fetchVocabularyData();
       expect( result ).toEqual( [] );
     } );
   } );
@@ -171,10 +171,10 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
     } );
 
     /**
-     * Test preservation of existing buckets when Google Sheets returns empty data
+     * Test preservation of existing buckets when the source returns empty data
      * @returns {Promise<void>}
      */
-    test( 'should preserve existing buckets when Google Sheets returns empty data', async () => {
+    test( 'should preserve existing buckets when the source returns empty data', async () => {
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
         'text': () => {
@@ -223,7 +223,7 @@ describe( 'Vocabulary Update System - Integration Tests', () => {
       global.fetch = jest.fn().mockResolvedValue( {
         'ok': true,
         'text': () => {
-          // Google Sheets now only contains first two words, 'بيت' is deleted
+          // The source now only contains first two words, 'بيت' is deleted
           return Promise.resolve( 'AR,AR,DE,EN,ES,md5\nكتاب,كتاب,Buch,book,libro,hash1\nقلم,قلم,Stift,pen,pluma,hash2' );
         }
       } );
