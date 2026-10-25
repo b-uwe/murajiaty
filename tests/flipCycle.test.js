@@ -2,7 +2,7 @@
  * @file Tests for 4-language flip cycle helpers (cycleOrderFor, promptLangFor).
  */
 
-const { cycleOrderFor, promptLangFor, textForSide } = require( '../app-utils.js' );
+const { cycleOrderFor, promptLangFor, textForSide } = require( '../vocab-logic.js' );
 
 describe( 'promptLangFor', () => {
   test( 'bucket 0 is German prompt', () => {

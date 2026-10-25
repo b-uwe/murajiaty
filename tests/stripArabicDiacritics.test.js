@@ -2,7 +2,7 @@
  * @file Tests for stripArabicDiacritics function
  */
 
-const { stripArabicDiacritics } = require( '../app-utils.js' );
+const { stripArabicDiacritics } = require( '../vocab-logic.js' );
 
 describe( 'stripArabicDiacritics', () => {
   test( 'should remove basic Arabic diacritics (fatha, kasra, damma, sukun)', () => {

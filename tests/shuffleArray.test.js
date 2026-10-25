@@ -2,7 +2,7 @@
  * @file Tests for shuffleArray utility function
  */
 
-const { shuffleArray } = require( '../app-utils.js' );
+const { shuffleArray } = require( '../vocab-logic.js' );
 
 describe( 'shuffleArray', () => {
   test( 'should return the same array reference', () => {

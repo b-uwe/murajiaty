@@ -4,7 +4,7 @@
  * threshold and direct level-0 fallback.
  */
 
-const { recallWords } = require( '../app-utils.js' );
+const { recallWords } = require( '../vocab-logic.js' );
 
 /**
  * Creates a test vocabulary word with sensible defaults.
