@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabelliste · مُرَاجِعَةِي</title>
+    <link rel="stylesheet" href="styles.css?v=1792936408">
+    <style>
+      body {
+        display: block;
+        font-size: 1rem;
+        padding: 1rem;
+      }
+      h1 {
+        font-size: 1.4rem;
+        margin: 0 0 0.5rem;
+      }
+      #diacritics-label {
+        display: inline-block;
+        color: #9a9a9a;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+      }
+      #status {
+        color: #9a9a9a;
+        margin-bottom: 1rem;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border-bottom: 1px solid #333;
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: #9a9a9a;
+        font-weight: normal;
+        position: sticky;
+        top: 0;
+        background: #1a1a1a;
+      }
+      td.ar {
+        direction: rtl;
+        text-align: right;
+        font-size: 1.6rem;
+        cursor: pointer;
+      }
+      td.ar:hover {
+        color: #4db884;
+      }
+    </style>
+    <script src="vocab-logic.js?v=1792940957" defer></script>
+    <script src="ui-helpers.js?v=1792939796" defer></script>
+    <script src="vocabulary-sync.js?v=1792952211" defer></script>
+    <script src="vocab.js?v=1792956800" defer></script>
+  </head>
+  <body>
+    <h1>قائمة المفردات</h1>
+    <label id="diacritics-label">
+      <input type="checkbox" id="diacritics-toggle"> إظهار التشكيل
+    </label>
+    <div id="status">جارٍ التحميل …</div>
+    <table>
+      <thead>
+        <tr>
+          <th>AR</th>
+          <th>DE</th>
+          <th>EN</th>
+          <th>ES</th>
+        </tr>
+      </thead>
+      <tbody id="vocab-body"></tbody>
+    </table>
+  </body>
+</html>

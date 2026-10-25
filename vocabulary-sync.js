@@ -275,7 +275,9 @@
 
   // Browser: expose on window namespace
   if ( typeof window !== 'undefined' ) {
-    window.VocabularySync = { checkForVocabularyUpdates };
+    window.VocabularySync = { checkForVocabularyUpdates,
+      fetchVocabularyData,
+      parseVocabularyCSV };
   }
 
   // Node.js: expose for testing
