@@ -444,55 +444,35 @@
     document.body.appendChild( overlay );
   };
 
-  // Browser: expose on window namespace
+  // Shared public API, exposed on window ( browser ) and module.exports ( tests )
+  const publicApi = {
+    flags,
+    COMMON_ARABIC_DIACRITICS,
+    ARABIC_FONTS,
+    pickRandomArabicFont,
+    promptLangFor,
+    cycleOrderFor,
+    textForSide,
+    shuffleArray,
+    stripArabicDiacritics,
+    speakWord,
+    buildLetterOverlayHTML,
+    calculateTargetLevel,
+    insertIntoReviewQueue,
+    findWordForLevel,
+    recallWords,
+    parseStoredWord,
+    createReviewPopup,
+    showStorageError,
+    ensurePersistentStorage,
+    setupViewport
+  };
+
   if ( typeof window !== 'undefined' ) {
-    window.AppUtils = {
-      flags,
-      COMMON_ARABIC_DIACRITICS,
-      ARABIC_FONTS,
-      pickRandomArabicFont,
-      promptLangFor,
-      cycleOrderFor,
-      textForSide,
-      shuffleArray,
-      stripArabicDiacritics,
-      speakWord,
-      buildLetterOverlayHTML,
-      calculateTargetLevel,
-      insertIntoReviewQueue,
-      findWordForLevel,
-      recallWords,
-      parseStoredWord,
-      createReviewPopup,
-      showStorageError,
-      ensurePersistentStorage,
-      setupViewport
-    };
+    window.AppUtils = publicApi;
   }
 
-  // Node.js: expose for testing
   if ( typeof module !== 'undefined' && module.exports ) {
-    module.exports = {
-      flags,
-      COMMON_ARABIC_DIACRITICS,
-      ARABIC_FONTS,
-      pickRandomArabicFont,
-      promptLangFor,
-      cycleOrderFor,
-      textForSide,
-      shuffleArray,
-      stripArabicDiacritics,
-      speakWord,
-      buildLetterOverlayHTML,
-      calculateTargetLevel,
-      insertIntoReviewQueue,
-      findWordForLevel,
-      recallWords,
-      parseStoredWord,
-      createReviewPopup,
-      showStorageError,
-      ensurePersistentStorage,
-      setupViewport
-    };
+    module.exports = publicApi;
   }
 } )();
