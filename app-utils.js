@@ -283,6 +283,23 @@
   };
 
   /**
+   * Counts how many words sit at each per-word reviewCount level.
+   * @param {Array<Array<object>>} targetBuckets - The bucket structure to scan
+   * @returns {Array<number>} Word counts indexed by reviewCount, lowest first
+   */
+  const reviewCountDistribution = ( targetBuckets ) => {
+    const distribution = [];
+    targetBuckets.flat().forEach( ( word ) => {
+      const level = word.reviewCount || 0;
+      while ( distribution.length <= level ) {
+        distribution.push( 0 );
+      }
+      distribution[ level ] += 1;
+    } );
+    return distribution;
+  };
+
+  /**
    * Detects if the app is running as a PWA
    * @returns {boolean} True if running as PWA
    */
@@ -444,55 +461,36 @@
     document.body.appendChild( overlay );
   };
 
-  // Browser: expose on window namespace
+  // Shared public API, exposed on window ( browser ) and module.exports ( tests )
+  const publicApi = {
+    flags,
+    COMMON_ARABIC_DIACRITICS,
+    ARABIC_FONTS,
+    pickRandomArabicFont,
+    promptLangFor,
+    cycleOrderFor,
+    textForSide,
+    shuffleArray,
+    stripArabicDiacritics,
+    speakWord,
+    buildLetterOverlayHTML,
+    calculateTargetLevel,
+    insertIntoReviewQueue,
+    findWordForLevel,
+    recallWords,
+    reviewCountDistribution,
+    parseStoredWord,
+    createReviewPopup,
+    showStorageError,
+    ensurePersistentStorage,
+    setupViewport
+  };
+
   if ( typeof window !== 'undefined' ) {
-    window.AppUtils = {
-      flags,
-      COMMON_ARABIC_DIACRITICS,
-      ARABIC_FONTS,
-      pickRandomArabicFont,
-      promptLangFor,
-      cycleOrderFor,
-      textForSide,
-      shuffleArray,
-      stripArabicDiacritics,
-      speakWord,
-      buildLetterOverlayHTML,
-      calculateTargetLevel,
-      insertIntoReviewQueue,
-      findWordForLevel,
-      recallWords,
-      parseStoredWord,
-      createReviewPopup,
-      showStorageError,
-      ensurePersistentStorage,
-      setupViewport
-    };
+    window.AppUtils = publicApi;
   }
 
-  // Node.js: expose for testing
   if ( typeof module !== 'undefined' && module.exports ) {
-    module.exports = {
-      flags,
-      COMMON_ARABIC_DIACRITICS,
-      ARABIC_FONTS,
-      pickRandomArabicFont,
-      promptLangFor,
-      cycleOrderFor,
-      textForSide,
-      shuffleArray,
-      stripArabicDiacritics,
-      speakWord,
-      buildLetterOverlayHTML,
-      calculateTargetLevel,
-      insertIntoReviewQueue,
-      findWordForLevel,
-      recallWords,
-      parseStoredWord,
-      createReviewPopup,
-      showStorageError,
-      ensurePersistentStorage,
-      setupViewport
-    };
+    module.exports = publicApi;
   }
 } )();

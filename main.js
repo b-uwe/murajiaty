@@ -17,6 +17,8 @@
   let letterOverlay;
   /** @type {HTMLElement} Header element showing bucket word counts */
   let wordsElement;
+  /** @type {HTMLElement} Header element showing the per-word reviewCount distribution */
+  let distributionElement;
 
   /** @type {number} Index of the currently active spaced-repetition bucket */
   let currentBucket = 0;
@@ -35,7 +37,7 @@
     pickRandomArabicFont, promptLangFor, cycleOrderFor, textForSide,
     shuffleArray, stripArabicDiacritics,
     speakWord, buildLetterOverlayHTML, insertIntoReviewQueue, recallWords,
-    parseStoredWord, createReviewPopup,
+    reviewCountDistribution, parseStoredWord, createReviewPopup,
     ensurePersistentStorage, showStorageError, setupViewport
   } = typeof window === 'undefined' ? require( './app-utils.js' ) : window.AppUtils;
 
@@ -43,6 +45,9 @@
    * Updates the header with the current bucket and word count
    */
   const updateHeader = () => {
+    if ( distributionElement ) {
+      distributionElement.textContent = reviewCountDistribution( buckets ).join( ' ' );
+    }
     wordsElement.textContent = `${buckets.filter( ( bucket, idx ) => {
       return idx !== buckets.length - 1;
     } ).map( ( bucket, idx ) => {
@@ -342,6 +347,7 @@
     flipButton = document.getElementById( 'flipButton' );
     letterOverlay = document.getElementById( 'letterOverlay' );
     wordsElement = document.getElementById( 'words' );
+    distributionElement = document.getElementById( 'distribution' );
 
     setupViewport();
 
