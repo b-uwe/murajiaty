@@ -16,6 +16,7 @@
   let showDiacritics = false;
   let commentsMap = {};
   let canComment = false;
+  let canDelete = false;
   let activeWord = null;
 
   /**
@@ -60,15 +61,27 @@
   };
 
   /**
-   * Builds a list item for one comment, prefixed with its author's name.
+   * Builds a list item for one comment, prefixed with its author's name. When
+   * deletion is allowed, a delete button carrying the comment index is added;
+   * a delegated listener in init acts on it.
    * @param {object} comment - Comment with text and author fields.
+   * @param {number} index - The comment's position within its word.
+   * @param {boolean} deletable - Whether a delete button should be shown.
    * @returns {HTMLLIElement} The populated list item.
    */
-  const renderComment = ( comment ) => {
+  const renderComment = ( comment, index, deletable ) => {
     const item = document.createElement( 'li' );
     const author = document.createElement( 'strong' );
     author.textContent = `${comment.author}: `;
     item.append( author, document.createTextNode( comment.text ) );
+    if ( deletable ) {
+      const remove = document.createElement( 'button' );
+      remove.type = 'button';
+      remove.className = 'comment-delete';
+      remove.dataset.index = String( index );
+      remove.textContent = '🗑';
+      item.append( ' ', remove );
+    }
     return item;
   };
 
@@ -86,6 +99,7 @@
       const data = await response.json();
       commentsMap = data.comments || {};
       canComment = Boolean( data.canComment );
+      canDelete = Boolean( data.canDelete );
     } catch {
       // Comments are optional; the table still works without them.
     }
@@ -123,6 +137,18 @@
   };
 
   /**
+   * Builds the POST body for deleting a comment: the word hash and the
+   * comment's index within that word.
+   * @param {object} word - Vocabulary word the comment belongs to.
+   * @param {number} index - The comment's position within its word.
+   * @returns {object} The body fields for the delete request.
+   */
+  const buildDeleteBody = ( word, index ) => {
+    return { 'hash': window.VocabularySync.hashVocabularyWord( word ),
+      'index': String( index ) };
+  };
+
+  /**
    * Builds the "add comment" form shown in the overlay when writing is
    * allowed. The save button is wired by a delegated listener in init.
    * @returns {HTMLDivElement} The form element.
@@ -149,8 +175,8 @@
     const body = document.getElementById( 'overlay-body' );
     const list = document.createElement( 'ul' );
     list.className = 'comment-list';
-    lookupComments( commentsMap, word ).forEach( ( comment ) => {
-      list.append( renderComment( comment ) );
+    lookupComments( commentsMap, word ).forEach( ( comment, index ) => {
+      list.append( renderComment( comment, index, canDelete ) );
     } );
     body.replaceChildren( list );
     if ( canComment ) {
@@ -236,6 +262,21 @@
   };
 
   /**
+   * Deletes a comment by its index, then reloads the comments, re-renders the
+   * table and reopens the overlay.
+   * @param {object} word - Vocabulary word the comment belongs to.
+   * @param {number} index - The comment's position within its word.
+   * @returns {Promise<void>} Resolves once the overlay is refreshed.
+   */
+  const deleteComment = async ( word, index ) => {
+    await fetch( './comments.php?action=delete', { 'method': 'POST',
+      'body': new URLSearchParams( buildDeleteBody( word, index ) ) } );
+    await fetchComments();
+    renderRows();
+    openCommentOverlay( word );
+  };
+
+  /**
    * Fetches the vocabulary and performs the initial render.
    * @returns {Promise<void>} Resolves once rendering is complete.
    */
@@ -268,6 +309,9 @@
       if ( event.target.classList.contains( 'comment-save' ) ) {
         saveComment( activeWord, event.target.previousElementSibling.value );
       }
+      if ( event.target.classList.contains( 'comment-delete' ) ) {
+        deleteComment( activeWord, Number( event.target.dataset.index ) );
+      }
     } );
     const toggle = document.getElementById( 'diacritics-toggle' );
     toggle.checked = showDiacritics;
@@ -291,6 +335,7 @@
       renderComment,
       markerLabel,
       buildSaveBody,
+      buildDeleteBody,
       readDiacriticsPref };
   }
 } )();

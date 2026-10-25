@@ -11,13 +11,14 @@ let lookupComments;
 let renderComment;
 let markerLabel;
 let buildSaveBody;
+let buildDeleteBody;
 let hashVocabularyWord;
 
 beforeAll( () => {
   require( '../vocab-logic.js' );
   ( { hashVocabularyWord } = require( '../vocabulary-sync.js' ) );
   window.UIHelpers = { 'speakWord': jest.fn() };
-  ( { lookupComments, renderComment, markerLabel, buildSaveBody } = require( '../vocab.js' ) );
+  ( { lookupComments, renderComment, markerLabel, buildSaveBody, buildDeleteBody } = require( '../vocab.js' ) );
 } );
 
 describe( 'lookupComments', () => {
@@ -49,6 +50,13 @@ describe( 'renderComment', () => {
     expect( node.textContent ).toContain( 'Hossam' );
     expect( node.textContent ).toContain( 'nett' );
   } );
+
+  test( 'adds a delete button only when deletion is allowed', () => {
+    const comment = { 'text': 'x',
+      'author': 'Uwe' };
+    expect( renderComment( comment, 0, false ).querySelector( '.comment-delete' ) ).toBeNull();
+    expect( renderComment( comment, 0, true ).querySelector( '.comment-delete' ) ).not.toBeNull();
+  } );
 } );
 
 describe( 'markerLabel', () => {
@@ -75,5 +83,17 @@ describe( 'buildSaveBody', () => {
     expect( body.hash ).toBe( hashVocabularyWord( word ) );
     expect( body.text ).toBe( 'hallo' );
     expect( JSON.parse( body.row ) ).toEqual( word );
+  } );
+} );
+
+describe( 'buildDeleteBody', () => {
+  test( 'carries the word hash and the comment index', () => {
+    const word = { 'ar': 'باب',
+      'de': 'Tür',
+      'en': 'door',
+      'es': 'puerta' };
+    const body = buildDeleteBody( word, 3 );
+    expect( body.hash ).toBe( hashVocabularyWord( word ) );
+    expect( body.index ).toBe( '3' );
   } );
 } );
