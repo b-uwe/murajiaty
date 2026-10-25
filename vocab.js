@@ -15,6 +15,8 @@
   let words = [];
   let showDiacritics = false;
   let commentsMap = {};
+  let canComment = false;
+  let activeWord = null;
 
   /**
    * Returns the Arabic text to display, stripping diacritics unless the
@@ -83,16 +85,67 @@
       }
       const data = await response.json();
       commentsMap = data.comments || {};
+      canComment = Boolean( data.canComment );
     } catch {
       // Comments are optional; the table still works without them.
     }
   };
 
   /**
-   * Opens the overlay and fills it with a word's comments.
+   * Chooses the marker text for a row: a count badge when comments exist, an
+   * add marker when writing is allowed, or nothing.
+   * @param {number} count - Number of comments on the word.
+   * @param {boolean} writable - Whether the viewer may add comments.
+   * @returns {string} The marker label, or an empty string for no marker.
+   */
+  const markerLabel = ( count, writable ) => {
+    if ( count > 0 ) {
+      return `💬 ${count}`;
+    }
+    return writable ? '➕' : '';
+  };
+
+  /**
+   * Builds the POST body for saving a comment: the word hash, the text and a
+   * snapshot of the row so an orphaned comment stays identifiable.
+   * @param {object} word - Vocabulary word with ar/de/en/es fields.
+   * @param {string} commentText - The comment text.
+   * @returns {object} The body fields for the save request.
+   */
+  const buildSaveBody = ( word, commentText ) => {
+    const row = { 'ar': word.ar,
+      'de': word.de,
+      'en': word.en,
+      'es': word.es };
+    return { 'hash': window.VocabularySync.hashVocabularyWord( word ),
+      'text': commentText,
+      'row': JSON.stringify( row ) };
+  };
+
+  /**
+   * Builds the "add comment" form shown in the overlay when writing is
+   * allowed. The save button is wired by a delegated listener in init.
+   * @returns {HTMLDivElement} The form element.
+   */
+  const buildCommentForm = () => {
+    const form = document.createElement( 'div' );
+    form.className = 'comment-form';
+    const input = document.createElement( 'textarea' );
+    const save = document.createElement( 'button' );
+    save.type = 'button';
+    save.className = 'comment-save';
+    save.textContent = 'Speichern';
+    form.append( input, save );
+    return form;
+  };
+
+  /**
+   * Opens the overlay for a word and fills it with the word's comments,
+   * remembering the word so a save knows which row it belongs to.
    * @param {object} word - Vocabulary word with ar/de/en/es fields.
    */
   const openCommentOverlay = ( word ) => {
+    activeWord = word;
     const body = document.getElementById( 'overlay-body' );
     const list = document.createElement( 'ul' );
     list.className = 'comment-list';
@@ -100,6 +153,9 @@
       list.append( renderComment( comment ) );
     } );
     body.replaceChildren( list );
+    if ( canComment ) {
+      body.append( buildCommentForm() );
+    }
     document.getElementById( 'overlay' ).hidden = false;
   };
 
@@ -111,12 +167,13 @@
    */
   const addCommentMarker = ( row, word ) => {
     const count = lookupComments( commentsMap, word ).length;
-    if ( count === 0 ) {
+    const label = markerLabel( count, canComment );
+    if ( label === '' ) {
       return;
     }
     const marker = document.createElement( 'button' );
     marker.className = 'comment-marker';
-    marker.textContent = `💬 ${count}`;
+    marker.textContent = label;
     marker.addEventListener( 'click', () => {
       openCommentOverlay( word );
     } );
@@ -161,6 +218,24 @@
   };
 
   /**
+   * Saves a comment for a word, then reloads the comments, re-renders the
+   * table and reopens the overlay so the new entry shows immediately.
+   * @param {object} word - Vocabulary word the comment belongs to.
+   * @param {string} commentText - The comment text.
+   * @returns {Promise<void>} Resolves once the overlay is refreshed.
+   */
+  const saveComment = async ( word, commentText ) => {
+    if ( commentText.trim() === '' ) {
+      return;
+    }
+    await fetch( './comments.php?action=save', { 'method': 'POST',
+      'body': new URLSearchParams( buildSaveBody( word, commentText ) ) } );
+    await fetchComments();
+    renderRows();
+    openCommentOverlay( word );
+  };
+
+  /**
    * Fetches the vocabulary and performs the initial render.
    * @returns {Promise<void>} Resolves once rendering is complete.
    */
@@ -189,6 +264,11 @@
     document.getElementById( 'overlay-close' ).addEventListener( 'click', () => {
       overlay.hidden = true;
     } );
+    document.getElementById( 'overlay-body' ).addEventListener( 'click', ( event ) => {
+      if ( event.target.classList.contains( 'comment-save' ) ) {
+        saveComment( activeWord, event.target.previousElementSibling.value );
+      }
+    } );
     const toggle = document.getElementById( 'diacritics-toggle' );
     toggle.checked = showDiacritics;
     toggle.addEventListener( 'change', () => {
@@ -209,6 +289,8 @@
       buildRow,
       lookupComments,
       renderComment,
+      markerLabel,
+      buildSaveBody,
       readDiacriticsPref };
   }
 } )();

@@ -9,13 +9,15 @@
 
 let lookupComments;
 let renderComment;
+let markerLabel;
+let buildSaveBody;
 let hashVocabularyWord;
 
 beforeAll( () => {
   require( '../vocab-logic.js' );
   ( { hashVocabularyWord } = require( '../vocabulary-sync.js' ) );
   window.UIHelpers = { 'speakWord': jest.fn() };
-  ( { lookupComments, renderComment } = require( '../vocab.js' ) );
+  ( { lookupComments, renderComment, markerLabel, buildSaveBody } = require( '../vocab.js' ) );
 } );
 
 describe( 'lookupComments', () => {
@@ -46,5 +48,32 @@ describe( 'renderComment', () => {
       'author': 'Hossam' } );
     expect( node.textContent ).toContain( 'Hossam' );
     expect( node.textContent ).toContain( 'nett' );
+  } );
+} );
+
+describe( 'markerLabel', () => {
+  test( 'shows the count when comments exist', () => {
+    expect( markerLabel( 2, false ) ).toBe( '💬 2' );
+  } );
+
+  test( 'offers an add marker when writing is allowed and none exist', () => {
+    expect( markerLabel( 0, true ) ).toBe( '➕' );
+  } );
+
+  test( 'shows nothing when none exist and writing is not allowed', () => {
+    expect( markerLabel( 0, false ) ).toBe( '' );
+  } );
+} );
+
+describe( 'buildSaveBody', () => {
+  test( 'carries the word hash, text and a row snapshot', () => {
+    const word = { 'ar': 'باب',
+      'de': 'Tür',
+      'en': 'door',
+      'es': 'puerta' };
+    const body = buildSaveBody( word, 'hallo' );
+    expect( body.hash ).toBe( hashVocabularyWord( word ) );
+    expect( body.text ).toBe( 'hallo' );
+    expect( JSON.parse( body.row ) ).toEqual( word );
   } );
 } );
