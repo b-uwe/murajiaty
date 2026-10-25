@@ -100,6 +100,20 @@
   };
 
   /**
+   * Computes a word's reviewCount after an unknown (👎) demotion. In the first
+   * bucket a word cannot drop any further, so instead its reviewCount is
+   * decremented (floored at 0) to push it back through the recall queue sooner.
+   * Any other bucket leaves the reviewCount untouched.
+   * @param {object} word - The vocabulary word being demoted
+   * @param {number} bucketIndex - The bucket the word is currently in
+   * @returns {number} The reviewCount to store on the word
+   */
+  const reviewCountAfterDemotion = ( word, bucketIndex ) => {
+    const current = word.reviewCount || 0;
+    return bucketIndex === 0 ? Math.max( 0, current - 1 ) : current;
+  };
+
+  /**
    * Finds a word in the bucket matching the target reviewCount level.
    *
    * Strategy:
@@ -253,6 +267,7 @@
     textForSide,
     calculateTargetLevel,
     insertIntoReviewQueue,
+    reviewCountAfterDemotion,
     findWordForLevel,
     recallWords,
     reviewCountDistribution,
