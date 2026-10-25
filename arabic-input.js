@@ -3,9 +3,10 @@
    * @file Arabic text input interface for vocabulary writing practice
    */
 
+  const { stripArabicDiacritics } = typeof window === 'undefined' ? require( './vocab-logic.js' ) : window.VocabLogic;
   const {
-    flags, pickRandomArabicFont, stripArabicDiacritics, speakWord
-  } = typeof window === 'undefined' ? require( './app-utils.js' ) : window.AppUtils;
+    flags, pickRandomArabicFont, speakWord
+  } = typeof window === 'undefined' ? require( './ui-helpers.js' ) : window.UIHelpers;
 
   /**
    * Sets up the Arabic input interface by creating DOM elements and

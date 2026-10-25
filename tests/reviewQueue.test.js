@@ -8,7 +8,7 @@ const {
   insertIntoReviewQueue,
   findWordForLevel,
   parseStoredWord
-} = require( '../app-utils.js' );
+} = require( '../vocab-logic.js' );
 
 describe( 'calculateTargetLevel', () => {
   test( 'should return 0 for odd counter values', () => {

@@ -3,7 +3,7 @@
  * feeds the distribution line shown above the bucket counts.
  */
 
-const { reviewCountDistribution } = require( '../app-utils.js' );
+const { reviewCountDistribution } = require( '../vocab-logic.js' );
 
 /**
  * Builds a bucket structure from a flat list of reviewCount values.

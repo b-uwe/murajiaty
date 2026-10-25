@@ -28,18 +28,23 @@
   /** @type {Array<Array<object>>} Spaced-repetition buckets holding vocabulary words */
   let buckets = [ [], [], [], [], [], [], [] ];
 
-  // Node.js (Jest): use require; browser: use window namespace set by app-utils.js
+  // Node.js (Jest): use require; browser: use window namespaces set by the modules
   /** @type {number} Global review counter for binary frequency distribution */
   let reviewCounter = 0;
 
+  const vocabLogic = typeof window === 'undefined' ? require( './vocab-logic.js' ) : window.VocabLogic;
+  const uiHelpers = typeof window === 'undefined' ? require( './ui-helpers.js' ) : window.UIHelpers;
+
   const {
-    flags, COMMON_ARABIC_DIACRITICS, ARABIC_FONTS,
-    pickRandomArabicFont, promptLangFor, cycleOrderFor, textForSide,
-    shuffleArray, stripArabicDiacritics,
-    speakWord, buildLetterOverlayHTML, insertIntoReviewQueue, recallWords,
-    reviewCountDistribution, parseStoredWord, createReviewPopup,
+    promptLangFor, cycleOrderFor, textForSide, shuffleArray, stripArabicDiacritics,
+    insertIntoReviewQueue, recallWords, reviewCountDistribution, parseStoredWord
+  } = vocabLogic;
+
+  const {
+    flags, COMMON_ARABIC_DIACRITICS, ARABIC_FONTS, pickRandomArabicFont,
+    speakWord, buildLetterOverlayHTML, createReviewPopup,
     ensurePersistentStorage, showStorageError, setupViewport
-  } = typeof window === 'undefined' ? require( './app-utils.js' ) : window.AppUtils;
+  } = uiHelpers;
 
   /**
    * Updates the header with the current bucket and word count

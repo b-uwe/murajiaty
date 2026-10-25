@@ -3,12 +3,13 @@
  */
 
 /** @constant {string} Current cache version identifier */
-const CACHE_NAME = 'murajiaty-v7';
+const CACHE_NAME = 'murajiaty-v8';
 /** @constant {string[]} URLs to pre-cache during service worker installation */
 const urlsToCache = [
   './',
   './index.html',
-  './app-utils.js',
+  './vocab-logic.js',
+  './ui-helpers.js',
   './arabic-input.js',
   './vocabulary-sync.js',
   './main.js',
