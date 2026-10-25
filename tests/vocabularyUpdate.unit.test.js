@@ -100,7 +100,7 @@ describe( 'Vocabulary Update System - Unit Tests', () => {
      * Test that Arabic is read from the first column (AR) of the source format.
      */
     test( 'should read Arabic from the first column', () => {
-      const word = parseCSVLineToWord( 'كتاب,Buch,book,libro,md5' );
+      const word = parseCSVLineToWord( 'كتاب,Buch,book,libro' );
       expect( word ).toEqual( {
         'ar': 'كتاب',
         'de': 'Buch',
@@ -114,7 +114,7 @@ describe( 'Vocabulary Update System - Unit Tests', () => {
      * Test that a row with an empty Arabic field is rejected
      */
     test( 'should reject a row whose Arabic field is empty', () => {
-      expect( parseCSVLineToWord( ',Buch,book,libro,md5' ) ).toBeNull();
+      expect( parseCSVLineToWord( ',Buch,book,libro' ) ).toBeNull();
     } );
   } );
 } );

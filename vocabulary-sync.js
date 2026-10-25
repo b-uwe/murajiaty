@@ -71,7 +71,7 @@
     // Parse CSV line with default comma separators, handling quoted fields properly
     const parts = parseCSVLine( csvLine );
 
-    // Extract columns: 0=AR, 1=DE, 2=EN, 3=ES, 4=Pl ( ignored ).
+    // Extract columns: 0=AR, 1=DE, 2=EN, 3=ES.
     const ar = ( parts[ 0 ] || '' ).trim();
     const de = ( parts[ 1 ] || '' ).trim();
     const en = ( parts[ 2 ] || '' ).trim();
