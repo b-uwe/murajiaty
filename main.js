@@ -37,7 +37,8 @@
 
   const {
     promptLangFor, cycleOrderFor, textForSide, shuffleArray, stripArabicDiacritics,
-    insertIntoReviewQueue, recallWords, reviewCountDistribution, parseStoredWord
+    insertIntoReviewQueue, reviewCountAfterDemotion, recallWords,
+    reviewCountDistribution, formatDistribution, parseStoredWord
   } = vocabLogic;
 
   const {
@@ -51,7 +52,9 @@
    */
   const updateHeader = () => {
     if ( distributionElement ) {
-      distributionElement.textContent = reviewCountDistribution( buckets ).join( ' ' );
+      const [ currentWord ] = buckets[ currentBucket ];
+      const highlightLevel = currentWord ? currentWord.reviewCount || 0 : null;
+      distributionElement.textContent = formatDistribution( reviewCountDistribution( buckets ), highlightLevel );
     }
     wordsElement.textContent = `${buckets.filter( ( bucket, idx ) => {
       return idx !== buckets.length - 1;
@@ -245,6 +248,12 @@
       return;
     }
     const trgtBucket = currentBucket > 0 ? currentBucket - 1 : 0;
+
+    /*
+     * In the first bucket a word cannot drop further, so decrement its
+     * reviewCount instead to recall it sooner (floored at 0).
+     */
+    currentWord.reviewCount = reviewCountAfterDemotion( currentWord, currentBucket );
 
     // Add the word to the end of the target (previous) bucket
     buckets[ trgtBucket ].push( currentWord );

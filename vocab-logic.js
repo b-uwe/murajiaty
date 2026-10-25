@@ -100,6 +100,20 @@
   };
 
   /**
+   * Computes a word's reviewCount after an unknown (👎) demotion. In the first
+   * bucket a word cannot drop any further, so instead its reviewCount is
+   * decremented (floored at 0) to push it back through the recall queue sooner.
+   * Any other bucket leaves the reviewCount untouched.
+   * @param {object} word - The vocabulary word being demoted
+   * @param {number} bucketIndex - The bucket the word is currently in
+   * @returns {number} The reviewCount to store on the word
+   */
+  const reviewCountAfterDemotion = ( word, bucketIndex ) => {
+    const current = word.reviewCount || 0;
+    return bucketIndex === 0 ? Math.max( 0, current - 1 ) : current;
+  };
+
+  /**
    * Finds a word in the bucket matching the target reviewCount level.
    *
    * Strategy:
@@ -221,6 +235,21 @@
   };
 
   /**
+   * Renders a reviewCount distribution as a space-separated string, wrapping
+   * the given level in angle brackets so the current word's reviewCount stands
+   * out the same way the active bucket does. A null or out-of-range level
+   * highlights nothing.
+   * @param {Array<number>} distribution - Word counts indexed by reviewCount
+   * @param {number|null} highlightLevel - The reviewCount level to mark, or null
+   * @returns {string} The formatted, space-separated distribution
+   */
+  const formatDistribution = ( distribution, highlightLevel ) => {
+    return distribution.map( ( count, level ) => {
+      return level === highlightLevel ? `<${count}>` : String( count );
+    } ).join( ' ' );
+  };
+
+  /**
    * Parses a stored vocabulary word, keeping only known properties
    * and discarding legacy fields like doneAt.
    * @param {object} raw - The raw word object from localStorage
@@ -253,9 +282,11 @@
     textForSide,
     calculateTargetLevel,
     insertIntoReviewQueue,
+    reviewCountAfterDemotion,
     findWordForLevel,
     recallWords,
     reviewCountDistribution,
+    formatDistribution,
     parseStoredWord
   };
 
