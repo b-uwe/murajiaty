@@ -7,6 +7,8 @@
 
   const vocabLogic = typeof window === 'undefined' ? require( './vocab-logic.js' ) : window.VocabLogic;
   const { stripArabicDiacritics } = vocabLogic;
+  const uiHelpers = typeof window === 'undefined' ? require( './ui-helpers.js' ) : window.UIHelpers;
+  const { speakWord } = uiHelpers;
 
   // Persisted preference key and module-level state shared by the renderers.
   const diacriticsKey = 'murajiaty-vocab-diacritics';
@@ -33,7 +35,18 @@
   };
 
   /**
-   * Builds one table row for a vocabulary word ( AR, DE, EN, ES ).
+   * Speaks a word's Arabic using the original text ( diacritics included ),
+   * which guides the text-to-speech even when the table shows the stripped
+   * form.
+   * @param {object} word - Vocabulary word with an ar field.
+   */
+  const speakArabic = ( word ) => {
+    speakWord( word.ar );
+  };
+
+  /**
+   * Builds one table row for a vocabulary word ( AR, DE, EN, ES ). The
+   * Arabic cell speaks the word when tapped.
    * @param {object} word - Vocabulary word with ar/de/en/es fields.
    * @returns {HTMLTableRowElement} The populated table row.
    */
@@ -45,6 +58,9 @@
       cell.textContent = text;
       if ( index === 0 ) {
         cell.className = 'ar';
+        cell.addEventListener( 'click', () => {
+          speakArabic( word );
+        } );
       }
       row.append( cell );
     } );
@@ -104,6 +120,7 @@
 
   if ( typeof module !== 'undefined' && module.exports ) {
     module.exports = { displayArabic,
+      speakArabic,
       buildRow,
       readDiacriticsPref };
   }

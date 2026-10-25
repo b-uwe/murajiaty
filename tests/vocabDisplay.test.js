@@ -1,11 +1,18 @@
+/* global window */
+
 /**
- * @file Tests for the vocabulary view's display logic.
- * vocab-logic.js is required first so vocab.js finds window.VocabLogic
- * ( jsdom provides the window the browser branch assigns onto ).
+ * @file Tests for the vocabulary view's display logic. VocabLogic and a
+ * stubbed UIHelpers are placed on the jsdom window before vocab.js
+ * destructures them, inside beforeAll where the jsdom window is active.
  */
 
-require( '../vocab-logic.js' );
-const { displayArabic } = require( '../vocab.js' );
+let displayArabic;
+
+beforeAll( () => {
+  require( '../vocab-logic.js' );
+  window.UIHelpers = { 'speakWord': jest.fn() };
+  ( { displayArabic } = require( '../vocab.js' ) );
+} );
 
 describe( 'displayArabic', () => {
   test( 'keeps diacritics when they are enabled', () => {
