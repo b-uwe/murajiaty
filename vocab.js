@@ -89,12 +89,12 @@
     words = await window.VocabularySync.fetchVocabularyData();
 
     if ( words.length === 0 ) {
-      status.textContent = 'Keine Vokabeln gefunden.';
+      status.textContent = 'لا توجد مفردات.';
       return;
     }
 
     renderRows();
-    status.textContent = `${words.length} Vokabeln`;
+    status.textContent = `${words.length} مفردة`;
   };
 
   /**
