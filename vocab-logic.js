@@ -235,6 +235,21 @@
   };
 
   /**
+   * Renders a reviewCount distribution as a space-separated string, wrapping
+   * the given level in angle brackets so the current word's reviewCount stands
+   * out the same way the active bucket does. A null or out-of-range level
+   * highlights nothing.
+   * @param {Array<number>} distribution - Word counts indexed by reviewCount
+   * @param {number|null} highlightLevel - The reviewCount level to mark, or null
+   * @returns {string} The formatted, space-separated distribution
+   */
+  const formatDistribution = ( distribution, highlightLevel ) => {
+    return distribution.map( ( count, level ) => {
+      return level === highlightLevel ? `<${count}>` : String( count );
+    } ).join( ' ' );
+  };
+
+  /**
    * Parses a stored vocabulary word, keeping only known properties
    * and discarding legacy fields like doneAt.
    * @param {object} raw - The raw word object from localStorage
@@ -271,6 +286,7 @@
     findWordForLevel,
     recallWords,
     reviewCountDistribution,
+    formatDistribution,
     parseStoredWord
   };
 

@@ -38,7 +38,7 @@
   const {
     promptLangFor, cycleOrderFor, textForSide, shuffleArray, stripArabicDiacritics,
     insertIntoReviewQueue, reviewCountAfterDemotion, recallWords,
-    reviewCountDistribution, parseStoredWord
+    reviewCountDistribution, formatDistribution, parseStoredWord
   } = vocabLogic;
 
   const {
@@ -52,7 +52,9 @@
    */
   const updateHeader = () => {
     if ( distributionElement ) {
-      distributionElement.textContent = reviewCountDistribution( buckets ).join( ' ' );
+      const [ currentWord ] = buckets[ currentBucket ];
+      const highlightLevel = currentWord ? currentWord.reviewCount || 0 : null;
+      distributionElement.textContent = formatDistribution( reviewCountDistribution( buckets ), highlightLevel );
     }
     wordsElement.textContent = `${buckets.filter( ( bucket, idx ) => {
       return idx !== buckets.length - 1;
