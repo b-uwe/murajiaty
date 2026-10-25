@@ -12,13 +12,14 @@ let renderComment;
 let markerLabel;
 let buildSaveBody;
 let buildDeleteBody;
+let buildTokenCookie;
 let hashVocabularyWord;
 
 beforeAll( () => {
   require( '../vocab-logic.js' );
   ( { hashVocabularyWord } = require( '../vocabulary-sync.js' ) );
   window.UIHelpers = { 'speakWord': jest.fn() };
-  ( { lookupComments, renderComment, markerLabel, buildSaveBody, buildDeleteBody } = require( '../vocab.js' ) );
+  ( { lookupComments, renderComment, markerLabel, buildSaveBody, buildDeleteBody, buildTokenCookie } = require( '../vocab.js' ) );
 } );
 
 describe( 'lookupComments', () => {
@@ -95,5 +96,13 @@ describe( 'buildDeleteBody', () => {
     const body = buildDeleteBody( word, 3 );
     expect( body.hash ).toBe( hashVocabularyWord( word ) );
     expect( body.index ).toBe( '3' );
+  } );
+} );
+
+describe( 'buildTokenCookie', () => {
+  test( 'names the cookie and restricts it to same-site requests', () => {
+    const cookie = buildTokenCookie( 'abc 123' );
+    expect( cookie ).toContain( 'murajiaty_token=abc%20123' );
+    expect( cookie ).toContain( 'samesite=strict' );
   } );
 } );

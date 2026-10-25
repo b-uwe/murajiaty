@@ -149,6 +149,17 @@
   };
 
   /**
+   * Builds the cookie string that carries a write token, scoped to this app's
+   * directory and restricted to same-site requests.
+   * @param {string} token - The write token to store.
+   * @returns {string} The document.cookie assignment string.
+   */
+  const buildTokenCookie = ( token ) => {
+    const tenYears = 60 * 60 * 24 * 365 * 10;
+    return `murajiaty_token=${encodeURIComponent( token )}; max-age=${tenYears}; samesite=strict`;
+  };
+
+  /**
    * Builds the "add comment" form shown in the overlay when writing is
    * allowed. The save button is wired by a delegated listener in init.
    * @returns {HTMLDivElement} The form element.
@@ -295,6 +306,17 @@
   };
 
   /**
+   * Developer mode: stores a write token in the cookie and reloads so the
+   * server grants comment rights. Call window.setCommentToken( '…' ) in the
+   * browser console.
+   * @param {string} token - The write token handed out for this person.
+   */
+  const setCommentToken = ( token ) => {
+    document.cookie = buildTokenCookie( token );
+    location.reload();
+  };
+
+  /**
    * Wires the diacritics toggle to the stored preference and re-renders
    * the Arabic column whenever it changes, then loads the vocabulary.
    * @returns {Promise<void>} Resolves once the initial load is complete.
@@ -324,6 +346,7 @@
   };
 
   if ( typeof document !== 'undefined' ) {
+    window.setCommentToken = setCommentToken;
     document.addEventListener( 'DOMContentLoaded', init );
   }
 
@@ -336,6 +359,7 @@
       markerLabel,
       buildSaveBody,
       buildDeleteBody,
+      buildTokenCookie,
       readDiacriticsPref };
   }
 } )();
