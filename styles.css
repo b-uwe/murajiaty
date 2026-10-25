@@ -55,13 +55,8 @@ body {
   word-break: break-word;
 }
 
-#distribution {
-  font-size: 1rem;
-  grid-column: 1 / 5;
-  text-align: center;
-}
-
-#words {
+/* Full-width, centred counter lines in the header ( buckets + distribution ) */
+.counter-line {
   font-size: 1rem;
   grid-column: 1 / 5;
   text-align: center;
