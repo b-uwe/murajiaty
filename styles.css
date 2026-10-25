@@ -55,6 +55,12 @@ body {
   word-break: break-word;
 }
 
+#distribution {
+  font-size: 1rem;
+  grid-column: 1 / 5;
+  text-align: center;
+}
+
 #words {
   font-size: 1rem;
   grid-column: 1 / 5;
