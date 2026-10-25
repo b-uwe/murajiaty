@@ -135,7 +135,7 @@
    */
   const fetchVocabularyData = async () => {
     try {
-      const response = await fetch( `https://docs.google.com/spreadsheets/d/1kPsGq3Zo9PPjtcst-T3pfiToeohq82K-yHuLywxtucU/export?format=csv&t=${Date.now()}` );
+      const response = await fetch( `./vocab.csv?t=${Date.now()}` );
 
       if ( !response.ok ) {
         throw new Error( `Network response was not ok: ${response.status}` );
