@@ -277,6 +277,7 @@
   if ( typeof window !== 'undefined' ) {
     window.VocabularySync = { checkForVocabularyUpdates,
       fetchVocabularyData,
+      hashVocabularyWord,
       parseVocabularyCSV };
   }
 
