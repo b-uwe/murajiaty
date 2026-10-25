@@ -7,7 +7,7 @@ const { parseCSVLineToWord } = require( '../vocabulary-sync.js' );
 describe( 'CSV Utilities', () => {
   describe( 'parseCSVLineToWord', () => {
     test( 'should parse vocabulary CSV line with comma separation', () => {
-      const csvLine = 'آسِفْ,آسِفْ,Es tut mir leid,I\'m sorry,Lo siento,9fdf6eccd7d89d3aba63dece6bed406a';
+      const csvLine = 'آسِفْ,Es tut mir leid,I\'m sorry,Lo siento,9fdf6eccd7d89d3aba63dece6bed406a';
       const result = parseCSVLineToWord( csvLine );
       expect( result ).toEqual( {
         'ar': 'آسِفْ',
@@ -20,7 +20,6 @@ describe( 'CSV Utilities', () => {
 
     test( 'should handle quoted fields in vocabulary CSV', () => {
       const csvLine = '"أَبُوك جَاي مَعَايَا بُكْرَة؟",' +
-        '"أَبُوك جَاي مَعَايَا بُكْرَة؟",' +
         '"Kommt dein Vater morgen mit mir?",' +
         '"Is your father coming with me tomorrow?",' +
         '"¿Viene tu padre conmigo mañana?",' +
@@ -36,7 +35,7 @@ describe( 'CSV Utilities', () => {
     } );
 
     test( 'should skip header row', () => {
-      const headerLine = 'AR,AR,DE,EN,ES,md5';
+      const headerLine = 'AR,DE,EN,ES,Pl';
       const result = parseCSVLineToWord( headerLine );
       expect( result ).toBeNull();
     } );
@@ -48,15 +47,15 @@ describe( 'CSV Utilities', () => {
     } );
 
     test( 'should handle empty fields gracefully', () => {
-      // Empty DE field (3rd column)
-      const csvLine = 'ar,ar,,en,es,hash';
+      // Empty DE field (2nd column)
+      const csvLine = 'ar,,en,es,hash';
       const result = parseCSVLineToWord( csvLine );
       // Should return null if any required field is empty
       expect( result ).toBeNull();
     } );
 
     test( 'should ignore extra columns beyond the required ones', () => {
-      const csvLine = 'آهْ,آهْ,ja,yes,sí,hash,extra,columns';
+      const csvLine = 'آهْ,ja,yes,sí,hash,extra,columns';
       const result = parseCSVLineToWord( csvLine );
       expect( result ).toEqual( {
         'ar': 'آهْ',
@@ -70,7 +69,7 @@ describe( 'CSV Utilities', () => {
 
   describe( 'parseCSVLineToWord with commas in fields', () => {
     test( 'should handle comma in Arabic field from the source', () => {
-      const csvLine = '"مرحبا، أهلا","مرحبا، أهلا",hallo,hello,hola,abc123';
+      const csvLine = '"مرحبا، أهلا",hallo,hello,hola,abc123';
       const result = parseCSVLineToWord( csvLine );
 
       expect( result ).not.toBeNull();
@@ -81,7 +80,7 @@ describe( 'CSV Utilities', () => {
     } );
 
     test( 'should handle comma in German field from the source', () => {
-      const csvLine = 'مرحبا,مرحبا,"hallo, guten Tag",hello,hola,abc123';
+      const csvLine = 'مرحبا,"hallo, guten Tag",hello,hola,abc123';
       const result = parseCSVLineToWord( csvLine );
 
       expect( result ).not.toBeNull();
@@ -92,7 +91,7 @@ describe( 'CSV Utilities', () => {
     } );
 
     test( 'should handle comma in English field from the source', () => {
-      const csvLine = 'مرحبا,مرحبا,hallo,"hello, hi",hola,abc123';
+      const csvLine = 'مرحبا,hallo,"hello, hi",hola,abc123';
       const result = parseCSVLineToWord( csvLine );
 
       expect( result ).not.toBeNull();
@@ -103,7 +102,7 @@ describe( 'CSV Utilities', () => {
     } );
 
     test( 'should handle comma in Spanish field from the source', () => {
-      const csvLine = 'مرحبا,مرحبا,hallo,hello,"hola, buenos días",abc123';
+      const csvLine = 'مرحبا,hallo,hello,"hola, buenos días",abc123';
       const result = parseCSVLineToWord( csvLine );
 
       expect( result ).not.toBeNull();
@@ -114,7 +113,7 @@ describe( 'CSV Utilities', () => {
     } );
 
     test( 'should handle multiple fields with commas in the source format', () => {
-      const csvLine = '"word, phrase","word, phrase","Wort, Ausdruck","word, expression","palabra, expresión",abc123';
+      const csvLine = '"word, phrase","Wort, Ausdruck","word, expression","palabra, expresión",abc123';
       const result = parseCSVLineToWord( csvLine );
 
       expect( result ).not.toBeNull();
@@ -125,7 +124,7 @@ describe( 'CSV Utilities', () => {
     } );
 
     test( 'should handle escaped quotes within quoted fields in the source', () => {
-      const csvLine = '"He said ""hello""","He said ""hello""","Er sagte ""hallo""","He said ""hello""","Él dijo ""hola""",abc123';
+      const csvLine = '"He said ""hello""","Er sagte ""hallo""","He said ""hello""","Él dijo ""hola""",abc123';
       const result = parseCSVLineToWord( csvLine );
 
       expect( result ).not.toBeNull();

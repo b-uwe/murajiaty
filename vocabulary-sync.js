@@ -54,7 +54,7 @@
 
   /**
    * Parses a vocabulary CSV line to extract word data
-   * Uses columns 1, 2, 3, 4 (AR, DE, EN, ES) from the source format
+   * Uses columns 0, 1, 2, 3 (AR, DE, EN, ES) from the source format
    * @param {string} csvLine - The CSV line to parse
    * @returns {object|null} Parsed word object or null if invalid
    */
@@ -64,25 +64,21 @@
     }
 
     // Skip header row
-    if ( csvLine.includes( 'AR,AR,DE,EN,ES' ) ) {
+    if ( csvLine.includes( 'AR,DE,EN,ES' ) ) {
       return null;
     }
 
     // Parse CSV line with default comma separators, handling quoted fields properly
     const parts = parseCSVLine( csvLine );
 
-    /*
-     * Extract columns: 0=AR(formula), 1=AR(text), 2=DE, 3=EN, 4=ES, 5=Pl.
-     * Column 0 is a formula that can transiently export a Sheets error (e.g.
-     * #ERROR!), so the Arabic is read from column 1, the stable plain-text copy.
-     */
-    const ar = ( parts[ 1 ] || '' ).trim();
-    const de = ( parts[ 2 ] || '' ).trim();
-    const en = ( parts[ 3 ] || '' ).trim();
-    const es = ( parts[ 4 ] || '' ).trim();
+    // Extract columns: 0=AR, 1=DE, 2=EN, 3=ES, 4=Pl ( ignored ).
+    const ar = ( parts[ 0 ] || '' ).trim();
+    const de = ( parts[ 1 ] || '' ).trim();
+    const en = ( parts[ 2 ] || '' ).trim();
+    const es = ( parts[ 3 ] || '' ).trim();
 
     // Validate that all required fields are present and non-empty
-    if ( ar && de && en && es && parts.length >= 5 ) {
+    if ( ar && de && en && es && parts.length >= 4 ) {
       return { ar,
         de,
         en,
