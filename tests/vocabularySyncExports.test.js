@@ -12,5 +12,6 @@ describe( 'VocabularySync browser exposure', () => {
     expect( typeof VocabularySync.checkForVocabularyUpdates ).toBe( 'function' );
     expect( typeof VocabularySync.fetchVocabularyData ).toBe( 'function' );
     expect( typeof VocabularySync.parseVocabularyCSV ).toBe( 'function' );
+    expect( typeof VocabularySync.hashVocabularyWord ).toBe( 'function' );
   } );
 } );
